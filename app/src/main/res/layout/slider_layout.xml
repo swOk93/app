@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#2A2A2A"
     android:padding="16dp">
+
+    <Button
+        android:id="@+id/minusButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:backgroundTint="#333333"
+        android:text="-"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@+id/hoursSeekBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/hoursSeekBar" />
 
     <TextView
         android:id="@+id/hoursTextView"
@@ -13,33 +26,48 @@
         android:text="Часы"
         android:textColor="#4285F4"
         android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/hoursSeekBar"
         app:layout_constraintTop_toTopOf="parent" />
 
     <SeekBar
         android:id="@+id/hoursSeekBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:max="10"
         android:progress="0"
         android:progressTint="#4285F4"
         android:thumbTint="#4285F4"
-        app:layout_constraintEnd_toStartOf="@+id/hoursValueTextView"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/plusButton"
+        app:layout_constraintStart_toEndOf="@+id/minusButton"
         app:layout_constraintTop_toBottomOf="@+id/hoursTextView" />
+
+    <Button
+        android:id="@+id/plusButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:backgroundTint="#4285F4"
+        android:text="+"
+        android:textAllCaps="false"
+        android:textColor="#E20B0B"
+        android:textColorHighlight="#F80707"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@+id/hoursSeekBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/hoursSeekBar" />
 
     <TextView
         android:id="@+id/hoursValueTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:text="0"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/hoursSeekBar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/hoursSeekBar" />
+        app:layout_constraintEnd_toEndOf="@+id/hoursSeekBar"
+        app:layout_constraintStart_toStartOf="@+id/hoursSeekBar"
+        app:layout_constraintTop_toBottomOf="@+id/hoursSeekBar" />
 
     <TextView
         android:id="@+id/minutesTextView"
@@ -49,57 +77,49 @@
         android:text="Минуты"
         android:textColor="#4285F4"
         android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/hoursSeekBar" />
+        app:layout_constraintStart_toStartOf="@+id/minutesSeekBar"
+        app:layout_constraintTop_toBottomOf="@+id/hoursValueTextView" />
 
     <SeekBar
         android:id="@+id/minutesSeekBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:max="59"
         android:progress="0"
         android:progressTint="#4285F4"
         android:thumbTint="#4285F4"
-        app:layout_constraintEnd_toStartOf="@+id/minutesValueTextView"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/plusButton"
+        app:layout_constraintStart_toEndOf="@+id/minusButton"
         app:layout_constraintTop_toBottomOf="@+id/minutesTextView" />
 
     <TextView
         android:id="@+id/minutesValueTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:text="0"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/minutesSeekBar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/minutesSeekBar" />
-
-    <Button
-        android:id="@+id/plusButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="#4285F4"
-        android:text="+"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/minutesSeekBar"
+        app:layout_constraintStart_toStartOf="@+id/minutesSeekBar"
         app:layout_constraintTop_toBottomOf="@+id/minutesSeekBar" />
 
-    <Button
-        android:id="@+id/minusButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="8dp"
-        android:backgroundTint="#333333"
-        android:text="-"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="@+id/plusButton"
-        app:layout_constraintEnd_toStartOf="@+id/plusButton"
-        app:layout_constraintTop_toTopOf="@+id/plusButton" />
+    <ImageButton
+        android:id="@+id/sliderDeleteButton"
+        android:layout_width="39dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/ic_menu_delete"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/minutesSeekBar"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/minusButton"
+        app:layout_constraintVertical_bias="0.0"
+        app:tint="#E53935" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
