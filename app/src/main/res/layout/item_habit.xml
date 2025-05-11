@@ -25,11 +25,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:layout_marginBottom="16dp"
         android:text="Создано: 11.05.2025"
         android:textColor="#80FFFFFF"
         android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/habitNameTextView"
         app:layout_constraintTop_toBottomOf="@+id/habitNameTextView" />
 
@@ -57,9 +55,9 @@
         android:layout_marginEnd="16dp"
         android:background="@android:color/transparent"
         android:src="@android:drawable/ic_menu_delete"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/habitDateTextView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/habitNameTextView"
         app:tint="#E53935" />
 
     <ImageButton
@@ -69,9 +67,22 @@
         android:layout_marginEnd="8dp"
         android:background="@android:color/transparent"
         android:src="@android:drawable/arrow_down_float"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/habitDateTextView"
         app:layout_constraintEnd_toStartOf="@+id/deleteButton"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/habitNameTextView"
         app:tint="#FFFFFF" />
+
+    <include
+        android:id="@+id/sliderLayout"
+        layout="@layout/slider_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/habitDateTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

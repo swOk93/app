@@ -167,9 +167,37 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             .show()
     }
     
-    override fun onUpdateProgress(position: Int) {
+    override fun onUpdateProgress(position: Int, hours: Int, minutes: Int) {
         val habit = habitAdapter.habits[position]
-        showProgressUpdateDialog(position, habit)
+        
+        when (habit.type) {
+            HabitType.TIME -> {
+                // Преобразуем часы и минуты в общее количество минут
+                val totalMinutes = hours * 60 + minutes
+                val updatedHabit = habit.copy(current = totalMinutes)
+                habitAdapter.updateHabit(position, updatedHabit)
+                Toast.makeText(this, "Прогресс обновлен: $totalMinutes минут", Toast.LENGTH_SHORT).show()
+            }
+            HabitType.REPEAT -> {
+                // Для повторений используем только значение часов как количество повторений
+                val updatedHabit = habit.copy(current = hours)
+                habitAdapter.updateHabit(position, updatedHabit)
+                Toast.makeText(this, "Прогресс обновлен: $hours повторений", Toast.LENGTH_SHORT).show()
+            }
+            HabitType.SIMPLE -> {
+                if (hours > 0) {
+                    // Отмечаем как выполненную
+                    val updatedHabit = habit.copy(current = 1)
+                    habitAdapter.updateHabit(position, updatedHabit)
+                    Toast.makeText(this, "Привычка отмечена как выполненная", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Отмечаем как невыполненную
+                    val updatedHabit = habit.copy(current = 0)
+                    habitAdapter.updateHabit(position, updatedHabit)
+                    Toast.makeText(this, "Привычка отмечена как невыполненная", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
 }
