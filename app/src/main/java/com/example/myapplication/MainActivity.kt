@@ -1,15 +1,22 @@
 package com.example.myapplication
 
+import android.app.AlertDialog
 import android.os.Bundle
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var habitAdapter: HabitAdapter
+    private var currentHabitType: HabitType = HabitType.SIMPLE
+    private var targetValue: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,13 +24,17 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Инициализация RecyclerView
+        setupRecyclerView()
+
         // Настройка кнопки добавления привычки
         binding.addButton.setOnClickListener {
             val habitText: String = binding.habitEditText.text.toString()
             if (habitText.isNotEmpty()) {
-                // Здесь будет логика добавления привычки
-                Toast.makeText(this, "Привычка добавлена: $habitText", Toast.LENGTH_SHORT).show()
+                addHabit(habitText, currentHabitType, targetValue)
                 binding.habitEditText.text.clear()
+                targetValue = 0
+                binding.minutesValueTextView.text = "0"
             } else {
                 Toast.makeText(this, "Введите название привычки", Toast.LENGTH_SHORT).show()
             }
@@ -31,15 +42,32 @@ class MainActivity : AppCompatActivity() {
         
         // Настройка кнопок типов привычек
         binding.timeButton.setOnClickListener {
-            Toast.makeText(this, "Выбран тип: Время", Toast.LENGTH_SHORT).show()
+            currentHabitType = HabitType.TIME
+            showTargetInputDialog("Введите целевое количество минут")
         }
         
         binding.repeatButton.setOnClickListener {
-            Toast.makeText(this, "Выбран тип: Повторения", Toast.LENGTH_SHORT).show()
+            currentHabitType = HabitType.REPEAT
+            showTargetInputDialog("Введите целевое количество повторений")
         }
         
         binding.simpleButton.setOnClickListener {
+            currentHabitType = HabitType.SIMPLE
+            targetValue = 1
+            binding.minutesValueTextView.text = "Простая привычка"
             Toast.makeText(this, "Выбран тип: Простая", Toast.LENGTH_SHORT).show()
+        }
+        
+        // Настройка кнопки прогресса
+        binding.progressButton.setOnClickListener {
+            val completedCount = habitAdapter.habits.count { it.isCompleted() }
+            val totalCount = habitAdapter.habits.size
+            val message = if (totalCount > 0) {
+                "Выполнено $completedCount из $totalCount привычек (${(completedCount * 100 / totalCount)}%)"
+            } else {
+                "Нет добавленных привычек"
+            }
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -60,6 +88,88 @@ class MainActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+    
+    private fun setupRecyclerView() {
+        habitAdapter = HabitAdapter(mutableListOf())
+        habitAdapter.listener = this
+        binding.habitsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = habitAdapter
+        }
+    }
+    
+    private fun addHabit(name: String, type: HabitType, target: Int) {
+        val habit = Habit(name = name, type = type, target = target)
+        habitAdapter.addHabit(habit)
+        Toast.makeText(this, "Привычка добавлена: $name", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun showTargetInputDialog(title: String) {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(input)
+            .setPositiveButton("OK") { _, _ ->
+                val inputText = input.text.toString()
+                if (inputText.isNotEmpty()) {
+                    targetValue = inputText.toInt()
+                    binding.minutesValueTextView.text = targetValue.toString()
+                }
+            }
+            .setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
+            .show()
+    }
+    
+    private fun showProgressUpdateDialog(position: Int, habit: Habit) {
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        
+        val title = when (habit.type) {
+            HabitType.TIME -> "Введите количество минут"
+            HabitType.REPEAT -> "Введите количество повторений"
+            HabitType.SIMPLE -> return markSimpleHabitAsCompleted(position, habit)
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(input)
+            .setPositiveButton("OK") { _, _ ->
+                val inputText = input.text.toString()
+                if (inputText.isNotEmpty()) {
+                    val newValue = inputText.toInt()
+                    val updatedHabit = habit.copy(current = habit.current + newValue)
+                    habitAdapter.updateHabit(position, updatedHabit)
+                }
+            }
+            .setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
+            .show()
+    }
+    
+    private fun markSimpleHabitAsCompleted(position: Int, habit: Habit) {
+        val updatedHabit = habit.copy(current = 1)
+        habitAdapter.updateHabit(position, updatedHabit)
+        Toast.makeText(this, "Привычка отмечена как выполненная", Toast.LENGTH_SHORT).show()
+    }
+    
+    // Реализация интерфейса HabitAdapter.HabitListener
+    override fun onDeleteHabit(position: Int) {
+        AlertDialog.Builder(this)
+            .setTitle("Удаление привычки")
+            .setMessage("Вы уверены, что хотите удалить эту привычку?")
+            .setPositiveButton("Да") { _, _ ->
+                habitAdapter.removeHabit(position)
+                Toast.makeText(this, "Привычка удалена", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Нет", null)
+            .show()
+    }
+    
+    override fun onUpdateProgress(position: Int) {
+        val habit = habitAdapter.habits[position]
+        showProgressUpdateDialog(position, habit)
     }
 
 }
