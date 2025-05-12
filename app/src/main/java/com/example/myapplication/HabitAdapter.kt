@@ -15,7 +15,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
     
     interface HabitListener {
         fun onDeleteHabit(position: Int)
-        fun onUpdateProgress(position: Int, hours: Int, minutes: Int)
+        fun onUpdateProgress(position: Int, count: Int)
     }
     
     var listener: HabitListener? = null
@@ -53,7 +53,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                     if (habit.type == HabitType.SIMPLE) {
                         // Для простых привычек переключаем статус выполнения
                         val newValue = if (habit.current > 0) 0 else 1
-                        listener?.onUpdateProgress(position, newValue, 0)
+                        listener?.onUpdateProgress(position, newValue)
                     } else {
                         toggleExpand()
                     }
@@ -80,23 +80,32 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     val habit = habits[position]
+                    val currentValue = habit.current
                     when (habit.type) {
                         HabitType.TIME -> {
                             val hours = hoursSeekBar.progress
                             val minutes = minutesSeekBar.progress
-                            listener?.onUpdateProgress(position, hours, minutes)
-                            toggleExpand()
+                            if (hours > 0 || minutes > 0) {
+                                // Сначала вычисляем новые значения
+                                val addValue = hours * 60 + minutes
+                                val newValue = currentValue + addValue
+                                // Затем обновляем ползунки
+                                hoursSeekBar.progress = 0
+                                minutesSeekBar.progress = 0
+                                // И вызываем обновление прогресса
+                                listener?.onUpdateProgress(position, newValue)
+                                toggleExpand()
+                            }
                         }
                         HabitType.REPEAT -> {
                             // Добавляем к текущему значению привычки, а не просто устанавливаем
-                            val currentValue = habit.current
                             val addValue = hoursSeekBar.progress
                             val newValue = currentValue + addValue
                             hoursValueTextView.text = newValue.toString()
-                            listener?.onUpdateProgress(position, newValue, 0)
+                            listener?.onUpdateProgress(position, newValue)
                         }
                         HabitType.SIMPLE -> {
-                            listener?.onUpdateProgress(position, 1, 0)
+                            listener?.onUpdateProgress(position, 1)
                             toggleExpand()
                         }
                     }
@@ -107,31 +116,33 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     val habit = habits[position]
+                    val currentValue = habit.current
                     when (habit.type) {
                         HabitType.TIME -> {
                             val hours = hoursSeekBar.progress
                             val minutes = minutesSeekBar.progress
                             if (hours > 0 || minutes > 0) {
-                                if (minutes > 0) {
-                                    minutesSeekBar.progress = minutes - 1
-                                } else if (hours > 0) {
-                                    hoursSeekBar.progress = hours - 1
-                                    minutesSeekBar.progress = 59
-                                }
-                                val newHours = hoursSeekBar.progress
-                                val newMinutes = minutesSeekBar.progress
-                                listener?.onUpdateProgress(position, newHours, newMinutes)
+                                // Сначала вычисляем новые значения
+                                val subtractValue = hours * 60 + minutes
+                                val newValue = (currentValue - subtractValue).coerceAtLeast(0)
+                                    // Затем обновляем ползунки
+                                hoursSeekBar.progress = 0
+                                minutesSeekBar.progress = 0
+                                
+                                // И вызываем обновление прогресса
+                                listener?.onUpdateProgress(position, newValue)
+                                toggleExpand()
                             }
                         }
                         HabitType.REPEAT -> {
-                            // Вычитаем из текущего значения привычки
-                            val currentValue = habit.current
-                            val newValue = (currentValue - 1).coerceAtLeast(0)
+                            // Вычитаем из текущего значения привычки значение с ползунка
+                            val subtractValue = hoursSeekBar.progress
+                            val newValue = (currentValue - subtractValue).coerceAtLeast(0)
                             hoursValueTextView.text = newValue.toString()
-                            listener?.onUpdateProgress(position, newValue, 0)
+                            listener?.onUpdateProgress(position, newValue)
                         }
                         HabitType.SIMPLE -> {
-                            listener?.onUpdateProgress(position, 0, 0)
+                            listener?.onUpdateProgress(position, 0)
                             toggleExpand()
                         }
                     }

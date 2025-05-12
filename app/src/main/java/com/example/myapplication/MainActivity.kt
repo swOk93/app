@@ -167,25 +167,23 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             .show()
     }
     
-    override fun onUpdateProgress(position: Int, hours: Int, minutes: Int) {
+    override fun onUpdateProgress(position: Int, count: Int) {
         val habit = habitAdapter.habits[position]
         
         when (habit.type) {
             HabitType.TIME -> {
-                // Преобразуем часы и минуты в общее количество минут
-                val totalMinutes = hours * 60 + minutes
-                val updatedHabit = habit.copy(current = totalMinutes)
+                val updatedHabit = habit.copy(current = count)
                 habitAdapter.updateHabit(position, updatedHabit)
-                Toast.makeText(this, "Прогресс обновлен: $totalMinutes минут", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Прогресс обновлен: $count минут", Toast.LENGTH_SHORT).show()
             }
             HabitType.REPEAT -> {
-                // Для повторений используем только значение часов как количество повторений
-                val updatedHabit = habit.copy(current = hours)
+                // Для повторений используем значение count как количество повторений
+                val updatedHabit = habit.copy(current = count)
                 habitAdapter.updateHabit(position, updatedHabit)
-                Toast.makeText(this, "Прогресс обновлен: $hours повторений", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Прогресс обновлен: $count повторений", Toast.LENGTH_SHORT).show()
             }
             HabitType.SIMPLE -> {
-                if (hours > 0) {
+                if (count > 0) {
                     // Отмечаем как выполненную
                     val updatedHabit = habit.copy(current = 1)
                     habitAdapter.updateHabit(position, updatedHabit)
