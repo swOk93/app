@@ -84,14 +84,14 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                         HabitType.TIME -> {
                             val hours = hoursSeekBar.progress
                             val minutes = minutesSeekBar.progress
-                            val totalMinutes = hours * 60 + minutes
                             listener?.onUpdateProgress(position, hours, minutes)
                             toggleExpand()
                         }
                         HabitType.REPEAT -> {
+                            // Добавляем к текущему значению привычки, а не просто устанавливаем
                             val currentValue = habit.current
-                            val newValue = (currentValue + 1).coerceAtMost(100)
-                            hoursSeekBar.progress = newValue
+                            val addValue = hoursSeekBar.progress
+                            val newValue = currentValue + addValue
                             hoursValueTextView.text = newValue.toString()
                             listener?.onUpdateProgress(position, newValue, 0)
                         }
@@ -124,9 +124,9 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                             }
                         }
                         HabitType.REPEAT -> {
+                            // Вычитаем из текущего значения привычки
                             val currentValue = habit.current
                             val newValue = (currentValue - 1).coerceAtLeast(0)
-                            hoursSeekBar.progress = newValue
                             hoursValueTextView.text = newValue.toString()
                             listener?.onUpdateProgress(position, newValue, 0)
                         }
