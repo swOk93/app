@@ -30,11 +30,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
 
         // Настройка кнопки добавления задачи
         binding.addTaskButton.setOnClickListener {
-            // Запускаем SecondFragment через FragmentManager
-            val transaction = supportFragmentManager.beginTransaction()
-            transaction.replace(android.R.id.content, SecondFragment())
-            transaction.addToBackStack(null)
-            transaction.commit()
+            // Показываем SecondFragment как диалог
+            val secondFragment = SecondFragment()
+            secondFragment.show(supportFragmentManager, "SecondFragment")
         }
         
         // Настройка кнопки прогресса

@@ -1,18 +1,18 @@
 package com.example.myapplication
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.DialogFragment
 import com.example.myapplication.databinding.FragmentSecondBinding
 import com.example.myapplication.HabitType
 
 /**
- * A simple [Fragment] subclass as the second destination in the navigation.
+ * A simple [DialogFragment] subclass for adding new habits.
  */
-class SecondFragment : Fragment() {
+class SecondFragment : DialogFragment() {
 
     private var _binding: FragmentSecondBinding? = null
     private var currentHabitType: HabitType = HabitType.SIMPLE
@@ -25,10 +25,17 @@ class SecondFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentSecondBinding.inflate(inflater, container, false)
         return binding.root
-
+    }
+    
+    override fun onStart() {
+        super.onStart()
+        // Устанавливаем размер диалога на всю ширину экрана
+        dialog?.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -60,7 +67,7 @@ class SecondFragment : Fragment() {
 
         // Настройка кнопки отмены
         binding.cancelButton.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
+            dismiss()
         }
 
         // Настройка кнопки сохранения
@@ -91,8 +98,8 @@ class SecondFragment : Fragment() {
         // Добавляем привычку через MainActivity
         (activity as? MainActivity)?.addHabit(habitName, currentHabitType, targetValue)
 
-        // Возвращаемся на главный экран
-        requireActivity().supportFragmentManager.popBackStack()
+        // Закрываем диалог
+        dismiss()
     }
 
     override fun onDestroyView() {
