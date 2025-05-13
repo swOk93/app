@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#121212"
     tools:context=".SecondFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -11,25 +12,194 @@
         android:layout_height="match_parent"
         android:padding="16dp">
 
-        <Button
-            android:id="@+id/button_second"
+        <TextView
+            android:id="@+id/addHabitTitleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/previous"
-            app:layout_constraintBottom_toTopOf="@id/textview_second"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:text="Добавление привычки"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/textview_second"
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/habitNameEditText"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/lorem_ipsum"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/edit_text_background"
+            android:hint="Название привычки"
+            android:padding="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#80FFFFFF"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/button_second" />
+            app:layout_constraintTop_toBottomOf="@+id/addHabitTitleTextView" />
+
+        <TextView
+            android:id="@+id/habitTypeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Тип привычки:"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/habitNameEditText" />
+
+        <RadioGroup
+            android:id="@+id/habitTypeRadioGroup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/habitTypeTextView">
+
+            <RadioButton
+                android:id="@+id/timeRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Время"
+                android:textColor="#FFFFFF"
+                android:buttonTint="#4285F4" />
+
+            <RadioButton
+                android:id="@+id/repeatRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Повторения"
+                android:textColor="#FFFFFF"
+                android:buttonTint="#4285F4" />
+
+            <RadioButton
+                android:id="@+id/simpleRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Простая"
+                android:textColor="#FFFFFF"
+                android:buttonTint="#4285F4" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:id="@+id/repeatSettingsLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/habitTypeRadioGroup">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Количество повторений"
+                android:textColor="#FFFFFF" />
+
+            <EditText
+                android:id="@+id/repeatCountEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/edit_text_background"
+                android:hint="Количество"
+                android:inputType="number"
+                android:padding="12dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#80FFFFFF" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/timeSettingsLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/habitTypeRadioGroup">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Время (часы:минуты)"
+                android:textColor="#FFFFFF" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+
+                <EditText
+                    android:id="@+id/hoursEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="Часы"
+                    android:inputType="number"
+                    android:padding="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#80FFFFFF" />
+
+                <EditText
+                    android:id="@+id/minutesEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="Минуты"
+                    android:inputType="number"
+                    android:padding="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#80FFFFFF" />
+            </LinearLayout>
+        </LinearLayout>
+        <!-- Барьер для объединения двух LinearLayout, который отслеживает нижнюю границу обоих блоков настроек -->
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/settingsBarrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="timeSettingsLayout,repeatSettingsLayout" />
+            
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/settingsBarrier"> <!-- привязка блока с кнопками к этому барьеру вместо конкретного блока настроек -->
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:backgroundTint="#333333"
+                android:text="ОТМЕНА"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:backgroundTint="#4285F4"
+                android:text="СОХРАНИТЬ"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

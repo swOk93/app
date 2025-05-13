@@ -5,8 +5,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
+import android.widget.Toast
 import com.example.myapplication.databinding.FragmentSecondBinding
+import com.example.myapplication.HabitType
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
@@ -14,6 +15,7 @@ import com.example.myapplication.databinding.FragmentSecondBinding
 class SecondFragment : Fragment() {
 
     private var _binding: FragmentSecondBinding? = null
+    private var currentHabitType: HabitType = HabitType.SIMPLE
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -32,9 +34,65 @@ class SecondFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.buttonSecond.setOnClickListener {
-            findNavController().navigate(R.id.action_SecondFragment_to_FirstFragment)
+        // Настройка радиокнопок типа привычки
+        binding.habitTypeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.timeRadioButton -> {
+                    currentHabitType = HabitType.TIME
+                    binding.timeSettingsLayout.visibility = View.VISIBLE
+                    binding.repeatSettingsLayout.visibility = View.GONE
+                }
+                R.id.repeatRadioButton -> {
+                    currentHabitType = HabitType.REPEAT
+                    binding.timeSettingsLayout.visibility = View.GONE
+                    binding.repeatSettingsLayout.visibility = View.VISIBLE
+                }
+                R.id.simpleRadioButton -> {
+                    currentHabitType = HabitType.SIMPLE
+                    binding.timeSettingsLayout.visibility = View.GONE
+                    binding.repeatSettingsLayout.visibility = View.GONE
+                }
+            }
         }
+
+        // По умолчанию выбираем простую привычку
+        binding.simpleRadioButton.isChecked = true
+
+        // Настройка кнопки отмены
+        binding.cancelButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+
+        // Настройка кнопки сохранения
+        binding.saveButton.setOnClickListener {
+            saveHabit()
+        }
+    }
+
+    private fun saveHabit() {
+        val habitName = binding.habitNameEditText.text.toString()
+        if (habitName.isEmpty()) {
+            Toast.makeText(requireContext(), "Введите название привычки", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val targetValue = when (currentHabitType) {
+            HabitType.TIME -> {
+                val hours = binding.hoursEditText.text.toString().toIntOrNull() ?: 0
+                val minutes = binding.minutesEditText.text.toString().toIntOrNull() ?: 0
+                hours * 60 + minutes
+            }
+            HabitType.REPEAT -> {
+                binding.repeatCountEditText.text.toString().toIntOrNull() ?: 0
+            }
+            HabitType.SIMPLE -> 1
+        }
+
+        // Добавляем привычку через MainActivity
+        (activity as? MainActivity)?.addHabit(habitName, currentHabitType, targetValue)
+
+        // Возвращаемся на главный экран
+        requireActivity().supportFragmentManager.popBackStack()
     }
 
     override fun onDestroyView() {

@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.databinding.ActivityMainBinding
+import com.example.myapplication.SecondFragment
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
 
@@ -27,35 +28,13 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         // Инициализация RecyclerView
         setupRecyclerView()
 
-        // Настройка кнопки добавления привычки
-        binding.addButton.setOnClickListener {
-            val habitText: String = binding.habitEditText.text.toString()
-            if (habitText.isNotEmpty()) {
-                addHabit(habitText, currentHabitType, targetValue)
-                binding.habitEditText.text.clear()
-                targetValue = 0
-                binding.minutesValueTextView.text = "0"
-            } else {
-                Toast.makeText(this, "Введите название привычки", Toast.LENGTH_SHORT).show()
-            }
-        }
-        
-        // Настройка кнопок типов привычек
-        binding.timeButton.setOnClickListener {
-            currentHabitType = HabitType.TIME
-            showTargetInputDialog("Введите целевое количество минут")
-        }
-        
-        binding.repeatButton.setOnClickListener {
-            currentHabitType = HabitType.REPEAT
-            showTargetInputDialog("Введите целевое количество повторений")
-        }
-        
-        binding.simpleButton.setOnClickListener {
-            currentHabitType = HabitType.SIMPLE
-            targetValue = 1
-            binding.minutesValueTextView.text = "Простая привычка"
-            Toast.makeText(this, "Выбран тип: Простая", Toast.LENGTH_SHORT).show()
+        // Настройка кнопки добавления задачи
+        binding.addTaskButton.setOnClickListener {
+            // Запускаем SecondFragment через FragmentManager
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.replace(android.R.id.content, SecondFragment())
+            transaction.addToBackStack(null)
+            transaction.commit()
         }
         
         // Настройка кнопки прогресса
@@ -99,12 +78,14 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         }
     }
     
-    private fun addHabit(name: String, type: HabitType, target: Int) {
+    fun addHabit(name: String, type: HabitType, target: Int) {
         val habit = Habit(name = name, type = type, target = target)
         habitAdapter.addHabit(habit)
         Toast.makeText(this, "Привычка добавлена: $name", Toast.LENGTH_SHORT).show()
     }
     
+    // Этот метод больше не используется в новом интерфейсе
+    /*
     private fun showTargetInputDialog(title: String) {
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
@@ -116,12 +97,13 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                 val inputText = input.text.toString()
                 if (inputText.isNotEmpty()) {
                     targetValue = inputText.toInt()
-                    binding.minutesValueTextView.text = targetValue.toString()
+                    // binding.minutesValueTextView.text = targetValue.toString()
                 }
             }
             .setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
             .show()
     }
+    */
     
     private fun showProgressUpdateDialog(position: Int, habit: Habit) {
         val input = EditText(this)

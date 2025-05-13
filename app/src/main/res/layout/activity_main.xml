@@ -7,149 +7,44 @@
     android:background="#121212"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Трекер привычек"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/habitEditText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/edit_text_background"
-        android:hint="Новая привычка"
-        android:padding="12dp"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#80FFFFFF"
-        app:layout_constraintEnd_toStartOf="@+id/addButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
-
     <Button
-        android:id="@+id/addButton"
+        android:id="@+id/addTaskButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:backgroundTint="#4285F4"
-        android:text="ДОБАВИТЬ"
+        android:text="ДОБАВИТЬ ЗАДАЧУ"
         android:textColor="#FFFFFF"
-        app:layout_constraintBottom_toBottomOf="@+id/habitEditText"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/habitEditText" />
+        tools:layout_editor_absoluteY="667dp" />
 
-    <LinearLayout
-        android:id="@+id/typeButtonsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/habitEditText">
-
-        <Button
-            android:id="@+id/timeButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="1"
-            android:backgroundTint="#333333"
-            android:drawableStart="@android:drawable/ic_menu_recent_history"
-            android:padding="8dp"
-            android:text="ВРЕМЯ"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/repeatButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="1"
-            android:backgroundTint="#333333"
-            android:drawableStart="@android:drawable/ic_menu_rotate"
-            android:padding="8dp"
-            android:text="ПОВТОРЕНИЯ"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/simpleButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_weight="1"
-            android:backgroundTint="#333333"
-            android:padding="8dp"
-            android:text="ПРОСТАЯ"
-            android:textColor="#FFFFFF" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/minutesTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Минут в день"
-        android:textColor="#80FFFFFF"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/typeButtonsLayout" />
-
-    <TextView
-        android:id="@+id/minutesValueTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:background="#1F1F1F"
+    <Button
+        android:id="@+id/progressButton"
+        android:layout_width="175dp"
+        android:layout_height="48dp"
+        android:backgroundTint="#333333"
+        android:drawableStart="@android:drawable/ic_menu_slideshow"
         android:padding="12dp"
-        android:text="0"
+        android:text="ПРОГРЕСС"
         android:textColor="#FFFFFF"
-        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.067"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/minutesTextView" />
+        tools:layout_editor_absoluteY="667dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/habitsRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/progressButton"
+        android:contentDescription="@string/habits_list_desc"
+        app:layout_constraintBottom_toTopOf="@+id/addTaskButton"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/minutesValueTextView"
-        tools:listitem="@layout/item_habit"
-        android:contentDescription="@string/habits_list_desc" />
-
-    <Button
-        android:id="@+id/progressButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#333333"
-        android:drawableStart="@android:drawable/ic_menu_slideshow"
-        android:padding="12dp"
-        android:text="ПРОГРЕСС"
-        android:textColor="#FFFFFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/habitsRecyclerView" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        tools:listitem="@layout/item_habit" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
