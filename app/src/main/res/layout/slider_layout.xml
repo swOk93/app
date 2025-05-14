@@ -39,8 +39,8 @@
         android:layout_marginEnd="8dp"
         android:max="10"
         android:progress="0"
-        android:progressTint="#4285F4"
-        android:thumbTint="#4285F4"
+        android:progressTint="@color/mint_accent"
+        android:thumbTint="@color/mint_accent"
         app:layout_constraintEnd_toStartOf="@+id/plusButton"
         app:layout_constraintStart_toEndOf="@+id/minusButton"
         app:layout_constraintTop_toBottomOf="@+id/hoursTextView" />
@@ -90,8 +90,8 @@
         android:layout_marginEnd="8dp"
         android:max="59"
         android:progress="0"
-        android:progressTint="#4285F4"
-        android:thumbTint="#4285F4"
+        android:progressTint="@color/mint_accent"
+        android:thumbTint="@color/mint_accent"
         app:layout_constraintEnd_toStartOf="@+id/plusButton"
         app:layout_constraintStart_toEndOf="@+id/minusButton"
         app:layout_constraintTop_toBottomOf="@+id/minutesTextView" />
