@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
-    android:background="#1F1F1F">
+    android:background="@drawable/rounded_card_background"
+    android:elevation="2dp"
+    android:padding="8dp">
 
     <TextView
         android:id="@+id/habitNameTextView"
@@ -15,7 +17,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:text="заправить постель"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/mint_text_primary"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@+id/expandButton"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="Создано: 11.05.2025"
-        android:textColor="#80FFFFFF"
+        android:textColor="@color/mint_text_secondary"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/habitNameTextView"
         app:layout_constraintTop_toBottomOf="@+id/habitNameTextView" />
@@ -37,13 +39,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:background="#E53935"
+        android:background="@drawable/rounded_progress_background"
         android:paddingStart="8dp"
         android:paddingTop="2dp"
         android:paddingEnd="8dp"
         android:paddingBottom="2dp"
         android:text="0 / 50 раз"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/mint_text_primary"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/habitDateTextView"
         app:layout_constraintStart_toEndOf="@+id/habitDateTextView"
@@ -59,7 +61,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/habitDateTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/habitNameTextView"
-        app:tint="#FFFFFF" />
+        app:tint="@color/mint_text_primary" />
 
     <include
         android:id="@+id/sliderLayout"
