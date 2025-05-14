@@ -12,7 +12,8 @@
         android:id="@+id/minusButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:backgroundTint="@color/mint_dark"
+        android:background="@drawable/square_button_background"
+        app:backgroundTint="@color/mint_dark"
         android:text="-"
         android:textColor="@color/mint_text_primary"
         android:textSize="20sp"
@@ -49,11 +50,11 @@
         android:id="@+id/plusButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:backgroundTint="#4285F4"
+        android:background="@drawable/square_button_background"
+        app:backgroundTint="@color/mint_accent"
         android:text="+"
         android:textAllCaps="false"
-        android:textColor="#E20B0B"
-        android:textColorHighlight="#F80707"
+        android:textColor="@color/mint_text_primary"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@+id/hoursSeekBar"
         app:layout_constraintEnd_toEndOf="parent"
@@ -121,6 +122,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/minusButton"
         app:layout_constraintVertical_bias="0.0"
-        app:tint="#E53935" />
+        app:tint="@color/mint_delete" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
