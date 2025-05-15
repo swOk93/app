@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.SecondFragment
+import java.util.Date
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
 
@@ -68,7 +69,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     }
     
     private fun setupRecyclerView() {
-        habitAdapter = HabitAdapter(mutableListOf())
+        habitAdapter = HabitAdapter(loadHabits())
         habitAdapter.listener = this
         binding.habitsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
@@ -76,9 +77,50 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         }
     }
     
+    private fun saveHabits() {
+        val sharedPreferences = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        
+        // Сохраняем количество привычек
+        editor.putInt("habits_count", habitAdapter.habits.size)
+        
+        // Сохраняем каждую привычку
+        habitAdapter.habits.forEachIndexed { index, habit ->
+            editor.putString("habit_${index}_name", habit.name)
+            editor.putInt("habit_${index}_type", habit.type.ordinal)
+            editor.putInt("habit_${index}_target", habit.target)
+            editor.putInt("habit_${index}_current", habit.current)
+            editor.putLong("habit_${index}_date", habit.createdDate.time)
+        }
+        
+        editor.apply()
+    }
+    
+    private fun loadHabits(): MutableList<Habit> {
+        val habits = mutableListOf<Habit>()
+        val sharedPreferences = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
+        
+        val habitsCount = sharedPreferences.getInt("habits_count", 0)
+        
+        for (i in 0 until habitsCount) {
+            val name = sharedPreferences.getString("habit_${i}_name", "") ?: ""
+            val typeOrdinal = sharedPreferences.getInt("habit_${i}_type", 0)
+            val target = sharedPreferences.getInt("habit_${i}_target", 0)
+            val current = sharedPreferences.getInt("habit_${i}_current", 0)
+            val date = sharedPreferences.getLong("habit_${i}_date", System.currentTimeMillis())
+            
+            val type = HabitType.values()[typeOrdinal]
+            
+            habits.add(Habit(name = name, type = type, target = target, current = current, createdDate = Date(date)))
+        }
+        
+        return habits
+    }
+    
     fun addHabit(name: String, type: HabitType, target: Int) {
         val habit = Habit(name = name, type = type, target = target)
         habitAdapter.addHabit(habit)
+        saveHabits()
         Toast.makeText(this, "Привычка добавлена: $name", Toast.LENGTH_SHORT).show()
     }
     
@@ -141,6 +183,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             .setMessage("Вы уверены, что хотите удалить эту привычку?")
             .setPositiveButton("Да") { _, _ ->
                 habitAdapter.removeHabit(position)
+                saveHabits()
                 Toast.makeText(this, "Привычка удалена", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Нет", null)
@@ -149,17 +192,24 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     
     override fun onUpdateProgress(position: Int, count: Int) {
         val habit = habitAdapter.habits[position]
+        val progressHistory = HabitProgressHistory(this)
         
         when (habit.type) {
             HabitType.TIME -> {
                 val updatedHabit = habit.copy(current = count)
                 habitAdapter.updateHabit(position, updatedHabit)
+                saveHabits()
+                // Добавляем запись в историю прогресса
+                progressHistory.addProgressRecord(position, count)
                 Toast.makeText(this, "Прогресс обновлен: $count минут", Toast.LENGTH_SHORT).show()
             }
             HabitType.REPEAT -> {
                 // Для повторений используем значение count как количество повторений
                 val updatedHabit = habit.copy(current = count)
                 habitAdapter.updateHabit(position, updatedHabit)
+                saveHabits()
+                // Добавляем запись в историю прогресса
+                progressHistory.addProgressRecord(position, count)
                 Toast.makeText(this, "Прогресс обновлен: $count повторений", Toast.LENGTH_SHORT).show()
             }
             HabitType.SIMPLE -> {
@@ -167,15 +217,27 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                     // Отмечаем как выполненную
                     val updatedHabit = habit.copy(current = 1)
                     habitAdapter.updateHabit(position, updatedHabit)
+                    saveHabits()
+                    // Добавляем запись в историю прогресса
+                    progressHistory.addProgressRecord(position, 1)
                     Toast.makeText(this, "Привычка отмечена как выполненная", Toast.LENGTH_SHORT).show()
                 } else {
                     // Отмечаем как невыполненную
                     val updatedHabit = habit.copy(current = 0)
                     habitAdapter.updateHabit(position, updatedHabit)
+                    saveHabits()
+                    // Добавляем запись в историю прогресса
+                    progressHistory.addProgressRecord(position, 0)
                     Toast.makeText(this, "Привычка отмечена как невыполненная", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+    }
+    
+    override fun onShowChart(position: Int) {
+        val habit = habitAdapter.habits[position]
+        val chartFragment = HabitChartFragment.newInstance(position, habit.name)
+        chartFragment.show(supportFragmentManager, "habitChart")
     }
 
 }

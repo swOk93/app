@@ -118,5 +118,16 @@
         app:layout_constraintStart_toStartOf="@+id/minusButton"
         app:layout_constraintTop_toBottomOf="@+id/minusButton"
         app:tint="@color/mint_delete" />
+        
+    <ImageButton
+        android:id="@+id/chartButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/ic_menu_recent_history"
+        app:layout_constraintEnd_toEndOf="@+id/plusButton"
+        app:layout_constraintTop_toBottomOf="@+id/plusButton"
+        app:tint="@color/mint_accent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

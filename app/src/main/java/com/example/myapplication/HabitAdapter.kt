@@ -16,6 +16,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
     interface HabitListener {
         fun onDeleteHabit(position: Int)
         fun onUpdateProgress(position: Int, count: Int)
+        fun onShowChart(position: Int)
     }
     
     var listener: HabitListener? = null
@@ -36,6 +37,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
         val plusButton: Button = sliderLayout.findViewById(R.id.plusButton)
         val minusButton: Button = sliderLayout.findViewById(R.id.minusButton)
         val sliderDeleteButton: ImageButton = sliderLayout.findViewById(R.id.sliderDeleteButton)
+        val chartButton: ImageButton = sliderLayout.findViewById(R.id.chartButton)
         
         private var isExpanded = false
         
@@ -44,6 +46,13 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     listener?.onDeleteHabit(position)
+                }
+            }
+            
+            chartButton.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener?.onShowChart(position)
                 }
             }
             
