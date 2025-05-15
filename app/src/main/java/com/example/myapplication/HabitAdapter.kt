@@ -183,13 +183,13 @@ class HabitAdapter(val habits: MutableList<Habit>) :
         holder.dateTextView.text = habit.getFormattedDate()
         holder.progressTextView.text = habit.getProgressText()
         
-        // Установка цвета фона для индикатора прогресса
-        val backgroundColor = if (habit.isCompleted()) {
-            ContextCompat.getColor(holder.itemView.context, android.R.color.holo_green_dark)
+        // Установка фона для индикатора прогресса
+        val backgroundResource = if (habit.isCompleted()) {
+            R.drawable.progress_indicator_background
         } else {
-            ContextCompat.getColor(holder.itemView.context, android.R.color.holo_red_dark)
+            R.drawable.progress_indicator_red_background
         }
-        holder.progressTextView.setBackgroundColor(backgroundColor)
+        holder.progressTextView.setBackgroundResource(backgroundResource)
         
         // Скрываем слайдер при привязке (чтобы не оставался открытым при переиспользовании ViewHolder)
         holder.sliderLayout.visibility = View.GONE

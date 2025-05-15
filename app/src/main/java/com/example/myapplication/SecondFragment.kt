@@ -62,6 +62,12 @@ class SecondFragment : DialogFragment() {
             }
         }
 
+        // Устанавливаем значения по умолчанию
+        binding.habitNameEditText.setText("привычка")
+        binding.hoursEditText.setText("1")
+        binding.minutesEditText.setText("30")
+        binding.repeatCountEditText.setText("10")
+        
         // По умолчанию выбираем простую привычку
         binding.simpleRadioButton.isChecked = true
 
