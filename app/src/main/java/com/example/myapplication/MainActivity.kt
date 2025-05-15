@@ -12,13 +12,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.SecondFragment
 import java.util.Date
+import androidx.fragment.app.commit
+import androidx.core.content.edit
+import android.view.View
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var habitAdapter: HabitAdapter
-    private var currentHabitType: HabitType = HabitType.SIMPLE
-    private var targetValue: Int = 0
+    public lateinit var habitAdapter: HabitAdapter
+    public lateinit var progressHistory: HabitProgressHistory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +49,11 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             }
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
+        
+        // Загружаем сохраненные привычки или создаем тестовые, если их нет
+        if (habitAdapter.habits.isEmpty()) {
+            createSampleHabits()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -69,38 +76,46 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     }
     
     private fun setupRecyclerView() {
-        habitAdapter = HabitAdapter(loadHabits())
+        // Инициализируем историю прогресса
+        progressHistory = HabitProgressHistory(this)
+        
+        // Инициализируем адаптер
+        habitAdapter = HabitAdapter(mutableListOf())
         habitAdapter.listener = this
         binding.habitsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = habitAdapter
         }
+        
+        // Загружаем сохраненные привычки
+        loadHabits()
     }
     
     private fun saveHabits() {
         val sharedPreferences = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
         
-        // Сохраняем количество привычек
-        editor.putInt("habits_count", habitAdapter.habits.size)
-        
-        // Сохраняем каждую привычку
-        habitAdapter.habits.forEachIndexed { index, habit ->
-            editor.putString("habit_${index}_name", habit.name)
-            editor.putInt("habit_${index}_type", habit.type.ordinal)
-            editor.putInt("habit_${index}_target", habit.target)
-            editor.putInt("habit_${index}_current", habit.current)
-            editor.putLong("habit_${index}_date", habit.createdDate.time)
+        sharedPreferences.edit {
+            // Сохраняем количество привычек
+            putInt("habits_count", habitAdapter.habits.size)
+            
+            // Сохраняем каждую привычку
+            habitAdapter.habits.forEachIndexed { index, habit ->
+                putString("habit_${index}_name", habit.name)
+                putInt("habit_${index}_type", habit.type.ordinal)
+                putInt("habit_${index}_target", habit.target)
+                putInt("habit_${index}_current", habit.current)
+                putLong("habit_${index}_date", habit.createdDate.time)
+            }
         }
-        
-        editor.apply()
     }
     
-    private fun loadHabits(): MutableList<Habit> {
-        val habits = mutableListOf<Habit>()
+    private fun loadHabits(): Boolean {
         val sharedPreferences = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
-        
         val habitsCount = sharedPreferences.getInt("habits_count", 0)
+        
+        if (habitsCount == 0) {
+            return false
+        }
         
         for (i in 0 until habitsCount) {
             val name = sharedPreferences.getString("habit_${i}_name", "") ?: ""
@@ -109,12 +124,13 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             val current = sharedPreferences.getInt("habit_${i}_current", 0)
             val date = sharedPreferences.getLong("habit_${i}_date", System.currentTimeMillis())
             
-            val type = HabitType.values()[typeOrdinal]
+            val type = HabitType.entries[typeOrdinal]
             
-            habits.add(Habit(name = name, type = type, target = target, current = current, createdDate = Date(date)))
+            val habit = Habit(name = name, type = type, target = target, current = current, createdDate = Date(date))
+            habitAdapter.addHabit(habit)
         }
         
-        return habits
+        return true
     }
     
     fun addHabit(name: String, type: HabitType, target: Int) {
@@ -145,35 +161,84 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     }
     */
     
-    private fun showProgressUpdateDialog(position: Int, habit: Habit) {
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_NUMBER
-        
-        val title = when (habit.type) {
-            HabitType.TIME -> "Введите количество минут"
-            HabitType.REPEAT -> "Введите количество повторений"
-            HabitType.SIMPLE -> return markSimpleHabitAsCompleted(position, habit)
-        }
-        
-        AlertDialog.Builder(this)
-            .setTitle(title)
-            .setView(input)
-            .setPositiveButton("OK") { _, _ ->
-                val inputText = input.text.toString()
-                if (inputText.isNotEmpty()) {
-                    val newValue = inputText.toInt()
-                    val updatedHabit = habit.copy(current = habit.current + newValue)
-                    habitAdapter.updateHabit(position, updatedHabit)
-                }
-            }
-            .setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
-            .show()
-    }
-    
+    // Метод markSimpleHabitAsCompleted используется в onUpdateProgress
     private fun markSimpleHabitAsCompleted(position: Int, habit: Habit) {
         val updatedHabit = habit.copy(current = 1)
         habitAdapter.updateHabit(position, updatedHabit)
         Toast.makeText(this, "Привычка отмечена как выполненная", Toast.LENGTH_SHORT).show()
+    }
+    
+    /**
+     * Создает три тестовые привычки разных типов с историей за неделю
+     */
+    private fun createSampleHabits() {
+        // Создаем привычки разных типов
+        val timeHabit = Habit(
+            name = "Медитация", 
+            type = HabitType.TIME, 
+            target = 15, 
+            current = 0, 
+            createdDate = Date()
+        ) // 15 минут
+        
+        val repeatHabit = Habit(
+            name = "Отжимания", 
+            type = HabitType.REPEAT, 
+            target = 20, 
+            current = 0, 
+            createdDate = Date()
+        ) // 20 повторений
+        
+        val simpleHabit = Habit(
+            name = "Пить воду", 
+            type = HabitType.SIMPLE, 
+            target = 1, 
+            current = 0, 
+            createdDate = Date()
+        ) // Просто выполнено/не выполнено
+        
+        // Добавляем привычки в адаптер
+        habitAdapter.addHabit(timeHabit)
+        habitAdapter.addHabit(repeatHabit)
+        habitAdapter.addHabit(simpleHabit)
+        
+        // Генерируем историю за неделю для каждой привычки
+        generateWeekHistory()
+        
+        // Сохраняем привычки
+        saveHabits()
+    }
+    
+    /**
+     * Генерирует историю прогресса за последнюю неделю для всех привычек
+     */
+    private fun generateWeekHistory() {
+        val random = java.util.Random()
+        val calendar = java.util.Calendar.getInstance()
+        
+        // Для каждой привычки
+        for (position in 0 until habitAdapter.habits.size) {
+            val habit = habitAdapter.habits[position]
+            
+            // Генерируем данные за последние 7 дней
+            for (day in 6 downTo 0) {
+                calendar.timeInMillis = System.currentTimeMillis()
+                calendar.add(java.util.Calendar.DAY_OF_YEAR, -day) // день в прошлом
+                val timestamp = calendar.timeInMillis
+                
+                // Генерируем случайное значение в зависимости от типа привычки
+                val progress = when (habit.type) {
+                    HabitType.TIME -> random.nextInt(habit.target * 2) // от 0 до 2*target минут
+                    HabitType.REPEAT -> random.nextInt(habit.target * 2) // от 0 до 2*target повторений
+                    HabitType.SIMPLE -> if (random.nextFloat() > 0.3f) 1 else 0 // 70% вероятность выполнения
+                }
+                
+                // Добавляем запись в историю
+                if (progress > 0) {
+                    progressHistory.addProgressRecord(position, progress, timestamp)
+                }
+            }
+        }
     }
     
     // Реализация интерфейса HabitAdapter.HabitListener
@@ -235,9 +300,25 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     }
     
     override fun onShowChart(position: Int) {
-        val habit = habitAdapter.habits[position]
-        val chartFragment = HabitChartFragment.newInstance(position, habit.name)
-        chartFragment.show(supportFragmentManager, "habitChart")
+        val habitChartFragment = HabitChartFragment.newInstance(position)
+        supportFragmentManager.commit {
+            replace(R.id.fragment_container, habitChartFragment)
+            addToBackStack("chart")
+        }
+        // Показываем контейнер фрагмента и скрываем RecyclerView
+        binding.fragmentContainer.visibility = View.VISIBLE
+        binding.habitsRecyclerView.visibility = View.GONE
+    }
+    
+    override fun onBackPressed() {
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            // Если есть фрагменты в стеке, возвращаемся к списку привычек
+            supportFragmentManager.popBackStack()
+            binding.fragmentContainer.visibility = View.GONE
+            binding.habitsRecyclerView.visibility = View.VISIBLE
+        } else {
+            super.onBackPressed()
+        }
     }
 
 }
