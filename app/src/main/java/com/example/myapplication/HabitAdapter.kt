@@ -24,6 +24,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
         val nameTextView: TextView = itemView.findViewById(R.id.habitNameTextView)
         val dateTextView: TextView = itemView.findViewById(R.id.habitDateTextView)
         val progressTextView: TextView = itemView.findViewById(R.id.habitProgressTextView)
+        val expandArrowButton: ImageButton = itemView.findViewById(R.id.expandArrowButton)
         val expandButton: ImageButton = itemView.findViewById(R.id.expandButton)
         val sliderLayout: View = itemView.findViewById(R.id.sliderLayout)
         
@@ -46,17 +47,33 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                 }
             }
             
+            // Обработчик нажатия на всю карточку и стрелку
+            val expandClickListener = View.OnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    toggleExpand()
+                }
+            }
+            itemView.setOnClickListener(expandClickListener)
+            expandArrowButton.setOnClickListener(expandClickListener)
+
+            // Обработчик нажатия на кнопку
             expandButton.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     val habit = habits[position]
-                    if (habit.type == HabitType.SIMPLE) {
-                        // Для простых привычек переключаем статус выполнения
-                        val newValue = if (habit.current > 0) 0 else 1
-                        listener?.onUpdateProgress(position, newValue)
-                    } else {
-                        toggleExpand()
+                    // Для всех типов привычек переключаем статус выполнения
+                    when (habit.type) {
+                        HabitType.TIME, HabitType.REPEAT -> {
+                            val newValue = if (habit.isCompleted()) 0 else habit.target
+                            listener?.onUpdateProgress(position, newValue)
+                        }
+                        HabitType.SIMPLE -> {
+                            val newValue = if (habit.current > 0) 0 else 1
+                            listener?.onUpdateProgress(position, newValue)
+                        }
                     }
+                    toggleExpand()
                 }
             }
             
@@ -104,10 +121,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                             hoursValueTextView.text = newValue.toString()
                             listener?.onUpdateProgress(position, newValue)
                         }
-                        HabitType.SIMPLE -> {
-                            listener?.onUpdateProgress(position, 1)
-                            toggleExpand()
-                        }
+                        else -> {}
                     }
                 }
             }
@@ -141,10 +155,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                             hoursValueTextView.text = newValue.toString()
                             listener?.onUpdateProgress(position, newValue)
                         }
-                        HabitType.SIMPLE -> {
-                            listener?.onUpdateProgress(position, 0)
-                            toggleExpand()
-                        }
+                        else -> {}
                     }
                 }
             }
@@ -154,19 +165,11 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             isExpanded = !isExpanded
             sliderLayout.visibility = if (isExpanded) View.VISIBLE else View.GONE
             
-            // Получаем позицию и тип привычки
-            val position = adapterPosition
-            if (position != RecyclerView.NO_POSITION) {
-                val habit = habits[position]
-                
-                // Меняем иконку только для привычек не типа SIMPLE
-                if (habit.type != HabitType.SIMPLE) {
-                    expandButton.setImageResource(
-                        if (isExpanded) android.R.drawable.arrow_up_float 
-                        else android.R.drawable.arrow_down_float
-                    )
-                }
-            }
+            // Обновляем иконку стрелки
+            expandArrowButton.setImageResource(
+                if (isExpanded) android.R.drawable.arrow_up_float 
+                else android.R.drawable.arrow_down_float
+            )
         }
     }
     
@@ -225,13 +228,19 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                 minutesTextView.visibility = View.VISIBLE
                 hoursValueTextView.visibility = View.VISIBLE
                 minutesValueTextView.visibility = View.VISIBLE
+                plusButton.visibility = View.VISIBLE
+                minusButton.visibility = View.VISIBLE
                 
                 // Настраиваем кнопки
                 plusButton.text = "+"
                 minusButton.text = "-"
                 
-                // Устанавливаем иконку стрелки для expandButton
-                holder.expandButton.setImageResource(android.R.drawable.arrow_down_float)
+                // Устанавливаем иконку в зависимости от статуса выполнения
+                if (habit.isCompleted()) {
+                    holder.expandButton.setImageResource(android.R.drawable.checkbox_on_background)
+                } else {
+                    holder.expandButton.setImageResource(android.R.drawable.checkbox_off_background)
+                }
             }
             HabitType.REPEAT -> {
                 // Для привычек с повторениями показываем только ползунок повторений
@@ -247,26 +256,30 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                 minutesTextView.visibility = View.GONE
                 minutesValueTextView.visibility = View.GONE
                 hoursValueTextView.visibility = View.VISIBLE
+                plusButton.visibility = View.VISIBLE
+                minusButton.visibility = View.VISIBLE
                 
                 // Настраиваем кнопки
                 plusButton.text = "+"
                 minusButton.text = "-"
                 
-                // Устанавливаем иконку стрелки для expandButton
-                holder.expandButton.setImageResource(android.R.drawable.arrow_down_float)
+                // Устанавливаем иконку в зависимости от статуса выполнения
+                if (habit.isCompleted()) {
+                    holder.expandButton.setImageResource(android.R.drawable.checkbox_on_background)
+                } else {
+                    holder.expandButton.setImageResource(android.R.drawable.checkbox_off_background)
+                }
             }
             HabitType.SIMPLE -> {
-                // Для простых привычек показываем только кнопку "Выполнено"
+                // Для простых привычек скрываем все элементы управления
                 hoursSeekBar.visibility = View.GONE
                 minutesSeekBar.visibility = View.GONE
                 hoursTextView.visibility = View.GONE
                 minutesTextView.visibility = View.GONE
                 hoursValueTextView.visibility = View.GONE
                 minutesValueTextView.visibility = View.GONE
-                
-                // Меняем текст кнопок для простой привычки
-                plusButton.text = "✓"
-                minusButton.text = "✗"
+                plusButton.visibility = View.GONE
+                minusButton.visibility = View.GONE
                 
                 // Устанавливаем иконку галочки для expandButton в зависимости от статуса
                 if (habit.current > 0) {

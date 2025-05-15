@@ -52,12 +52,24 @@
         app:layout_constraintTop_toTopOf="@+id/habitDateTextView" />
 
     <ImageButton
-        android:id="@+id/expandButton"
-        android:layout_width="37dp"
-        android:layout_height="47dp"
-        android:layout_marginEnd="16dp"
+        android:id="@+id/expandArrowButton"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="8dp"
         android:background="@android:color/transparent"
         android:src="@android:drawable/arrow_down_float"
+        app:layout_constraintBottom_toBottomOf="@+id/habitDateTextView"
+        app:layout_constraintEnd_toStartOf="@+id/expandButton"
+        app:layout_constraintTop_toTopOf="@+id/habitNameTextView"
+        app:tint="@color/mint_text_primary" />
+
+    <ImageButton
+        android:id="@+id/expandButton"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/checkbox_off_background"
         app:layout_constraintBottom_toBottomOf="@+id/habitDateTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/habitNameTextView"
