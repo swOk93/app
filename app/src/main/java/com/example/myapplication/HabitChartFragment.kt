@@ -91,6 +91,9 @@ class HabitChartFragment : Fragment() {
             setDrawFilled(true)
             fillAlpha = 60
             
+            // Настраиваем плавные линии с использованием кубических кривых Безье
+            mode = LineDataSet.Mode.CUBIC_BEZIER
+            
             // Настраиваем цвета в зависимости от типа привычки
             val mainColor = when (habit.type) {
                 HabitType.TIME -> Color.BLUE
