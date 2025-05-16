@@ -9,6 +9,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.HabitChartFragment
 
 class HabitAdapter(val habits: MutableList<Habit>) : 
     RecyclerView.Adapter<HabitAdapter.HabitViewHolder>() {
@@ -52,6 +53,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             chartButton.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
+                    // Вызываем метод onShowChart в MainActivity
                     listener?.onShowChart(position)
                 }
             }

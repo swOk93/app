@@ -15,6 +15,8 @@ import java.util.Date
 import androidx.fragment.app.commit
 import androidx.core.content.edit
 import android.view.View
+import com.example.myapplication.HabitChartFragment
+import com.example.myapplication.HabitChartDialogFragment
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
 
@@ -27,6 +29,21 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
+        // Настройка обработчика кнопки "Назад"
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    // Если есть фрагменты в стеке, возвращаемся к списку привычек
+                    supportFragmentManager.popBackStack()
+                    binding.fragmentContainer.visibility = View.GONE
+                    binding.habitsRecyclerView.visibility = View.VISIBLE
+                } else {
+                    // Стандартное поведение - закрытие приложения
+                    finish()
+                }
+            }
+        })
 
         // Инициализация RecyclerView
         setupRecyclerView()
@@ -299,26 +316,21 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         }
     }
     
+
+
+    // Метод для отображения графика прогресса привычки
     override fun onShowChart(position: Int) {
-        val habitChartFragment = HabitChartFragment.newInstance(position)
-        supportFragmentManager.commit {
-            replace(R.id.fragment_container, habitChartFragment)
-            addToBackStack("chart")
-        }
+        // Используем HabitChartFragment для отображения графика
+        val chartFragment = HabitChartFragment.newInstance(position)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, chartFragment)
+            .addToBackStack("chart")
+            .commit()
         // Показываем контейнер фрагмента и скрываем RecyclerView
         binding.fragmentContainer.visibility = View.VISIBLE
         binding.habitsRecyclerView.visibility = View.GONE
     }
     
-    override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            // Если есть фрагменты в стеке, возвращаемся к списку привычек
-            supportFragmentManager.popBackStack()
-            binding.fragmentContainer.visibility = View.GONE
-            binding.habitsRecyclerView.visibility = View.VISIBLE
-        } else {
-            super.onBackPressed()
-        }
-    }
+    // Метод для обработки кнопки "Назад" при навигации по фрагментам
 
 }
