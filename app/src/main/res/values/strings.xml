@@ -44,4 +44,7 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <string name="habits_list_desc">Список привычек</string>
+    <string name="week">Неделя</string>
+    <string name="month">месяц</string>
+    <string name="year">Год</string>
 </resources>

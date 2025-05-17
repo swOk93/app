@@ -300,14 +300,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     }
     
     override fun onShowChart(position: Int) {
-        val habitChartFragment = HabitChartFragment.newInstance(position)
-        supportFragmentManager.commit {
-            replace(R.id.fragment_container, habitChartFragment)
-            addToBackStack("chart")
-        }
-        // Показываем контейнер фрагмента и скрываем RecyclerView
-        binding.fragmentContainer.visibility = View.VISIBLE
-        binding.habitsRecyclerView.visibility = View.GONE
+        val dialogFragment = HabitChartDialogFragment.newInstance(position)
+        dialogFragment.show(supportFragmentManager, "HabitChartDialog")
     }
     
     override fun onBackPressed() {
