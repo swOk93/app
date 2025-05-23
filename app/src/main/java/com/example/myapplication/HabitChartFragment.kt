@@ -1,11 +1,13 @@
 package com.example.myapplication
 
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
@@ -86,21 +88,37 @@ class HabitChartFragment : Fragment() {
         
         // Создаем и настраиваем набор данных
         val dataSet = LineDataSet(entries, habit.name).apply {
-            lineWidth = 2f
-            circleRadius = 4f
+            lineWidth = 3f
+            circleRadius = 5f
             setDrawFilled(true)
-            fillAlpha = 60
+            fillAlpha = 80
+            mode = LineDataSet.Mode.CUBIC_BEZIER // Сглаженные линии
             
             // Настраиваем цвета в зависимости от типа привычки
             val mainColor = when (habit.type) {
-                HabitType.TIME -> Color.BLUE
-                HabitType.REPEAT -> Color.GREEN
-                HabitType.SIMPLE -> Color.RED
+                HabitType.TIME -> resources.getColor(R.color.mint_primary, null) // Коралловый
+                HabitType.REPEAT -> resources.getColor(R.color.mint_dark, null) // Мятный
+                HabitType.SIMPLE -> resources.getColor(R.color.mint_progress, null) // Персиковый
+            }
+            
+            // Настройка градиентной заливки
+            val gradientDrawable = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(mainColor, Color.TRANSPARENT))
+            val drawable = context?.let { ContextCompat.getDrawable(it, R.drawable.fade_gradient) }
+            if (drawable != null) {
+                drawable.setTint(mainColor)
+                fillDrawable = drawable
             }
             
             setColor(mainColor)
             setCircleColor(mainColor)
-            setFillColor(mainColor)
+            valueTextColor = mainColor
+            valueTextSize = 12f
+            
+            // Настройка выделения точек
+            highLightColor = resources.getColor(R.color.mint_accent, null)
+            setDrawHighlightIndicators(true)
+            enableDashedHighlightLine(10f, 5f, 0f)
         }
         
         // Создаем и устанавливаем данные для графика
@@ -119,6 +137,9 @@ class HabitChartFragment : Fragment() {
             position = XAxis.XAxisPosition.BOTTOM
             valueFormatter = IndexAxisValueFormatter(xLabels)
             granularity = 1f
+            textColor = resources.getColor(R.color.mint_text_primary, null)
+            textSize = 12f
+            setDrawGridLines(false)
         }
         
         // Настраиваем описание оси Y в зависимости от типа привычки
@@ -130,8 +151,11 @@ class HabitChartFragment : Fragment() {
         
         lineChart.axisLeft.apply {
             axisMinimum = 0f
-            textColor = Color.BLACK
+            textColor = resources.getColor(R.color.mint_text_primary, null)
             textSize = 12f
+            setDrawGridLines(true)
+            gridColor = resources.getColor(R.color.mint_text_secondary, null)
+            gridLineWidth = 0.5f
         }
         
         // Set the Y-axis label using proper method
@@ -146,8 +170,10 @@ class HabitChartFragment : Fragment() {
         // Добавляем горизонтальную линию для целевого значения
         if (habit.type != HabitType.SIMPLE) {
             val targetLine = LimitLine(habit.target.toFloat(), "Цель")
-            targetLine.lineColor = Color.RED
-            targetLine.lineWidth = 1f
+            targetLine.lineColor = resources.getColor(R.color.mint_delete, null) // Лавандовый
+            targetLine.lineWidth = 2f
+            targetLine.textColor = resources.getColor(R.color.mint_text_primary, null)
+            targetLine.textSize = 12f
             lineChart.axisLeft.addLimitLine(targetLine)
         }
         
@@ -157,11 +183,22 @@ class HabitChartFragment : Fragment() {
             desc.isEnabled = false
             description = desc
             legend.isEnabled = true
+            legend.textColor = resources.getColor(R.color.mint_text_primary, null)
             setTouchEnabled(true)
             isDragEnabled = true
             setScaleEnabled(true)
             setPinchZoom(true)
-            animateX(1000)
+            animateX(1500)
+            
+            // Настройка фона графика
+            setBackgroundColor(resources.getColor(R.color.mint_card, null))
+            setDrawGridBackground(false)
+            setDrawBorders(false)
+            
+            // Настройка маркера при нажатии на точку
+            val markerView = context?.let { MarkerView(it, R.layout.custom_marker_view) }
+            markerView?.chartView = this
+            marker = markerView
         }
         
         // Обновляем график
