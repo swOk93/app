@@ -140,32 +140,21 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         Toast.makeText(this, "Привычка добавлена: $name", Toast.LENGTH_SHORT).show()
     }
     
-    // Этот метод больше не используется в новом интерфейсе
-    /*
-    private fun showTargetInputDialog(title: String) {
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_NUMBER
-        
-        AlertDialog.Builder(this)
-            .setTitle(title)
-            .setView(input)
-            .setPositiveButton("OK") { _, _ ->
-                val inputText = input.text.toString()
-                if (inputText.isNotEmpty()) {
-                    targetValue = inputText.toInt()
-                    // binding.minutesValueTextView.text = targetValue.toString()
-                }
-            }
-            .setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
-            .show()
-    }
-    */
     
     // Метод markSimpleHabitAsCompleted используется в onUpdateProgress
-    private fun markSimpleHabitAsCompleted(position: Int, habit: Habit) {
-        val updatedHabit = habit.copy(current = 1)
-        habitAdapter.updateHabit(position, updatedHabit)
-        Toast.makeText(this, "Привычка отмечена как выполненная", Toast.LENGTH_SHORT).show()
+    fun markSimpleHabitAsCompleted(position: Int, isCompleted: Boolean) {
+        val habit = habitAdapter.habits[position]
+        if (habit.type == HabitType.SIMPLE) {
+            val updatedHabit = habit.copy(current = if (isCompleted) 1 else 0)
+            habitAdapter.updateHabit(position, updatedHabit)
+            saveHabits()
+            
+            // Добавляем запись в историю прогресса
+            progressHistory.addProgressRecord(position, if (isCompleted) 1 else 0)
+            
+            val message = if (isCompleted) "Привычка отмечена как выполненная" else "Привычка отмечена как невыполненная"
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
     }
     
     /**
@@ -257,7 +246,6 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     
     override fun onUpdateProgress(position: Int, count: Int) {
         val habit = habitAdapter.habits[position]
-        val progressHistory = HabitProgressHistory(this)
         
         when (habit.type) {
             HabitType.TIME -> {
@@ -278,23 +266,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                 Toast.makeText(this, "Прогресс обновлен: $count повторений", Toast.LENGTH_SHORT).show()
             }
             HabitType.SIMPLE -> {
-                if (count > 0) {
-                    // Отмечаем как выполненную
-                    val updatedHabit = habit.copy(current = 1)
-                    habitAdapter.updateHabit(position, updatedHabit)
-                    saveHabits()
-                    // Добавляем запись в историю прогресса
-                    progressHistory.addProgressRecord(position, 1)
-                    Toast.makeText(this, "Привычка отмечена как выполненная", Toast.LENGTH_SHORT).show()
-                } else {
-                    // Отмечаем как невыполненную
-                    val updatedHabit = habit.copy(current = 0)
-                    habitAdapter.updateHabit(position, updatedHabit)
-                    saveHabits()
-                    // Добавляем запись в историю прогресса
-                    progressHistory.addProgressRecord(position, 0)
-                    Toast.makeText(this, "Привычка отмечена как невыполненная", Toast.LENGTH_SHORT).show()
-                }
+                // Используем метод markSimpleHabitAsCompleted для обработки простых привычек
+                markSimpleHabitAsCompleted(position, count > 0)
             }
         }
     }
