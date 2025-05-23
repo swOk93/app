@@ -77,7 +77,9 @@ class HabitChartFragment : Fragment() {
         val weekRecords = getLastWeekRecords()
         
         if (weekRecords.isEmpty()) {
-            lineChart.setNoDataText("Нет данных за последнюю неделю")
+            lineChart.setNoDataText("Нет данных о прогрессе за последнюю неделю")
+            lineChart.setNoDataTextColor(resources.getColor(R.color.mint_text_primary, null))
+            lineChart.invalidate()
             return
         }
         
@@ -213,40 +215,13 @@ class HabitChartFragment : Fragment() {
         calendar.add(Calendar.DAY_OF_YEAR, -7) // Неделя назад
         val weekAgo = calendar.timeInMillis
         
+        // Получаем все записи для данной привычки
         val records = progressHistory.getRecordsForHabit(habitPosition)
         
-        // Если нет реальных записей, создаем тестовые данные
-        if (records.isEmpty() || records.all { it.timestamp < weekAgo }) {
-            return generateTestData()
-        }
-        
+        // Фильтруем записи за последнюю неделю и сортируем их по времени
         return records.filter { it.timestamp >= weekAgo }
             .sortedBy { it.timestamp }
     }
     
-    /**
-     * Генерирует тестовые данные за последнюю неделю
-     */
-    private fun generateTestData(): List<HabitProgressHistory.ProgressRecord> {
-        val result = mutableListOf<HabitProgressHistory.ProgressRecord>()
-        val calendar = Calendar.getInstance()
-        val random = Random()
-        
-        // Генерируем данные за последние 7 дней
-        for (i in 6 downTo 0) {
-            calendar.add(Calendar.DAY_OF_YEAR, -1)
-            val timestamp = calendar.timeInMillis
-            
-            // Генерируем случайное значение в зависимости от типа привычки
-            val count = when (habit.type) {
-                HabitType.TIME -> random.nextInt(habit.target * 2)
-                HabitType.REPEAT -> random.nextInt(habit.target * 2)
-                HabitType.SIMPLE -> if (random.nextBoolean()) 1 else 0
-            }
-            
-            result.add(HabitProgressHistory.ProgressRecord(habitPosition, count, timestamp))
-        }
-        
-        return result
-    }
+    // Удаляем метод generateTestData(), так как он больше не используется
 }
