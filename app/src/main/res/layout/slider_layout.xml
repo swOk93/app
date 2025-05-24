@@ -120,6 +120,18 @@
         app:tint="@color/mint_delete" />
         
     <ImageButton
+        android:id="@+id/sliderEditButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/ic_menu_edit"
+        app:layout_constraintStart_toEndOf="@+id/sliderDeleteButton"
+        app:layout_constraintEnd_toStartOf="@+id/chartButton"
+        app:layout_constraintTop_toBottomOf="@+id/minusButton"
+        app:tint="@color/mint_accent" />
+        
+    <ImageButton
         android:id="@+id/chartButton"
         android:layout_width="48dp"
         android:layout_height="48dp"

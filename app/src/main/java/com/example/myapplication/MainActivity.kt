@@ -141,6 +141,25 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         Toast.makeText(this, "Привычка добавлена: $name", Toast.LENGTH_SHORT).show()
     }
     
+    /**
+     * Обновляет существующую привычку
+     */
+    fun updateHabit(position: Int, name: String, type: HabitType, target: Int) {
+        if (position >= 0 && position < habitAdapter.habits.size) {
+            val oldHabit = habitAdapter.habits[position]
+            // Сохраняем текущий прогресс и дату создания
+            val updatedHabit = Habit(
+                name = name,
+                type = type,
+                target = target,
+                current = oldHabit.current,
+                createdDate = oldHabit.createdDate
+            )
+            habitAdapter.updateHabit(position, updatedHabit)
+            saveHabits()
+        }
+    }
+    
     
     // Метод markSimpleHabitAsCompleted используется в onUpdateProgress
     fun markSimpleHabitAsCompleted(position: Int, isCompleted: Boolean) {
@@ -243,6 +262,15 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             }
             .setNegativeButton("Нет", null)
             .show()
+    }
+    
+    override fun onEditHabit(position: Int) {
+        if (position >= 0 && position < habitAdapter.habits.size) {
+            val habit = habitAdapter.habits[position]
+            // Создаем и показываем SecondFragment в режиме редактирования
+            val secondFragment = SecondFragment.newInstance(position, habit)
+            secondFragment.show(supportFragmentManager, "SecondFragment")
+        }
     }
     
     override fun onUpdateProgress(position: Int, count: Int) {

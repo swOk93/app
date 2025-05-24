@@ -10,13 +10,19 @@ import com.example.myapplication.databinding.FragmentSecondBinding
 import com.example.myapplication.HabitType
 
 /**
- * A simple [DialogFragment] subclass for adding new habits.
+ * A [DialogFragment] subclass for adding or editing habits.
  */
 class SecondFragment : DialogFragment() {
 
     private var _binding: FragmentSecondBinding? = null
     private var currentHabitType: HabitType = HabitType.SIMPLE
-
+    
+    // Параметры для редактирования существующей привычки
+    private var isEditMode = false
+    private var habitPosition = -1
+    private var habitName = ""
+    private var habitTarget = 0
+    
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -40,6 +46,20 @@ class SecondFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Получаем аргументы, если они есть
+        arguments?.let { args ->
+            isEditMode = args.getBoolean(ARG_IS_EDIT_MODE, false)
+            if (isEditMode) {
+                habitPosition = args.getInt(ARG_HABIT_POSITION, -1)
+                habitName = args.getString(ARG_HABIT_NAME, "")
+                habitTarget = args.getInt(ARG_HABIT_TARGET, 0)
+                currentHabitType = HabitType.entries[args.getInt(ARG_HABIT_TYPE, 0)]
+                
+                // Изменяем заголовок диалога
+                binding.addHabitTitleTextView.text = "Редактирование привычки"
+            }
+        }
 
         // Настройка радиокнопок типа привычки
         binding.habitTypeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -62,14 +82,37 @@ class SecondFragment : DialogFragment() {
             }
         }
 
-        // Устанавливаем значения по умолчанию
-        binding.habitNameEditText.setText("привычка")
-        binding.hoursEditText.setText("1")
-        binding.minutesEditText.setText("30")
-        binding.repeatCountEditText.setText("10")
-        
-        // По умолчанию выбираем простую привычку
-        binding.simpleRadioButton.isChecked = true
+        // Устанавливаем значения по умолчанию или из редактируемой привычки
+        if (isEditMode) {
+            binding.habitNameEditText.setText(habitName)
+            
+            // Устанавливаем тип привычки
+            when (currentHabitType) {
+                HabitType.TIME -> {
+                    binding.timeRadioButton.isChecked = true
+                    val hours = habitTarget / 60
+                    val minutes = habitTarget % 60
+                    binding.hoursEditText.setText(hours.toString())
+                    binding.minutesEditText.setText(minutes.toString())
+                }
+                HabitType.REPEAT -> {
+                    binding.repeatRadioButton.isChecked = true
+                    binding.repeatCountEditText.setText(habitTarget.toString())
+                }
+                HabitType.SIMPLE -> {
+                    binding.simpleRadioButton.isChecked = true
+                }
+            }
+        } else {
+            // Значения по умолчанию для новой привычки
+            binding.habitNameEditText.setText("привычка")
+            binding.hoursEditText.setText("1")
+            binding.minutesEditText.setText("30")
+            binding.repeatCountEditText.setText("10")
+            
+            // По умолчанию выбираем простую привычку
+            binding.simpleRadioButton.isChecked = true
+        }
 
         // Настройка кнопки отмены
         binding.cancelButton.setOnClickListener {
@@ -101,8 +144,14 @@ class SecondFragment : DialogFragment() {
             HabitType.SIMPLE -> 1
         }
 
-        // Добавляем привычку через MainActivity
-        (activity as? MainActivity)?.addHabit(habitName, currentHabitType, targetValue)
+        if (isEditMode && habitPosition >= 0) {
+            // Обновляем существующую привычку
+            (activity as? MainActivity)?.updateHabit(habitPosition, habitName, currentHabitType, targetValue)
+            Toast.makeText(requireContext(), "Привычка обновлена", Toast.LENGTH_SHORT).show()
+        } else {
+            // Добавляем новую привычку
+            (activity as? MainActivity)?.addHabit(habitName, currentHabitType, targetValue)
+        }
 
         // Закрываем диалог
         dismiss()
@@ -111,5 +160,29 @@ class SecondFragment : DialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+    
+    companion object {
+        private const val ARG_IS_EDIT_MODE = "is_edit_mode"
+        private const val ARG_HABIT_POSITION = "habit_position"
+        private const val ARG_HABIT_NAME = "habit_name"
+        private const val ARG_HABIT_TYPE = "habit_type"
+        private const val ARG_HABIT_TARGET = "habit_target"
+        
+        /**
+         * Создает новый экземпляр SecondFragment для редактирования существующей привычки
+         */
+        fun newInstance(position: Int, habit: Habit): SecondFragment {
+            val fragment = SecondFragment()
+            val args = Bundle().apply {
+                putBoolean(ARG_IS_EDIT_MODE, true)
+                putInt(ARG_HABIT_POSITION, position)
+                putString(ARG_HABIT_NAME, habit.name)
+                putInt(ARG_HABIT_TYPE, habit.type.ordinal)
+                putInt(ARG_HABIT_TARGET, habit.target)
+            }
+            fragment.arguments = args
+            return fragment
+        }
     }
 }
