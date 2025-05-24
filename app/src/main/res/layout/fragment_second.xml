@@ -199,7 +199,8 @@
                 android:layout_weight="1"
                 android:background="@drawable/rounded_button_background"
                 android:text="СОХРАНИТЬ"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:textColorLink="#673AB7" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

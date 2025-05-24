@@ -2,15 +2,12 @@ package com.example.myapplication
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.databinding.ActivityMainBinding
-import com.example.myapplication.SecondFragment
 import java.util.Date
 import androidx.fragment.app.commit
 import androidx.core.content.edit
@@ -36,18 +33,6 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             // Показываем SecondFragment как диалог
             val secondFragment = SecondFragment()
             secondFragment.show(supportFragmentManager, "SecondFragment")
-        }
-        
-        // Настройка кнопки прогресса
-        binding.progressButton.setOnClickListener {
-            val completedCount = habitAdapter.habits.count { it.isCompleted() }
-            val totalCount = habitAdapter.habits.size
-            val message = if (totalCount > 0) {
-                "Выполнено $completedCount из $totalCount привычек (${(completedCount * 100 / totalCount)}%)"
-            } else {
-                "Нет добавленных привычек"
-            }
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
         
         // Привычки уже загружены или созданы в setupRecyclerView()
