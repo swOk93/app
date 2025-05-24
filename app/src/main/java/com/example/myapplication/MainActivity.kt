@@ -50,10 +50,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
         
-        // Загружаем сохраненные привычки или создаем тестовые, если их нет
-        if (habitAdapter.habits.isEmpty()) {
-            createSampleHabits()
-        }
+        // Привычки уже загружены или созданы в setupRecyclerView()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -87,8 +84,12 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             adapter = habitAdapter
         }
         
-        // Загружаем сохраненные привычки
-        loadHabits()
+        // Загружаем сохраненные привычки или создаем стартовые, если это первый запуск
+        val habitsLoaded = loadHabits()
+        if (!habitsLoaded) {
+            // Если привычки не были загружены (первый запуск), создаем стартовые
+            createSampleHabits()
+        }
     }
     
     private fun saveHabits() {
