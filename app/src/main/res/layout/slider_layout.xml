@@ -28,6 +28,7 @@
         android:text="Часы"
         android:textColor="@color/mint_accent"
         android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/hoursSeekBar"
         app:layout_constraintStart_toStartOf="@+id/hoursSeekBar"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -79,22 +80,23 @@
         android:text="Минуты"
         android:textColor="@color/mint_accent"
         android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/minutesSeekBar"
         app:layout_constraintStart_toStartOf="@+id/minutesSeekBar"
         app:layout_constraintTop_toBottomOf="@+id/hoursValueTextView" />
 
     <SeekBar
         android:id="@+id/minutesSeekBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="195dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
         android:max="59"
         android:progress="0"
         android:progressTint="@color/mint_accent"
         android:thumbTint="@color/mint_accent"
         app:layout_constraintEnd_toStartOf="@+id/plusButton"
-        app:layout_constraintStart_toEndOf="@+id/minusButton"
+        app:layout_constraintStart_toEndOf="@+id/sliderEditButton"
         app:layout_constraintTop_toBottomOf="@+id/minutesTextView" />
 
     <TextView
@@ -118,7 +120,7 @@
         app:layout_constraintStart_toStartOf="@+id/minusButton"
         app:layout_constraintTop_toBottomOf="@+id/minusButton"
         app:tint="@color/mint_delete" />
-        
+
     <ImageButton
         android:id="@+id/sliderEditButton"
         android:layout_width="48dp"
@@ -126,11 +128,12 @@
         android:layout_marginTop="20dp"
         android:background="@android:color/transparent"
         android:src="@android:drawable/ic_menu_edit"
-        app:layout_constraintStart_toEndOf="@+id/sliderDeleteButton"
         app:layout_constraintEnd_toStartOf="@+id/chartButton"
+        app:layout_constraintHorizontal_bias="0.034"
+        app:layout_constraintStart_toEndOf="@+id/sliderDeleteButton"
         app:layout_constraintTop_toBottomOf="@+id/minusButton"
         app:tint="@color/mint_accent" />
-        
+
     <ImageButton
         android:id="@+id/chartButton"
         android:layout_width="48dp"
