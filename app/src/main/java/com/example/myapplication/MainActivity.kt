@@ -36,6 +36,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         }
         
         // Привычки уже загружены или созданы в setupRecyclerView()
+        
+        // Проверяем, нужно ли сбросить прогресс привычек
+        checkAndResetHabits()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -92,12 +95,22 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                 putInt("habit_${index}_current", habit.current)
                 putLong("habit_${index}_date", habit.createdDate.time)
             }
+            
+            // Сохраняем дату последнего запуска приложения
+            putLong("last_launch_date", System.currentTimeMillis())
         }
     }
     
     private fun loadHabits(): Boolean {
         val sharedPreferences = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
         val habitsCount = sharedPreferences.getInt("habits_count", 0)
+        
+        // Если это первый запуск, сохраняем текущую дату
+        if (!sharedPreferences.contains("last_launch_date")) {
+            sharedPreferences.edit {
+                putLong("last_launch_date", System.currentTimeMillis())
+            }
+        }
         
         if (habitsCount == 0) {
             return false
@@ -160,6 +173,49 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             val message = if (isCompleted) "Привычка отмечена как выполненная" else "Привычка отмечена как невыполненная"
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
+    }
+    
+    /**
+     * Проверяет, изменился ли день с момента последнего запуска приложения,
+     * и если да, сбрасывает прогресс всех привычек
+     */
+    private fun checkAndResetHabits() {
+        val sharedPreferences = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
+        val lastLaunchDate = sharedPreferences.getLong("last_launch_date", System.currentTimeMillis())
+        
+        val lastCalendar = java.util.Calendar.getInstance()
+        lastCalendar.timeInMillis = lastLaunchDate
+        
+        val currentCalendar = java.util.Calendar.getInstance()
+        
+        // Проверяем, изменился ли день
+        val lastDay = lastCalendar.get(java.util.Calendar.DAY_OF_YEAR)
+        val lastYear = lastCalendar.get(java.util.Calendar.YEAR)
+        val currentDay = currentCalendar.get(java.util.Calendar.DAY_OF_YEAR)
+        val currentYear = currentCalendar.get(java.util.Calendar.YEAR)
+        
+        if (currentDay != lastDay || currentYear != lastYear) {
+            // День изменился, сбрасываем прогресс
+            resetHabitsProgress()
+            Toast.makeText(this, "Прогресс привычек сброшен для нового дня", Toast.LENGTH_SHORT).show()
+        }
+        
+        // Обновляем дату последнего запуска
+        sharedPreferences.edit {
+            putLong("last_launch_date", System.currentTimeMillis())
+        }
+    }
+    
+    /**
+     * Сбрасывает прогресс всех привычек на 0
+     */
+    private fun resetHabitsProgress() {
+        for (i in 0 until habitAdapter.habits.size) {
+            val habit = habitAdapter.habits[i]
+            val updatedHabit = habit.copy(current = 0)
+            habitAdapter.updateHabit(i, updatedHabit)
+        }
+        saveHabits()
     }
     
     /**

@@ -3,6 +3,7 @@ package com.example.myapplication
 import android.content.Context
 import android.widget.Toast
 import androidx.core.content.edit
+import java.util.Calendar
 
 class HabitProgressHistory(private val context: Context) {
     private val progressRecords = mutableListOf<ProgressRecord>()
@@ -18,9 +19,42 @@ class HabitProgressHistory(private val context: Context) {
         loadProgressHistory()
     }
     
+    /**
+     * Добавляет или обновляет запись о прогрессе привычки за текущий день
+     * Если запись за текущий день уже существует, она будет обновлена
+     */
     fun addProgressRecord(position: Int, count: Int, timestamp: Long = System.currentTimeMillis()) {
-        progressRecords.add(ProgressRecord(position, count, timestamp))
-        // Сохраняем историю после добавления новой записи
+        // Получаем календарь для текущей даты записи
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = timestamp
+        // Обнуляем время, оставляя только дату
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val recordDate = calendar.timeInMillis
+        
+        // Ищем существующую запись за этот день
+        val existingRecordIndex = progressRecords.indexOfFirst { record -> 
+            val recordCalendar = Calendar.getInstance()
+            recordCalendar.timeInMillis = record.timestamp
+            recordCalendar.set(Calendar.HOUR_OF_DAY, 0)
+            recordCalendar.set(Calendar.MINUTE, 0)
+            recordCalendar.set(Calendar.SECOND, 0)
+            recordCalendar.set(Calendar.MILLISECOND, 0)
+            
+            record.position == position && recordCalendar.timeInMillis == recordDate
+        }
+        
+        if (existingRecordIndex >= 0) {
+            // Обновляем существующую запись
+            progressRecords[existingRecordIndex] = ProgressRecord(position, count, timestamp)
+        } else {
+            // Добавляем новую запись
+            progressRecords.add(ProgressRecord(position, count, timestamp))
+        }
+        
+        // Сохраняем историю после добавления/обновления записи
         saveProgressHistory()
     }
     
