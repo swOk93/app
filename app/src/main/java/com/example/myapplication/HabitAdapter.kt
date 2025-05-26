@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
@@ -27,7 +28,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
         val dateTextView: TextView = itemView.findViewById(R.id.habitDateTextView)
         val progressTextView: TextView = itemView.findViewById(R.id.habitProgressTextView)
         val expandArrowButton: ImageButton = itemView.findViewById(R.id.expandArrowButton)
-        val expandButton: ImageButton = itemView.findViewById(R.id.expandButton)
+        val expandButton: CheckBox = itemView.findViewById(R.id.expandButton)
         val sliderLayout: View = itemView.findViewById(R.id.sliderLayout)
         
         // Элементы управления ползунками
@@ -253,12 +254,8 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                 plusButton.text = "+"
                 minusButton.text = "-"
                 
-                // Устанавливаем иконку в зависимости от статуса выполнения
-                if (habit.isCompleted()) {
-                    holder.expandButton.setImageResource(android.R.drawable.checkbox_on_background)
-                } else {
-                    holder.expandButton.setImageResource(android.R.drawable.checkbox_off_background)
-                }
+                // Устанавливаем состояние чекбокса в зависимости от статуса выполнения
+                holder.expandButton.isChecked = habit.isCompleted()
             }
             HabitType.REPEAT -> {
                 // Для привычек с повторениями показываем только ползунок повторений
@@ -281,12 +278,8 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                 plusButton.text = "+"
                 minusButton.text = "-"
                 
-                // Устанавливаем иконку в зависимости от статуса выполнения
-                if (habit.isCompleted()) {
-                    holder.expandButton.setImageResource(android.R.drawable.checkbox_on_background)
-                } else {
-                    holder.expandButton.setImageResource(android.R.drawable.checkbox_off_background)
-                }
+                // Устанавливаем состояние чекбокса в зависимости от статуса выполнения
+                holder.expandButton.isChecked = habit.isCompleted()
             }
             HabitType.SIMPLE -> {
                 // Для простых привычек скрываем все элементы управления
@@ -299,12 +292,8 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                 plusButton.visibility = View.GONE
                 minusButton.visibility = View.GONE
                 
-                // Устанавливаем иконку галочки для expandButton в зависимости от статуса
-                if (habit.current > 0) {
-                    holder.expandButton.setImageResource(android.R.drawable.checkbox_on_background)
-                } else {
-                    holder.expandButton.setImageResource(android.R.drawable.checkbox_off_background)
-                }
+                // Устанавливаем состояние чекбокса в зависимости от статуса
+                holder.expandButton.isChecked = habit.current > 0
             }
         }
     }

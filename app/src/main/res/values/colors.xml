@@ -14,4 +14,6 @@
     <color name="mint_text_secondary">#B3FFFFFF</color> <!-- Полупрозрачный белый -->
     <color name="mint_progress">#E8A87C</color> <!-- Персиковый -->
     <color name="mint_delete">#C38D9E</color> <!-- Лавандовый -->
+    <color name="colorGreen">#4CAF50</color><!-- цвет для состояния ON -->
+    <color name="colorGray">#9E9E9E</color><!-- цвет для состояния OFF -->
 </resources>
