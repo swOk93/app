@@ -15,7 +15,7 @@
         android:background="@drawable/circle_button_background"
         android:foreground="@drawable/remove_24"
         android:foregroundTint="#009688"
-        android:gravity="center_horizontal|center_vertical"
+        android:text="-"
         android:textColor="@color/mint_text_primary"
         android:textSize="20sp"
         app:backgroundTint="@color/mint_dark"
@@ -30,16 +30,17 @@
         android:text="Часы"
         android:textColor="@color/mint_accent"
         android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/hoursSeekBar"
         app:layout_constraintStart_toStartOf="@+id/hoursSeekBar"
         app:layout_constraintTop_toTopOf="parent" />
 
     <SeekBar
         android:id="@+id/hoursSeekBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_width="228dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:max="10"
         android:progress="0"
         android:progressTint="@color/mint_accent"
@@ -55,7 +56,7 @@
         android:background="@drawable/circle_button_background"
         android:foreground="@drawable/ic_add_white_24dp"
         android:foregroundTint="#009688"
-        android:gravity="center_horizontal|center_vertical"
+        android:text="+"
         android:textAllCaps="false"
         android:textColor="@color/mint_text_primary"
         android:textSize="20sp"
@@ -79,17 +80,19 @@
         android:id="@+id/minutesTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:text="Минуты"
         android:textColor="@color/mint_accent"
         android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/minutesSeekBar"
+        app:layout_constraintHorizontal_bias="0.481"
         app:layout_constraintStart_toStartOf="@+id/minutesSeekBar"
         app:layout_constraintTop_toBottomOf="@+id/hoursValueTextView" />
 
     <SeekBar
         android:id="@+id/minutesSeekBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="188dp"
+        android:layout_height="22dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -98,7 +101,8 @@
         android:progressTint="@color/mint_accent"
         android:thumbTint="@color/mint_accent"
         app:layout_constraintEnd_toStartOf="@+id/plusButton"
-        app:layout_constraintStart_toEndOf="@+id/minusButton"
+        app:layout_constraintHorizontal_bias="0.516"
+        app:layout_constraintStart_toEndOf="@+id/sliderEditButton"
         app:layout_constraintTop_toBottomOf="@+id/minutesTextView" />
 
     <TextView
@@ -122,7 +126,7 @@
         app:layout_constraintStart_toStartOf="@+id/minusButton"
         app:layout_constraintTop_toBottomOf="@+id/minusButton"
         app:tint="@color/mint_delete" />
-        
+
     <ImageButton
         android:id="@+id/sliderEditButton"
         android:layout_width="48dp"
@@ -130,8 +134,9 @@
         android:layout_marginTop="20dp"
         android:background="@android:color/transparent"
         android:src="@android:drawable/ic_menu_edit"
-        app:layout_constraintStart_toEndOf="@+id/sliderDeleteButton"
         app:layout_constraintEnd_toStartOf="@+id/chartButton"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/sliderDeleteButton"
         app:layout_constraintTop_toBottomOf="@+id/minusButton"
         app:tint="@color/mint_accent" />
 
@@ -142,6 +147,8 @@
         android:layout_marginTop="20dp"
         android:background="@android:color/transparent"
         android:src="@drawable/outline_chart_data_24"
+        android:padding="0dp"
+        android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="@+id/plusButton"
         app:layout_constraintTop_toBottomOf="@+id/plusButton"
         app:tint="@color/mint_accent" />
