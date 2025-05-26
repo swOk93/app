@@ -55,6 +55,11 @@ class HabitChartFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_habit_chart, container, false)
     }
     
+    // Кэш для хранения записей, чтобы избежать повторных вычислений
+    private var cachedRecords: List<HabitProgressHistory.ProgressRecord>? = null
+    private var lastCacheTime: Long = 0
+    private val CACHE_VALID_TIME = 60000L // 1 минута
+    
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
@@ -72,9 +77,28 @@ class HabitChartFragment : Fragment() {
         setupChart()
     }
     
+    /**
+     * Получает записи из кэша или загружает новые, если кэш устарел
+     */
+    private fun getCachedWeekRecords(): List<HabitProgressHistory.ProgressRecord> {
+        val currentTime = System.currentTimeMillis()
+        
+        // Если кэш действителен и не пустой, возвращаем его
+        if (cachedRecords != null && currentTime - lastCacheTime < CACHE_VALID_TIME) {
+            return cachedRecords!!
+        }
+        
+        // Иначе загружаем новые данные и обновляем кэш
+        val newRecords = getLastWeekRecords()
+        cachedRecords = newRecords
+        lastCacheTime = currentTime
+        
+        return newRecords
+    }
+    
     private fun setupChart() {
-        // Получаем записи за последнюю неделю
-        val weekRecords = getLastWeekRecords()
+        // Используем кэшированные записи за последнюю неделю
+        val weekRecords = getCachedWeekRecords()
         
         if (weekRecords.isEmpty()) {
             lineChart.setNoDataText("Нет данных о прогрессе за последнюю неделю")
@@ -83,12 +107,20 @@ class HabitChartFragment : Fragment() {
             return
         }
         
-        // Создаем список точек для графика
-        val entries = weekRecords.mapIndexed { index, record ->
-            Entry(index.toFloat(), record.count.toFloat())
+        // Предварительно вычисляем некоторые значения для оптимизации
+        lineChart.setHardwareAccelerationEnabled(true)
+        
+        // Оптимизация: предварительно вычисляем первый timestamp
+        val firstTimestamp = weekRecords.first().timestamp
+        
+        // Создаем список точек для графика - оптимизированная версия
+        val entries = ArrayList<Entry>(weekRecords.size) // Предварительное выделение памяти
+        for (i in weekRecords.indices) {
+            val record = weekRecords[i]
+            entries.add(Entry(i.toFloat(), record.count.toFloat()))
         }
         
-        // Создаем и настраиваем набор данных
+        // Создаем и настраиваем набор данных с оптимизированными настройками
         val dataSet = LineDataSet(entries, habit.name).apply {
             lineWidth = 3f
             circleRadius = 5f
@@ -103,9 +135,7 @@ class HabitChartFragment : Fragment() {
                 HabitType.SIMPLE -> resources.getColor(R.color.mint_progress, null) // Персиковый
             }
             
-            // Настройка градиентной заливки
-            val gradientDrawable = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(mainColor, Color.TRANSPARENT))
+            // Настройка градиентной заливки - оптимизированная версия
             val drawable = context?.let { ContextCompat.getDrawable(it, R.drawable.fade_gradient) }
             if (drawable != null) {
                 drawable.setTint(mainColor)
@@ -127,12 +157,14 @@ class HabitChartFragment : Fragment() {
         val lineData = LineData(dataSet)
         lineChart.data = lineData
         
-        // Настраиваем форматирование оси X (даты)
+        // Настраиваем форматирование оси X (даты) - оптимизированная версия
         val dateFormat = SimpleDateFormat("dd.MM", Locale.getDefault())
-        val xLabels = weekRecords.map { record ->
-            val calendar = Calendar.getInstance()
+        val calendar = Calendar.getInstance() // Переиспользуем один экземпляр Calendar
+        val xLabels = ArrayList<String>(weekRecords.size)
+        
+        for (record in weekRecords) {
             calendar.timeInMillis = record.timestamp
-            dateFormat.format(calendar.time)
+            xLabels.add(dateFormat.format(calendar.time))
         }
         
         lineChart.xAxis.apply {
@@ -179,8 +211,8 @@ class HabitChartFragment : Fragment() {
             lineChart.axisLeft.addLimitLine(targetLine)
         }
         
-        // Дополнительные настройки графика
-        lineChart.apply {
+        // Дополнительные настройки графика - оптимизированная версия
+        with(lineChart) {
             val desc = Description()
             desc.isEnabled = false
             description = desc
@@ -190,12 +222,17 @@ class HabitChartFragment : Fragment() {
             isDragEnabled = true
             setScaleEnabled(true)
             setPinchZoom(true)
-            animateX(1500)
+            
+            // Уменьшаем время анимации для ускорения отрисовки
+            animateX(500)
             
             // Настройка фона графика
             setBackgroundColor(resources.getColor(R.color.mint_card, null))
             setDrawGridBackground(false)
             setDrawBorders(false)
+            
+            // Отключаем лишние вычисления при отрисовке
+            isHighlightPerDragEnabled = false
             
             // Настройка маркера при нажатии на точку
             val markerView = context?.let { MarkerView(it, R.layout.custom_marker_view) }
@@ -209,18 +246,20 @@ class HabitChartFragment : Fragment() {
     
     /**
      * Получает записи за последнюю неделю
+     * Оптимизированная версия для более быстрого получения данных
      */
     private fun getLastWeekRecords(): List<HabitProgressHistory.ProgressRecord> {
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.DAY_OF_YEAR, -7) // Неделя назад
         val weekAgo = calendar.timeInMillis
         
-        // Получаем все записи для данной привычки
-        val records = progressHistory.getRecordsForHabit(habitPosition)
-        
-        // Фильтруем записи за последнюю неделю и сортируем их по времени
-        return records.filter { it.timestamp >= weekAgo }
+        // Получаем только записи для данной привычки за последнюю неделю
+        // Используем последовательность для ленивой обработки данных
+        return progressHistory.getRecordsForHabit(habitPosition)
+            .asSequence()
+            .filter { it.timestamp >= weekAgo }
             .sortedBy { it.timestamp }
+            .toList()
     }
     
     // Удаляем метод generateTestData(), так как он больше не используется
