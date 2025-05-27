@@ -260,7 +260,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     }
     
     /**
-     * Генерирует историю прогресса за последнюю неделю для всех привычек
+     * Генерирует историю прогресса за последние 5 месяцев для всех привычек
      */
     private fun generateWeekHistory() {
         val random = java.util.Random()
@@ -270,8 +270,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         for (position in 0 until habitAdapter.habits.size) {
             val habit = habitAdapter.habits[position]
             
-            // Генерируем данные за последние 7 дней
-            for (day in 6 downTo 0) {
+            // Генерируем данные за последние 150 дней (примерно 5 месяцев)
+            for (day in 149 downTo 0) {
                 calendar.timeInMillis = System.currentTimeMillis()
                 calendar.add(java.util.Calendar.DAY_OF_YEAR, -day) // день в прошлом
                 val timestamp = calendar.timeInMillis
@@ -284,9 +284,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                 }
                 
                 // Добавляем запись в историю
-                if (progress > 0) {
-                    progressHistory.addProgressRecord(position, progress, timestamp)
-                }
+                progressHistory.addProgressRecord(position, progress, timestamp)
             }
         }
     }

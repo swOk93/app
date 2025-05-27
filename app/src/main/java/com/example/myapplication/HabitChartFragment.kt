@@ -256,7 +256,11 @@ class HabitChartFragment : Fragment() {
                 
                 // Находим первую ненулевую отметку
                 val firstNonZeroIndex = sortedRecords.indexOfFirst { it.count > 0 }
-                val firstTimestamp = sortedRecords[firstNonZeroIndex].timestamp
+                val firstTimestamp = if (firstNonZeroIndex != -1) {
+                    sortedRecords[firstNonZeroIndex].timestamp
+                } else {
+                    sortedRecords.first().timestamp
+                }
                 val lastTimestamp = sortedRecords.last().timestamp
                 val totalDays = ((lastTimestamp - firstTimestamp) / (24 * 60 * 60 * 1000L)).toInt() + 1
                 
@@ -296,53 +300,51 @@ class HabitChartFragment : Fragment() {
                         })
                     }
                 } else {
-                    // Если дней больше MAX_ALL_TIME_POINTS, агрегируем данные
-                    val daysPerPoint = totalDays / MAX_ALL_TIME_POINTS + 1
-                    val aggregatedData = Array(MAX_ALL_TIME_POINTS) { 0f }
-                    val pointCounts = Array(MAX_ALL_TIME_POINTS) { 0 }
+                    // Если дней больше MAX_ALL_TIME_POINTS, агрегируем данные по 2 дня
+                    val daysPerPoint = 2
+                    val numPoints = (totalDays + daysPerPoint - 1) / daysPerPoint // округление вверх
+                    val aggregatedData = Array(numPoints) { 0f }
+                    val pointCounts = Array(numPoints) { 0 }
                     
                     // Распределяем записи по точкам графика
                     for (record in sortedRecords) {
                         val dayIndex = ((record.timestamp - firstTimestamp) / (24 * 60 * 60 * 1000L)).toInt()
-                        val pointIndex = kotlin.math.min(dayIndex / daysPerPoint, MAX_ALL_TIME_POINTS - 1)
+                        val pointIndex = dayIndex / daysPerPoint
                         
-                        if (habit.type == HabitType.SIMPLE) {
-                            // Для простой привычки берем максимальное значение в группе дней
-                            aggregatedData[pointIndex] = kotlin.math.max(aggregatedData[pointIndex], record.count.toFloat())
-                            pointCounts[pointIndex] = 1 // Для простой привычки не нужно считать среднее
-                        } else {
-                            // Для других типов суммируем значения
-                            aggregatedData[pointIndex] += record.count.toFloat()
-                            pointCounts[pointIndex]++
+                        if (pointIndex < numPoints) {
+                            if (habit.type == HabitType.SIMPLE) {
+                                // Для простой привычки берем максимальное значение в группе дней
+                                aggregatedData[pointIndex] = kotlin.math.max(aggregatedData[pointIndex], record.count.toFloat())
+                                pointCounts[pointIndex] = 1 // Для простой привычки не нужно считать среднее
+                            } else {
+                                // Для других типов суммируем значения
+                                aggregatedData[pointIndex] += record.count.toFloat()
+                                pointCounts[pointIndex]++
+                            }
                         }
                     }
                     
                     // Создаем записи для графика
-                    for (i in 0 until MAX_ALL_TIME_POINTS) {
-                        if (pointCounts[i] > 0) {
-                            val value = if (habit.type == HabitType.SIMPLE) {
-                                // Для простой привычки уже взяли максимальное значение
-                                aggregatedData[i]
-                            } else {
-                                // Для других типов берем среднее значение за период
-                                aggregatedData[i] / pointCounts[i]
-                            }
-                            
-                            entries.add(Entry(i.toFloat(), value))
-                            
-                            // Добавляем метку для оси X
-                            calendar.timeInMillis = firstTimestamp + (i * daysPerPoint) * 24 * 60 * 60 * 1000L
-                            xLabels.add(if (i % (MAX_ALL_TIME_POINTS / 10 + 1) == 0 || i == MAX_ALL_TIME_POINTS - 1) {
-                                dateFormat.format(calendar.time)
-                            } else {
-                                ""
-                            })
+                    for (i in 0 until numPoints) {
+                        val value = if (habit.type == HabitType.SIMPLE) {
+                            // Для простой привычки уже взяли максимальное значение
+                            aggregatedData[i]
+                        } else if (pointCounts[i] > 0) {
+                            // Для других типов берем среднее значение за период
+                            aggregatedData[i] / pointCounts[i]
                         } else {
-                            // Если нет данных для этой точки, добавляем пустую метку
-                            if (i < entries.size) {
-                                xLabels.add("")
-                            }
+                            0f
                         }
+                        
+                        entries.add(Entry(i.toFloat(), value))
+                        
+                        // Добавляем метку для оси X
+                        calendar.timeInMillis = firstTimestamp + (i * daysPerPoint) * 24 * 60 * 60 * 1000L
+                        xLabels.add(if (i % (numPoints / 10 + 1) == 0 || i == numPoints - 1) {
+                            dateFormat.format(calendar.time)
+                        } else {
+                            ""
+                        })
                     }
                 }
             }
