@@ -30,9 +30,12 @@ class HabitChartFragment : Fragment() {
     private lateinit var chartTitleTextView: TextView
     private lateinit var backButton: ImageButton
     private lateinit var timeRangeToggleGroup: MaterialButtonToggleGroup
+    private lateinit var displayModeToggleGroup: MaterialButtonToggleGroup
     private lateinit var weekButton: MaterialButton
     private lateinit var monthButton: MaterialButton
     private lateinit var allTimeButton: MaterialButton
+    private lateinit var normalModeButton: MaterialButton
+    private lateinit var cumulativeModeButton: MaterialButton
     
     private var habitPosition: Int = -1
     private lateinit var progressHistory: HabitProgressHistory
@@ -40,6 +43,9 @@ class HabitChartFragment : Fragment() {
     
     // Текущий выбранный временной диапазон
     private var currentTimeRange: TimeRange = TimeRange.WEEK
+    
+    // Текущий режим отображения
+    private var isCumulativeMode: Boolean = false
     
     // Кэш для хранения записей, чтобы избежать повторных вычислений
     private var cachedRecords: MutableMap<TimeRange, List<HabitProgressHistory.ProgressRecord>> = mutableMapOf()
@@ -95,9 +101,12 @@ class HabitChartFragment : Fragment() {
         chartTitleTextView = view.findViewById(R.id.chartTitleTextView)
         backButton = view.findViewById(R.id.backButton)
         timeRangeToggleGroup = view.findViewById(R.id.timeRangeToggleGroup)
+        displayModeToggleGroup = view.findViewById(R.id.displayModeToggleGroup)
         weekButton = view.findViewById(R.id.weekButton)
         monthButton = view.findViewById(R.id.monthButton)
         allTimeButton = view.findViewById(R.id.allTimeButton)
+        normalModeButton = view.findViewById(R.id.normalModeButton)
+        cumulativeModeButton = view.findViewById(R.id.cumulativeModeButton)
         
         // Настраиваем заголовок
         chartTitleTextView.text = "График прогресса: ${habit.name}"
@@ -109,6 +118,7 @@ class HabitChartFragment : Fragment() {
         
         // Настройка переключателей временного диапазона
         weekButton.isChecked = true // По умолчанию выбран недельный диапазон
+        normalModeButton.isChecked = true // По умолчанию выбран обычный режим
         
         timeRangeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
@@ -118,6 +128,13 @@ class HabitChartFragment : Fragment() {
                     R.id.allTimeButton -> TimeRange.ALL_TIME
                     else -> TimeRange.WEEK
                 }
+                setupChart()
+            }
+        }
+        
+        displayModeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                isCumulativeMode = (checkedId == R.id.cumulativeModeButton)
                 setupChart()
             }
         }
@@ -200,7 +217,13 @@ class HabitChartFragment : Fragment() {
                         dayRecords.maxByOrNull { it.timestamp }?.count?.toFloat() ?: 0f
                     } else {
                         // Для других типов суммируем все значения за день
-                        dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                        val dailySum = dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                        if (isCumulativeMode && i > 0) {
+                            // В накопительном режиме добавляем значение предыдущего дня
+                            dailySum + entries[i - 1].y
+                        } else {
+                            dailySum
+                        }
                     }
                     
                     entries.add(Entry(i.toFloat(), value))
@@ -234,7 +257,13 @@ class HabitChartFragment : Fragment() {
                         dayRecords.maxByOrNull { it.timestamp }?.count?.toFloat() ?: 0f
                     } else {
                         // Для других типов суммируем все значения за день
-                        dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                        val dailySum = dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                        if (isCumulativeMode && i > 0) {
+                            // В накопительном режиме добавляем значение предыдущего дня
+                            dailySum + entries[i - 1].y
+                        } else {
+                            dailySum
+                        }
                     }
                     
                     entries.add(Entry(i.toFloat(), value))
@@ -286,7 +315,13 @@ class HabitChartFragment : Fragment() {
                             dayRecords.maxByOrNull { it.timestamp }?.count?.toFloat() ?: 0f
                         } else {
                             // Для других типов суммируем все значения за день
-                            dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                            val dailySum = dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                            if (isCumulativeMode && i > 0) {
+                                // В накопительном режиме добавляем значение предыдущего дня
+                                dailySum + entries[i - 1].y
+                            } else {
+                                dailySum
+                            }
                         }
                         
                         entries.add(Entry(i.toFloat(), value))
@@ -331,7 +366,13 @@ class HabitChartFragment : Fragment() {
                             aggregatedData[i]
                         } else if (pointCounts[i] > 0) {
                             // Для других типов берем среднее значение за период
-                            aggregatedData[i] / pointCounts[i]
+                            val periodValue = aggregatedData[i] / pointCounts[i]
+                            if (isCumulativeMode && i > 0) {
+                                // В накопительном режиме добавляем значение предыдущей точки
+                                periodValue + entries[i - 1].y
+                            } else {
+                                periodValue
+                            }
                         } else {
                             0f
                         }
