@@ -6,6 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".HabitChartFragment">
 
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Назад"
+        android:src="@drawable/ic_arrow_back_24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/mint_text_primary" />
+
     <TextView
         android:id="@+id/chartTitleTextView"
         android:layout_width="wrap_content"
@@ -23,9 +36,45 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/timeRangeToggleGroup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chartTitleTextView" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/timeRangeToggleGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:singleSelection="true">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/weekButton"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="7 дней"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/monthButton"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="30 дней"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/allTimeButton"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Всё время"
+            android:textSize="12sp" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

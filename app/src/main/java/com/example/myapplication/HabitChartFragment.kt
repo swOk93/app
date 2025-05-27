@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -19,14 +20,41 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.components.YAxis
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import java.text.SimpleDateFormat
 import java.util.*
 
 class HabitChartFragment : Fragment() {
+    private lateinit var lineChart: LineChart
+    private lateinit var chartTitleTextView: TextView
+    private lateinit var backButton: ImageButton
+    private lateinit var timeRangeToggleGroup: MaterialButtonToggleGroup
+    private lateinit var weekButton: MaterialButton
+    private lateinit var monthButton: MaterialButton
+    private lateinit var allTimeButton: MaterialButton
+    
     private var habitPosition: Int = -1
     private lateinit var progressHistory: HabitProgressHistory
     private lateinit var habit: Habit
-    private lateinit var lineChart: LineChart
+    
+    // Текущий выбранный временной диапазон
+    private var currentTimeRange: TimeRange = TimeRange.WEEK
+    
+    // Кэш для хранения записей, чтобы избежать повторных вычислений
+    private var cachedRecords: MutableMap<TimeRange, List<HabitProgressHistory.ProgressRecord>> = mutableMapOf()
+    private var lastCacheTime: Long = 0
+    private val CACHE_VALID_TIME = 60000L // 1 минута
+    
+    // Максимальное количество точек для графика "За всё время"
+    private val MAX_ALL_TIME_POINTS = 100
+    
+    // Перечисление для временных диапазонов
+    enum class TimeRange {
+        WEEK,   // 7 дней
+        MONTH,  // 30 дней
+        ALL_TIME // Всё время
+    }
     
     companion object {
         private const val ARG_HABIT_POSITION = "habit_position"
@@ -55,11 +83,6 @@ class HabitChartFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_habit_chart, container, false)
     }
     
-    // Кэш для хранения записей, чтобы избежать повторных вычислений
-    private var cachedRecords: List<HabitProgressHistory.ProgressRecord>? = null
-    private var lastCacheTime: Long = 0
-    private val CACHE_VALID_TIME = 60000L // 1 минута
-    
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
@@ -68,56 +91,259 @@ class HabitChartFragment : Fragment() {
         progressHistory = mainActivity.progressHistory
         habit = mainActivity.habitAdapter.habits[habitPosition]
         
+        lineChart = view.findViewById(R.id.lineChart)
+        chartTitleTextView = view.findViewById(R.id.chartTitleTextView)
+        backButton = view.findViewById(R.id.backButton)
+        timeRangeToggleGroup = view.findViewById(R.id.timeRangeToggleGroup)
+        weekButton = view.findViewById(R.id.weekButton)
+        monthButton = view.findViewById(R.id.monthButton)
+        allTimeButton = view.findViewById(R.id.allTimeButton)
+        
         // Настраиваем заголовок
-        val chartTitleTextView = view.findViewById<TextView>(R.id.chartTitleTextView)
         chartTitleTextView.text = "График прогресса: ${habit.name}"
         
+        // Настройка кнопки назад
+        backButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+        
+        // Настройка переключателей временного диапазона
+        weekButton.isChecked = true // По умолчанию выбран недельный диапазон
+        
+        timeRangeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                currentTimeRange = when (checkedId) {
+                    R.id.weekButton -> TimeRange.WEEK
+                    R.id.monthButton -> TimeRange.MONTH
+                    R.id.allTimeButton -> TimeRange.ALL_TIME
+                    else -> TimeRange.WEEK
+                }
+                setupChart()
+            }
+        }
+        
         // Инициализируем и настраиваем график
-        lineChart = view.findViewById(R.id.lineChart)
         setupChart()
+    }
+    
+    private fun getRecordsForTimeRange(timeRange: TimeRange): List<HabitProgressHistory.ProgressRecord> {
+        val currentTime = System.currentTimeMillis()
+        
+        // Если кэш действителен, возвращаем его
+        if (cachedRecords.containsKey(timeRange) && (currentTime - lastCacheTime) < CACHE_VALID_TIME) {
+            return cachedRecords[timeRange]!!
+        }
+        
+        // Иначе загружаем новые данные и обновляем кэш
+        val records = when (timeRange) {
+            TimeRange.WEEK -> getLastWeekRecords()
+            TimeRange.MONTH -> getLastMonthRecords()
+            TimeRange.ALL_TIME -> getAllTimeRecords()
+        }
+        
+        // Обновляем кэш
+        cachedRecords[timeRange] = records
+        lastCacheTime = currentTime
+        
+        return records
     }
     
     /**
      * Получает записи из кэша или загружает новые, если кэш устарел
      */
     private fun getCachedWeekRecords(): List<HabitProgressHistory.ProgressRecord> {
-        val currentTime = System.currentTimeMillis()
-        
-        // Если кэш действителен и не пустой, возвращаем его
-        if (cachedRecords != null && currentTime - lastCacheTime < CACHE_VALID_TIME) {
-            return cachedRecords!!
-        }
-        
-        // Иначе загружаем новые данные и обновляем кэш
-        val newRecords = getLastWeekRecords()
-        cachedRecords = newRecords
-        lastCacheTime = currentTime
-        
-        return newRecords
+        return getRecordsForTimeRange(TimeRange.WEEK)
     }
     
     private fun setupChart() {
-        // Используем кэшированные записи за последнюю неделю
-        val weekRecords = getCachedWeekRecords()
+        // Включаем аппаратное ускорение для графика
+        lineChart.setHardwareAccelerationEnabled(true)
         
-        if (weekRecords.isEmpty()) {
-            lineChart.setNoDataText("Нет данных о прогрессе за последнюю неделю")
+        // Получаем записи прогресса для текущей привычки в зависимости от выбранного временного диапазона
+        val records = getRecordsForTimeRange(currentTimeRange)
+        
+        if (records.isEmpty()) {
+            lineChart.setNoDataText("Нет данных о прогрессе")
             lineChart.setNoDataTextColor(resources.getColor(R.color.mint_text_primary, null))
             lineChart.invalidate()
             return
         }
         
-        // Предварительно вычисляем некоторые значения для оптимизации
-        lineChart.setHardwareAccelerationEnabled(true)
+        // Создаем список точек для графика и метки для оси X
+        val entries = ArrayList<Entry>()
+        val dateFormat = SimpleDateFormat("dd.MM", Locale.getDefault())
+        val calendar = Calendar.getInstance() // Переиспользуем один экземпляр Calendar
+        val xLabels = ArrayList<String>()
         
-        // Оптимизация: предварительно вычисляем первый timestamp
-        val firstTimestamp = weekRecords.first().timestamp
-        
-        // Создаем список точек для графика - оптимизированная версия
-        val entries = ArrayList<Entry>(weekRecords.size) // Предварительное выделение памяти
-        for (i in weekRecords.indices) {
-            val record = weekRecords[i]
-            entries.add(Entry(i.toFloat(), record.count.toFloat()))
+        when (currentTimeRange) {
+            TimeRange.WEEK -> {
+                // Для недели - показываем данные за последние 7 дней
+                val weekStartTime = Calendar.getInstance().apply {
+                    add(Calendar.DAY_OF_YEAR, -6) // 7 дней назад (включая сегодня)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+                
+                // Создаем точки для каждого дня недели
+                for (i in 0..6) {
+                    val dayTimestamp = weekStartTime + i * 24 * 60 * 60 * 1000L
+                    val nextDayTimestamp = dayTimestamp + 24 * 60 * 60 * 1000L
+                    
+                    // Находим записи за этот день
+                    val dayRecords = records.asSequence()
+                        .filter { it.timestamp >= dayTimestamp && it.timestamp < nextDayTimestamp }
+                    
+                    val value = if (habit.type == HabitType.SIMPLE) {
+                        // Для простой привычки берем последнее значение за день (0 или 1)
+                        dayRecords.maxByOrNull { it.timestamp }?.count?.toFloat() ?: 0f
+                    } else {
+                        // Для других типов суммируем все значения за день
+                        dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                    }
+                    
+                    entries.add(Entry(i.toFloat(), value))
+                    
+                    // Добавляем метку для оси X
+                    calendar.timeInMillis = dayTimestamp
+                    xLabels.add(dateFormat.format(calendar.time))
+                }
+            }
+            TimeRange.MONTH -> {
+                // Для месяца - показываем данные за последние 30 дней
+                val monthStartTime = Calendar.getInstance().apply {
+                    add(Calendar.DAY_OF_YEAR, -29) // 30 дней назад (включая сегодня)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+                
+                // Создаем точки для каждого дня месяца
+                for (i in 0..29) {
+                    val dayTimestamp = monthStartTime + i * 24 * 60 * 60 * 1000L
+                    val nextDayTimestamp = dayTimestamp + 24 * 60 * 60 * 1000L
+                    
+                    // Находим записи за этот день
+                    val dayRecords = records.asSequence()
+                        .filter { it.timestamp >= dayTimestamp && it.timestamp < nextDayTimestamp }
+                    
+                    val value = if (habit.type == HabitType.SIMPLE) {
+                        // Для простой привычки берем последнее значение за день (0 или 1)
+                        dayRecords.maxByOrNull { it.timestamp }?.count?.toFloat() ?: 0f
+                    } else {
+                        // Для других типов суммируем все значения за день
+                        dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                    }
+                    
+                    entries.add(Entry(i.toFloat(), value))
+                    
+                    // Добавляем метку для оси X (показываем каждый 5-й день для читаемости)
+                    calendar.timeInMillis = dayTimestamp
+                    xLabels.add(if (i % 5 == 0 || i == 29) dateFormat.format(calendar.time) else "")
+                }
+            }
+            TimeRange.ALL_TIME -> {
+                // Для всего времени - обрабатываем все записи
+                val sortedRecords = records.sortedBy { it.timestamp }
+                
+                if (sortedRecords.isEmpty()) {
+                    lineChart.setNoDataText("Нет данных для отображения")
+                    lineChart.invalidate()
+                    return
+                }
+                
+                val firstTimestamp = sortedRecords.first().timestamp
+                val lastTimestamp = sortedRecords.last().timestamp
+                val totalDays = ((lastTimestamp - firstTimestamp) / (24 * 60 * 60 * 1000L)).toInt() + 1
+                
+                if (totalDays <= MAX_ALL_TIME_POINTS) {
+                    // Если дней меньше MAX_ALL_TIME_POINTS, показываем каждый день
+                    val dayMap = mutableMapOf<Int, MutableList<HabitProgressHistory.ProgressRecord>>()
+                    
+                    // Группируем записи по дням
+                    for (record in sortedRecords) {
+                        val dayIndex = ((record.timestamp - firstTimestamp) / (24 * 60 * 60 * 1000L)).toInt()
+                        if (!dayMap.containsKey(dayIndex)) {
+                            dayMap[dayIndex] = mutableListOf()
+                        }
+                        dayMap[dayIndex]!!.add(record)
+                    }
+                    
+                    // Создаем записи для каждого дня
+                    for (i in 0 until totalDays) {
+                        val dayRecords = dayMap[i] ?: emptyList()
+                        
+                        val value = if (habit.type == HabitType.SIMPLE) {
+                            // Для простой привычки берем последнее значение за день (0 или 1)
+                            dayRecords.maxByOrNull { it.timestamp }?.count?.toFloat() ?: 0f
+                        } else {
+                            // Для других типов суммируем все значения за день
+                            dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                        }
+                        
+                        entries.add(Entry(i.toFloat(), value))
+                        
+                        // Добавляем метку для оси X (показываем только некоторые даты для читаемости)
+                        calendar.timeInMillis = firstTimestamp + i * 24 * 60 * 60 * 1000L
+                        xLabels.add(if (totalDays <= 10 || i % (totalDays / 10 + 1) == 0 || i == totalDays - 1) {
+                            dateFormat.format(calendar.time)
+                        } else {
+                            ""
+                        })
+                    }
+                } else {
+                    // Если дней больше MAX_ALL_TIME_POINTS, агрегируем данные
+                    val daysPerPoint = totalDays / MAX_ALL_TIME_POINTS + 1
+                    val aggregatedData = Array(MAX_ALL_TIME_POINTS) { 0f }
+                    val pointCounts = Array(MAX_ALL_TIME_POINTS) { 0 }
+                    
+                    // Распределяем записи по точкам графика
+                    for (record in sortedRecords) {
+                        val dayIndex = ((record.timestamp - firstTimestamp) / (24 * 60 * 60 * 1000L)).toInt()
+                        val pointIndex = kotlin.math.min(dayIndex / daysPerPoint, MAX_ALL_TIME_POINTS - 1)
+                        
+                        if (habit.type == HabitType.SIMPLE) {
+                            // Для простой привычки берем максимальное значение в группе дней
+                            aggregatedData[pointIndex] = kotlin.math.max(aggregatedData[pointIndex], record.count.toFloat())
+                            pointCounts[pointIndex] = 1 // Для простой привычки не нужно считать среднее
+                        } else {
+                            // Для других типов суммируем значения
+                            aggregatedData[pointIndex] += record.count.toFloat()
+                            pointCounts[pointIndex]++
+                        }
+                    }
+                    
+                    // Создаем записи для графика
+                    for (i in 0 until MAX_ALL_TIME_POINTS) {
+                        if (pointCounts[i] > 0) {
+                            val value = if (habit.type == HabitType.SIMPLE) {
+                                // Для простой привычки уже взяли максимальное значение
+                                aggregatedData[i]
+                            } else {
+                                // Для других типов берем среднее значение за период
+                                aggregatedData[i] / pointCounts[i]
+                            }
+                            
+                            entries.add(Entry(i.toFloat(), value))
+                            
+                            // Добавляем метку для оси X
+                            calendar.timeInMillis = firstTimestamp + (i * daysPerPoint) * 24 * 60 * 60 * 1000L
+                            xLabels.add(if (i % (MAX_ALL_TIME_POINTS / 10 + 1) == 0 || i == MAX_ALL_TIME_POINTS - 1) {
+                                dateFormat.format(calendar.time)
+                            } else {
+                                ""
+                            })
+                        } else {
+                            // Если нет данных для этой точки, добавляем пустую метку
+                            if (i < entries.size) {
+                                xLabels.add("")
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         // Создаем и настраиваем набор данных с оптимизированными настройками
@@ -157,19 +383,15 @@ class HabitChartFragment : Fragment() {
         val lineData = LineData(dataSet)
         lineChart.data = lineData
         
-        // Настраиваем форматирование оси X (даты) - оптимизированная версия
-        val dateFormat = SimpleDateFormat("dd.MM", Locale.getDefault())
-        val calendar = Calendar.getInstance() // Переиспользуем один экземпляр Calendar
-        val xLabels = ArrayList<String>(weekRecords.size)
-        
-        for (record in weekRecords) {
-            calendar.timeInMillis = record.timestamp
-            xLabels.add(dateFormat.format(calendar.time))
-        }
-        
+        // Настраиваем форматирование оси X (даты)
         lineChart.xAxis.apply {
             position = XAxis.XAxisPosition.BOTTOM
-            valueFormatter = IndexAxisValueFormatter(xLabels)
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    val index = value.toInt()
+                    return if (index >= 0 && index < xLabels.size) xLabels[index] else ""
+                }
+            }
             granularity = 1f
             textColor = resources.getColor(R.color.mint_text_primary, null)
             textSize = 12f
@@ -192,12 +414,17 @@ class HabitChartFragment : Fragment() {
             gridLineWidth = 0.5f
         }
         
-        // Set the Y-axis label using proper method
+        // Настраиваем метки оси Y
         lineChart.axisLeft.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
-                return "${value.toInt()} $yAxisDescription"
+                return if (habit.type == HabitType.SIMPLE) {
+                    if (value < 0.5f) "Нет" else "Да"
+                } else {
+                    "${value.toInt()} $yAxisDescription"
+                }
             }
         }
+        
         // Отключаем правую ось Y
         lineChart.axisRight.isEnabled = false
         
@@ -260,6 +487,39 @@ class HabitChartFragment : Fragment() {
             .filter { it.timestamp >= weekAgo }
             .sortedBy { it.timestamp }
             .toList()
+    }
+    
+    /**
+     * Получает записи прогресса за последний месяц (30 дней)
+     */
+    private fun getLastMonthRecords(): List<HabitProgressHistory.ProgressRecord> {
+        // Получаем все записи для текущей привычки
+        val allRecords = progressHistory.getRecordsForHabit(habitPosition)
+        
+        // Если записей нет, возвращаем пустой список
+        if (allRecords.isEmpty()) return emptyList()
+        
+        // Вычисляем timestamp для начала месяца (30 дней назад)
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, -30)
+        val monthStartTime = calendar.timeInMillis
+        
+        // Фильтруем записи за последний месяц и сортируем по времени
+        return allRecords.asSequence()
+            .filter { it.timestamp >= monthStartTime }
+            .sortedBy { it.timestamp }
+            .toList()
+    }
+    
+    /**
+     * Получает все записи прогресса для привычки
+     */
+    private fun getAllTimeRecords(): List<HabitProgressHistory.ProgressRecord> {
+        // Получаем все записи для текущей привычки
+        val allRecords = progressHistory.getRecordsForHabit(habitPosition)
+        
+        // Сортируем записи по времени
+        return allRecords.sortedBy { it.timestamp }
     }
     
     // Удаляем метод generateTestData(), так как он больше не используется
