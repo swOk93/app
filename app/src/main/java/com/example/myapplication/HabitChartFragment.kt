@@ -254,7 +254,9 @@ class HabitChartFragment : Fragment() {
                     return
                 }
                 
-                val firstTimestamp = sortedRecords.first().timestamp
+                // Находим первую ненулевую отметку
+                val firstNonZeroIndex = sortedRecords.indexOfFirst { it.count > 0 }
+                val firstTimestamp = sortedRecords[firstNonZeroIndex].timestamp
                 val lastTimestamp = sortedRecords.last().timestamp
                 val totalDays = ((lastTimestamp - firstTimestamp) / (24 * 60 * 60 * 1000L)).toInt() + 1
                 
