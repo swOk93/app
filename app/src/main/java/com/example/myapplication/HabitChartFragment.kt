@@ -294,7 +294,8 @@ class HabitChartFragment : Fragment() {
                 } else {
                     sortedRecords.first().timestamp
                 }
-                val lastTimestamp = sortedRecords.last().timestamp
+                // Используем текущую дату как последнюю дату для графика
+                val lastTimestamp = Calendar.getInstance().timeInMillis
                 val totalDays = ((lastTimestamp - firstTimestamp) / (24 * 60 * 60 * 1000L)).toInt() + 1
                 
                 if (totalDays <= MAX_ALL_TIME_POINTS) {
