@@ -10,6 +10,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.Description
@@ -111,9 +112,10 @@ class HabitChartFragment : Fragment() {
         // Настраиваем заголовок
         chartTitleTextView.text = "График прогресса: ${habit.name}"
         
-        // Настройка кнопки назад
+        // Настройка кнопки назад для возврата на стартовый экран
         backButton.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
+            // Очищаем весь бэкстек и возвращаемся на стартовый экран
+            requireActivity().supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
         
         // Настройка переключателей временного диапазона
