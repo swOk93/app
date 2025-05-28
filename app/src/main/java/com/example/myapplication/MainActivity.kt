@@ -18,6 +18,17 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     private lateinit var binding: ActivityMainBinding
     public lateinit var habitAdapter: HabitAdapter
     public lateinit var progressHistory: HabitProgressHistory
+    
+    // Публичные методы для управления видимостью контейнеров
+    fun showHabitList() {
+        binding.fragmentContainer.visibility = View.GONE
+        binding.habitsRecyclerView.visibility = View.VISIBLE
+    }
+    
+    fun showFragmentContainer() {
+        binding.fragmentContainer.visibility = View.VISIBLE
+        binding.habitsRecyclerView.visibility = View.GONE
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -346,17 +357,15 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             replace(R.id.fragment_container, habitChartFragment)
             addToBackStack("chart")
         }
-        // Показываем контейнер фрагмента и скрываем RecyclerView
-        binding.fragmentContainer.visibility = View.VISIBLE
-        binding.habitsRecyclerView.visibility = View.GONE
+        // Показываем контейнер фрагмента через публичный метод
+        showFragmentContainer()
     }
     
     override fun onBackPressed() {
         if (supportFragmentManager.backStackEntryCount > 0) {
             // Если есть фрагменты в стеке, возвращаемся к списку привычек
             supportFragmentManager.popBackStack()
-            binding.fragmentContainer.visibility = View.GONE
-            binding.habitsRecyclerView.visibility = View.VISIBLE
+            showHabitList()
         } else {
             super.onBackPressed()
         }

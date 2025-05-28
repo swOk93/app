@@ -112,10 +112,12 @@ class HabitChartFragment : Fragment() {
         // Настраиваем заголовок
         chartTitleTextView.text = "График прогресса: ${habit.name}"
         
-        // Настройка кнопки назад для возврата на стартовый экран
+        // Настройка кнопки назад
         backButton.setOnClickListener {
-            // Очищаем весь бэкстек и возвращаемся на стартовый экран
-            requireActivity().supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            // Возвращаемся к списку привычек
+            requireActivity().supportFragmentManager.popBackStack()
+            // Показываем список привычек через публичный метод MainActivity
+            (requireActivity() as MainActivity).showHabitList()
         }
         
         // Настройка переключателей временного диапазона
