@@ -21,22 +21,22 @@
 
     <TextView
         android:id="@+id/chartTitleTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="330dp"
+        android:layout_height="45dp"
         android:layout_marginTop="16dp"
         android:text="График прогресса привычки"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/backButton"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/lineChart"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="374dp"
+        android:layout_height="527dp"
         android:layout_margin="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/timeRangeToggleGroup"
+        app:layout_constraintBottom_toTopOf="@+id/displayModeToggleGroup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chartTitleTextView" />

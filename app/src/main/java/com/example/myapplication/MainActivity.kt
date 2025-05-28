@@ -20,14 +20,22 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     public lateinit var progressHistory: HabitProgressHistory
     
     // Публичные методы для управления видимостью контейнеров
+    /**
+     * Показывает список привычек и скрывает контейнер фрагментов
+     */
     fun showHabitList() {
         binding.fragmentContainer.visibility = View.GONE
         binding.habitsRecyclerView.visibility = View.VISIBLE
+        binding.addTaskButton.visibility = View.VISIBLE // Показываем кнопку добавления привычки
     }
     
+    /**
+     * Показывает контейнер фрагментов и скрывает список привычек
+     */
     fun showFragmentContainer() {
         binding.fragmentContainer.visibility = View.VISIBLE
         binding.habitsRecyclerView.visibility = View.GONE
+        binding.addTaskButton.visibility = View.GONE // Скрываем кнопку добавления привычки
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
