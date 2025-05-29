@@ -13,7 +13,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Назад"
+        android:contentDescription="@string/back"
         android:src="@drawable/ic_arrow_back_24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -24,7 +24,7 @@
         android:layout_width="330dp"
         android:layout_height="45dp"
         android:layout_marginTop="16dp"
-        android:text="График прогресса привычки"
+        android:text="@string/progress_chart_title"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -56,7 +56,7 @@
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Обычный"
+            android:text="@string/normal_mode"
             android:textSize="12sp" />
 
         <com.google.android.material.button.MaterialButton
@@ -64,7 +64,7 @@
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Накопительный"
+            android:text="@string/cumulative_mode"
             android:textSize="12sp" />
 
     </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -84,7 +84,7 @@
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="7 дней"
+            android:text="@string/seven_days"
             android:textSize="12sp" />
 
         <com.google.android.material.button.MaterialButton
@@ -92,7 +92,7 @@
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="30 дней"
+            android:text="@string/thirty_days"
             android:textSize="12sp" />
 
         <com.google.android.material.button.MaterialButton
@@ -100,7 +100,7 @@
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Всё время"
+            android:text="@string/all_time"
             android:textSize="12sp" />
 
     </com.google.android.material.button.MaterialButtonToggleGroup>

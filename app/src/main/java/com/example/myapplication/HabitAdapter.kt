@@ -229,8 +229,8 @@ class HabitAdapter(val habits: MutableList<Habit>) :
         when (habit.type) {
             HabitType.TIME -> {
                 // Для привычек по времени показываем оба ползунка
-                hoursTextView.text = "Часы"
-                minutesTextView.text = "Минуты"
+                hoursTextView.setText(R.string.hours_short)
+                minutesTextView.setText(R.string.minutes_short)
                 
                 // Устанавливаем начальные значения ползунков
                 val hours = habit.current / 60
@@ -259,7 +259,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             }
             HabitType.REPEAT -> {
                 // Для привычек с повторениями показываем только ползунок повторений
-                hoursTextView.text = "Повторения"
+                hoursTextView.setText(R.string.repetitions_short)
                 
                 hoursSeekBar.max = 100 // Максимальное количество повторений
                 hoursSeekBar.progress = habit.current.coerceAtMost(100)

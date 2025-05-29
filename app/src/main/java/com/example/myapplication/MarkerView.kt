@@ -18,7 +18,7 @@ class MarkerView(context: Context, layoutResource: Int) : MarkerView(context, la
     override fun refreshContent(e: Entry?, highlight: Highlight?) {
         e?.let {
             val value = e.y.toInt()
-            tvContent.text = "$value"
+            tvContent.text = value.toString()
         }
         super.refreshContent(e, highlight)
     }

@@ -44,4 +44,97 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <string name="habits_list_desc">Список привычек</string>
+    <string name="quantity">Количество</string>
+    
+    <!-- Строки из item_habit.xml -->
+    <string name="make_bed">заправить постель</string>
+    <string name="created_date_format">Создано: %1$s</string>
+    <string name="progress_format">%1$d / %2$d %3$s</string>
+    
+    <!-- Строки из slider_layout.xml -->
+    <string name="hours">Часы</string>
+    <string name="minutes">Минуты</string>
+    <string name="zero">0</string>
+    
+    <!-- Строки из MainActivity.kt -->
+    <string name="settings">Настройки</string>
+    <string name="habit_added_format">Привычка добавлена: %1$s</string>
+    <string name="habit_marked_completed">Привычка отмечена как выполненная</string>
+    <string name="habit_marked_uncompleted">Привычка отмечена как невыполненная</string>
+    <string name="habits_progress_reset">Прогресс привычек сброшен для нового дня</string>
+    <string name="meditation">Медитация</string>
+    <string name="pushups">Отжимания</string>
+    <string name="times">раз</string>
+    <string name="drink_water">Пить воду</string>
+    <string name="delete_habit_title">Удаление привычки</string>
+    <string name="delete_habit_confirmation">Вы уверены, что хотите удалить эту привычку?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="habit_deleted">Привычка удалена</string>
+    <string name="progress_updated_minutes">Прогресс обновлен: %1$d минут</string>
+    <string name="progress_updated_format">Прогресс обновлен: %1$d %2$s</string>
+    <string name="repetitions">Количество</string>
+    
+    <!-- Строки из SecondFragment.kt -->
+    <string name="edit_habit">Редактирование привычки</string>
+    <string name="habit">привычка</string>
+    <string name="one">1</string>
+    <string name="thirty">30</string>
+    <string name="ten">10</string>
+    <string name="enter_habit_name">Введите название привычки</string>
+    <string name="habit_updated">Привычка обновлена</string>
+    
+    <!-- Строки из Habit.kt -->
+    <string name="min">мин</string>
+    <string name="completed">Выполнено</string>
+    <string name="not_completed">Не выполнено</string>
+    
+    <!-- HabitChartFragment.kt -->
+    <string name="progress_chart">График прогресса</string>
+    <string name="display_mode">Режим отображения</string>
+    <string name="time_interval">Временной интервал</string>
+    <string name="data_labels">Метки данных</string>
+    <string name="show">Показать</string>
+    <string name="hide">Скрыть</string>
+    <string name="daily">Ежедневно</string>
+    <string name="weekly">Еженедельно</string>
+    <string name="monthly">Ежемесячно</string>
+    <string name="in_progress">В процессе</string>
+    
+    <!-- Строки из HabitAdapter.kt -->
+    <string name="hours_short">Часы</string>
+    <string name="minutes_short">Минуты</string>
+    <string name="repetitions_short">Количество</string>
+    <string name="plus">+</string>
+    <string name="minus">-</string>
+    
+    <!-- Строки из HabitChartFragment.kt -->
+    <string name="back">Назад</string>
+    <string name="progress_chart_title">График прогресса: %1$s</string>
+    <string name="normal_mode">Обычный</string>
+    <string name="cumulative_mode">Накопительный</string>
+    <string name="seven_days">7 дней</string>
+    <string name="thirty_days">30 дней</string>
+    <string name="all_time">Всё время</string>
+    <string name="no_progress_data">Нет данных о прогрессе</string>
+    <string name="no_data_to_display">Нет данных для отображения</string>
+    <string name="minutes_label">Минуты</string>
+    <string name="repetitions_label">Количество</string>
+    <string name="completed_label">Выполнено</string>
+    <string name="yes_short">Да</string>
+    <string name="target">Цель</string>
+    
+    <!-- Строки из fragment_second.xml -->
+    <string name="add_habit">Добавление привычки</string>
+    <string name="habit_name">Название привычки</string>
+    <string name="habit_type">Тип привычки:</string>
+    <string name="time">Время</string>
+    <string name="simple">Простая</string>
+    <string name="unit">единица</string>
+    <string name="time_hours_minutes">Время (часы:минуты)</string>
+    <string name="cancel">ОТМЕНА</string>
+    <string name="save">СОХРАНИТЬ</string>
+    
+    <!-- Строки из activity_main.xml -->
+    <string name="add_task">Добавить задачу</string>
 </resources>

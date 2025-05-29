@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_settings -> {
-                Toast.makeText(this, "Настройки", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.settings), Toast.LENGTH_SHORT).show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         val habit = Habit(name = name, type = type, target = target, unit = unit)
         habitAdapter.addHabit(habit)
         saveHabits()
-        Toast.makeText(this, "Привычка добавлена: $name", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.habit_added_format, name), Toast.LENGTH_SHORT).show()
     }
     
     /**
@@ -192,7 +192,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             // Добавляем запись в историю прогресса
             progressHistory.addProgressRecord(position, if (isCompleted) 1 else 0)
             
-            val message = if (isCompleted) "Привычка отмечена как выполненная" else "Привычка отмечена как невыполненная"
+            val message = if (isCompleted) getString(R.string.habit_marked_completed) else getString(R.string.habit_marked_uncompleted)
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
     }
@@ -219,7 +219,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         if (currentDay != lastDay || currentYear != lastYear) {
             // День изменился, сбрасываем прогресс
             resetHabitsProgress()
-            Toast.makeText(this, "Прогресс привычек сброшен для нового дня", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.habits_progress_reset), Toast.LENGTH_SHORT).show()
         }
         
         // Обновляем дату последнего запуска
@@ -246,7 +246,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     private fun createSampleHabits() {
         // Создаем привычки разных типов
         val timeHabit = Habit(
-            name = "Медитация", 
+            name = getString(R.string.meditation), 
             type = HabitType.TIME, 
             target = 15, 
             current = 0, 
@@ -254,16 +254,16 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         ) // 15 минут
         
         val repeatHabit = Habit(
-            name = "Отжимания", 
+            name = getString(R.string.pushups), 
             type = HabitType.REPEAT, 
             target = 20, 
             current = 0, 
             createdDate = Date(),
-            unit = "раз"
+            unit = getString(R.string.times)
         ) // 20 повторений
         
         val simpleHabit = Habit(
-            name = "Пить воду", 
+            name = getString(R.string.drink_water), 
             type = HabitType.SIMPLE, 
             target = 1, 
             current = 0, 
@@ -315,14 +315,14 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     // Реализация интерфейса HabitAdapter.HabitListener
     override fun onDeleteHabit(position: Int) {
         AlertDialog.Builder(this)
-            .setTitle("Удаление привычки")
-            .setMessage("Вы уверены, что хотите удалить эту привычку?")
-            .setPositiveButton("Да") { _, _ ->
+            .setTitle(getString(R.string.delete_habit_title))
+            .setMessage(getString(R.string.delete_habit_confirmation))
+            .setPositiveButton(getString(R.string.yes)) { _, _ ->
                 habitAdapter.removeHabit(position)
                 saveHabits()
-                Toast.makeText(this, "Привычка удалена", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.habit_deleted), Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Нет", null)
+            .setNegativeButton(getString(R.string.no), null)
             .show()
     }
     
@@ -345,7 +345,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                 saveHabits()
                 // Добавляем запись в историю прогресса
                 progressHistory.addProgressRecord(position, count)
-                Toast.makeText(this, "Прогресс обновлен: $count минут", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.progress_updated_minutes, count), Toast.LENGTH_SHORT).show()
             }
             HabitType.REPEAT -> {
                 // Для повторений используем значение count как количество повторений
@@ -354,8 +354,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                 saveHabits()
                 // Добавляем запись в историю прогресса
                 progressHistory.addProgressRecord(position, count)
-                val unitText = if (habit.unit.isNotEmpty()) habit.unit else "повторений"
-                Toast.makeText(this, "Прогресс обновлен: $count $unitText", Toast.LENGTH_SHORT).show()
+                val unitText = if (habit.unit.isNotEmpty()) habit.unit else getString(R.string.repetitions)
+                Toast.makeText(this, getString(R.string.progress_updated_format, count, unitText), Toast.LENGTH_SHORT).show()
             }
             HabitType.SIMPLE -> {
                 // Используем метод markSimpleHabitAsCompleted для обработки простых привычек

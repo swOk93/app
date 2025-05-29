@@ -22,6 +22,11 @@ data class Habit(
         return "Создано: ${dateFormat.format(createdDate)}"
     }
     
+    fun getFormattedDate(context: android.content.Context): String {
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        return context.getString(R.string.created_date_format, dateFormat.format(createdDate))
+    }
+    
     fun getProgressText(): String {
         return when (type) {
             HabitType.TIME -> "$current / $target мин"
@@ -30,6 +35,17 @@ data class Habit(
                 "$current / $target $unitText"
             }
             HabitType.SIMPLE -> if (current > 0) "Выполнено" else "Не выполнено"
+        }
+    }
+    
+    fun getProgressText(context: android.content.Context): String {
+        return when (type) {
+            HabitType.TIME -> context.getString(R.string.progress_format, current, target, context.getString(R.string.min))
+            HabitType.REPEAT -> {
+                val unitText = if (unit.isNotEmpty()) unit else context.getString(R.string.times)
+                context.getString(R.string.progress_format, current, target, unitText)
+            }
+            HabitType.SIMPLE -> if (current > 0) context.getString(R.string.completed) else context.getString(R.string.not_completed)
         }
     }
     

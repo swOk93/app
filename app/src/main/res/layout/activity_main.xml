@@ -38,7 +38,7 @@
         android:layout_height="92dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:contentDescription="Добавить задачу"
+        android:contentDescription="@string/add_task"
         android:foreground="@drawable/ic_add_white_24dp"
         android:foregroundTint="#009688"
         android:src="@android:drawable/ic_input_add"

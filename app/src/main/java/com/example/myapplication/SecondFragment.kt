@@ -59,7 +59,7 @@ class SecondFragment : DialogFragment() {
                 currentHabitType = HabitType.entries[args.getInt(ARG_HABIT_TYPE, 0)]
                 
                 // Изменяем заголовок диалога
-                binding.addHabitTitleTextView.text = "Редактирование привычки"
+                binding.addHabitTitleTextView.text = getString(R.string.edit_habit)
             }
         }
 
@@ -108,10 +108,10 @@ class SecondFragment : DialogFragment() {
             }
         } else {
             // Значения по умолчанию для новой привычки
-            binding.habitNameEditText.setText("привычка")
-            binding.hoursEditText.setText("1")
-            binding.minutesEditText.setText("30")
-            binding.repeatCountEditText.setText("10")
+            binding.habitNameEditText.setText(getString(R.string.habit))
+        binding.hoursEditText.setText(getString(R.string.one))
+        binding.minutesEditText.setText(getString(R.string.thirty))
+        binding.repeatCountEditText.setText(getString(R.string.ten))
             binding.repeatUnitEditText.setText("") // Пустая единица измерения по умолчанию
             
             // По умолчанию выбираем простую привычку
@@ -132,7 +132,7 @@ class SecondFragment : DialogFragment() {
     private fun saveHabit() {
         val habitName = binding.habitNameEditText.text.toString()
         if (habitName.isEmpty()) {
-            Toast.makeText(requireContext(), "Введите название привычки", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.enter_habit_name), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -158,7 +158,7 @@ class SecondFragment : DialogFragment() {
         if (isEditMode && habitPosition >= 0) {
             // Обновляем существующую привычку
             (activity as? MainActivity)?.updateHabit(habitPosition, habitName, currentHabitType, targetValue, unitValue)
-            Toast.makeText(requireContext(), "Привычка обновлена", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.habit_updated), Toast.LENGTH_SHORT).show()
         } else {
             // Добавляем новую привычку
             (activity as? MainActivity)?.addHabit(habitName, currentHabitType, targetValue, unitValue)

@@ -16,7 +16,7 @@
             android:id="@+id/addHabitTitleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Добавление привычки"
+            android:text="@string/add_habit"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:background="@drawable/edit_text_background"
-            android:hint="Название привычки"
+            android:hint="@string/habit_name"
             android:padding="12dp"
             android:textColor="#FFFFFF"
             android:textColorHint="#80FFFFFF"
@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Тип привычки:"
+            android:text="@string/habit_type"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -61,7 +61,7 @@
                 android:id="@+id/timeRadioButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Время"
+                android:text="@string/time"
                 android:textColor="#FFFFFF"
                 android:buttonTint="#4285F4" />
 
@@ -69,7 +69,7 @@
                 android:id="@+id/repeatRadioButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Повторения"
+                android:text="@string/quantity"
                 android:textColor="#FFFFFF"
                 android:buttonTint="#4285F4" />
 
@@ -77,7 +77,7 @@
                 android:id="@+id/simpleRadioButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Простая"
+                android:text="@string/simple"
                 android:textColor="#FFFFFF"
                 android:buttonTint="#4285F4" />
         </RadioGroup>
@@ -101,7 +101,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Количество"
+                    android:text="@string/quantity"
                     android:textColor="#FFFFFF" />
 
                 <EditText
@@ -110,7 +110,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:background="@drawable/edit_text_background"
-                    android:hint="единица"
+                    android:hint="@string/unit"
                     android:padding="4dp"
                     android:textColor="#FFFFFF"
                     android:textColorHint="#80FFFFFF"
@@ -123,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/edit_text_background"
-                android:hint="Количество"
+                android:hint="@string/quantity"
                 android:inputType="number"
                 android:padding="12dp"
                 android:textColor="#FFFFFF"
@@ -144,7 +144,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Время (часы:минуты)"
+                android:text="@string/time_hours_minutes"
                 android:textColor="#FFFFFF" />
 
             <LinearLayout
@@ -161,7 +161,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
                     android:background="@drawable/edit_text_background"
-                    android:hint="Часы"
+                    android:hint="@string/hours"
                     android:inputType="number"
                     android:padding="12dp"
                     android:textColor="#FFFFFF"
@@ -173,7 +173,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@drawable/edit_text_background"
-                    android:hint="Минуты"
+                    android:hint="@string/minutes"
                     android:inputType="number"
                     android:padding="12dp"
                     android:textColor="#FFFFFF"
@@ -206,7 +206,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/rounded_button_background"
             app:backgroundTint="@color/mint_dark"
-                android:text="ОТМЕНА"
+                android:text="@string/cancel"
                 android:textColor="#FFFFFF" />
 
             <Button
@@ -216,7 +216,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/rounded_button_background"
-                android:text="СОХРАНИТЬ"
+                android:text="@string/save"
                 android:textColor="#FFFFFF"
                 android:textColorLink="#673AB7" />
         </LinearLayout>

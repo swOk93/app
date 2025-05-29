@@ -110,7 +110,7 @@ class HabitChartFragment : Fragment() {
         cumulativeModeButton = view.findViewById(R.id.cumulativeModeButton)
         
         // Настраиваем заголовок
-        chartTitleTextView.text = "График прогресса: ${habit.name}"
+        chartTitleTextView.text = getString(R.string.progress_chart_title, habit.name)
         
         // Настройка кнопки назад
         backButton.setOnClickListener {
@@ -184,7 +184,7 @@ class HabitChartFragment : Fragment() {
         val records = getRecordsForTimeRange(currentTimeRange)
         
         if (records.isEmpty()) {
-            lineChart.setNoDataText("Нет данных о прогрессе")
+            lineChart.setNoDataText(getString(R.string.no_progress_data))
             lineChart.setNoDataTextColor(resources.getColor(R.color.mint_text_primary, null))
             lineChart.invalidate()
             return
@@ -282,7 +282,7 @@ class HabitChartFragment : Fragment() {
                 val sortedRecords = records.sortedBy { it.timestamp }
                 
                 if (sortedRecords.isEmpty()) {
-                    lineChart.setNoDataText("Нет данных для отображения")
+                    lineChart.setNoDataText(getString(R.string.no_data_to_display))
                     lineChart.invalidate()
                     return
                 }
@@ -450,9 +450,9 @@ class HabitChartFragment : Fragment() {
         
         // Настраиваем описание оси Y в зависимости от типа привычки
         val yAxisDescription = when (habit.type) {
-            HabitType.TIME -> "Минуты"
-            HabitType.REPEAT -> "Повторения"
-            HabitType.SIMPLE -> "Выполнено"
+            HabitType.TIME -> getString(R.string.minutes_label)
+            HabitType.REPEAT -> getString(R.string.repetitions_label)
+            HabitType.SIMPLE -> getString(R.string.completed_label)
         }
         
         lineChart.axisLeft.apply {
@@ -468,7 +468,7 @@ class HabitChartFragment : Fragment() {
         lineChart.axisLeft.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 return if (habit.type == HabitType.SIMPLE) {
-                    if (value < 0.5f) "Нет" else "Да"
+                    if (value < 0.5f) getString(R.string.no) else getString(R.string.yes_short)
                 } else {
                     "${value.toInt()} $yAxisDescription"
                 }
@@ -480,7 +480,7 @@ class HabitChartFragment : Fragment() {
         
         // Добавляем горизонтальную линию для целевого значения
         if (habit.type != HabitType.SIMPLE) {
-            val targetLine = LimitLine(habit.target.toFloat(), "Цель")
+            val targetLine = LimitLine(habit.target.toFloat(), getString(R.string.target))
             targetLine.lineColor = resources.getColor(R.color.mint_delete, null) // Лавандовый
             targetLine.lineWidth = 2f
             targetLine.textColor = resources.getColor(R.color.mint_text_primary, null)
