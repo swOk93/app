@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         binding.fragmentContainer.visibility = View.GONE
         binding.habitsRecyclerView.visibility = View.VISIBLE
         binding.addTaskButton.visibility = View.VISIBLE // Показываем кнопку добавления привычки
+        // Кнопки навигации остаются видимыми
+        binding.TypeGroup.visibility = View.VISIBLE
     }
     
     /**
@@ -39,6 +41,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         binding.fragmentContainer.visibility = View.VISIBLE
         binding.habitsRecyclerView.visibility = View.GONE
         binding.addTaskButton.visibility = View.GONE // Скрываем кнопку добавления привычки
+        // Кнопки навигации остаются видимыми
+        binding.TypeGroup.visibility = View.VISIBLE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,6 +60,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             val secondFragment = SecondFragment()
             secondFragment.show(supportFragmentManager, "SecondFragment")
         }
+        
+        // Настройка кнопок переключения между разделами
+        setupNavigationButtons()
         
         // Привычки уже загружены или созданы в setupRecyclerView()
         
@@ -382,9 +389,23 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     
     override fun onBackPressed() {
         if (supportFragmentManager.backStackEntryCount > 0) {
-            // Если есть фрагменты в стеке, возвращаемся к списку привычек
-            supportFragmentManager.popBackStack()
-            showHabitList()
+            // Получаем имя текущего фрагмента в стеке
+            val fragmentTag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
+            
+            // Если это фрагмент задач или заметок, возвращаемся к списку привычек
+            if (fragmentTag == "tasks" || fragmentTag == "notes") {
+                supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                showHabitList()
+                // Устанавливаем кнопку "Привычки" как выбранную
+                binding.TypeGroup.check(R.id.Habits)
+            } else {
+                // Для других фрагментов (например, графика привычки) просто возвращаемся назад
+                supportFragmentManager.popBackStack()
+                // Если больше нет фрагментов в стеке, показываем список привычек
+                if (supportFragmentManager.backStackEntryCount == 0) {
+                    showHabitList()
+                }
+            }
         } else {
             super.onBackPressed()
         }
@@ -451,6 +472,54 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     override fun onStartDrag(viewHolder: RecyclerView.ViewHolder) {
         // Запускаем перетаскивание
         itemTouchHelper.startDrag(viewHolder)
+    }
+    
+    /**
+     * Настраивает кнопки навигации между разделами приложения
+     */
+    private fun setupNavigationButtons() {
+        // По умолчанию выбрана кнопка "Привычки"
+        binding.TypeGroup.check(R.id.Habits)
+        
+        // Кнопка "Привычки"
+        binding.Habits.setOnClickListener {
+            // Показываем список привычек
+            showHabitList()
+            // Если есть фрагменты в стеке, очищаем их
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            }
+            // Устанавливаем кнопку "Привычки" как выбранную
+            binding.TypeGroup.check(R.id.Habits)
+        }
+        
+        // Кнопка "Задачи"
+        binding.Tasks.setOnClickListener {
+            // Создаем и показываем фрагмент задач
+            val tasksFragment = TasksFragment.newInstance()
+            supportFragmentManager.commit {
+                replace(R.id.fragment_container, tasksFragment)
+                addToBackStack("tasks")
+            }
+            // Показываем контейнер фрагмента
+            showFragmentContainer()
+            // Устанавливаем кнопку "Задачи" как выбранную
+            binding.TypeGroup.check(R.id.Tasks)
+        }
+        
+        // Кнопка "Заметки"
+        binding.Notes.setOnClickListener {
+            // Создаем и показываем фрагмент заметок
+            val notesFragment = NotesFragment.newInstance()
+            supportFragmentManager.commit {
+                replace(R.id.fragment_container, notesFragment)
+                addToBackStack("notes")
+            }
+            // Показываем контейнер фрагмента
+            showFragmentContainer()
+            // Устанавливаем кнопку "Заметки" как выбранную
+            binding.TypeGroup.check(R.id.Notes)
+        }
     }
 
 }
