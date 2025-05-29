@@ -354,7 +354,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                 saveHabits()
                 // Добавляем запись в историю прогресса
                 progressHistory.addProgressRecord(position, count)
-                val unitText = if (habit.unit.isNotEmpty()) habit.unit else getString(R.string.repetitions)
+                val unitText = if (habit.unit.isNotEmpty()) habit.unit else getString(R.string.quantity)
                 Toast.makeText(this, getString(R.string.progress_updated_format, count, unitText), Toast.LENGTH_SHORT).show()
             }
             HabitType.SIMPLE -> {

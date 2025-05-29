@@ -34,10 +34,10 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addTaskButton"
-        android:layout_width="115dp"
-        android:layout_height="92dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_width="77dp"
+        android:layout_height="82dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="72dp"
         android:contentDescription="@string/add_task"
         android:foreground="@drawable/ic_add_white_24dp"
         android:foregroundTint="#009688"

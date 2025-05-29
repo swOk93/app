@@ -73,8 +73,7 @@
     <string name="habit_deleted">Привычка удалена</string>
     <string name="progress_updated_minutes">Прогресс обновлен: %1$d минут</string>
     <string name="progress_updated_format">Прогресс обновлен: %1$d %2$s</string>
-    <string name="repetitions">Количество</string>
-    
+
     <!-- Строки из SecondFragment.kt -->
     <string name="edit_habit">Редактирование привычки</string>
     <string name="habit">привычка</string>
@@ -104,7 +103,6 @@
     <!-- Строки из HabitAdapter.kt -->
     <string name="hours_short">Часы</string>
     <string name="minutes_short">Минуты</string>
-    <string name="repetitions_short">Количество</string>
     <string name="plus">+</string>
     <string name="minus">-</string>
     
@@ -119,7 +117,6 @@
     <string name="no_progress_data">Нет данных о прогрессе</string>
     <string name="no_data_to_display">Нет данных для отображения</string>
     <string name="minutes_label">Минуты</string>
-    <string name="repetitions_label">Количество</string>
     <string name="completed_label">Выполнено</string>
     <string name="yes_short">Да</string>
     <string name="target">Цель</string>

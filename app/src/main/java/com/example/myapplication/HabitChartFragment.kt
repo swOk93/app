@@ -1,7 +1,5 @@
 package com.example.myapplication
 
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +8,6 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.Description
@@ -18,9 +15,7 @@ import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.components.YAxis
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import java.text.SimpleDateFormat
@@ -451,7 +446,7 @@ class HabitChartFragment : Fragment() {
         // Настраиваем описание оси Y в зависимости от типа привычки
         val yAxisDescription = when (habit.type) {
             HabitType.TIME -> getString(R.string.minutes_label)
-            HabitType.REPEAT -> getString(R.string.repetitions_label)
+            HabitType.REPEAT -> getString(R.string.quantity)
             HabitType.SIMPLE -> getString(R.string.completed_label)
         }
         

@@ -8,7 +8,6 @@ import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
 class HabitAdapter(val habits: MutableList<Habit>) : 
@@ -259,7 +258,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             }
             HabitType.REPEAT -> {
                 // Для привычек с повторениями показываем только ползунок повторений
-                hoursTextView.setText(R.string.repetitions_short)
+                hoursTextView.setText(R.string.quantity)
                 
                 hoursSeekBar.max = 100 // Максимальное количество повторений
                 hoursSeekBar.progress = habit.current.coerceAtMost(100)
