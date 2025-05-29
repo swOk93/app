@@ -14,6 +14,14 @@ class HabitAdapter(val habits: MutableList<Habit>) :
     RecyclerView.Adapter<HabitAdapter.HabitViewHolder>(), 
     java.util.Comparator<Habit> {
     
+    // Интерфейс для обработки перетаскивания
+    interface OnStartDragListener {
+        fun onStartDrag(viewHolder: RecyclerView.ViewHolder)
+    }
+    
+    // Слушатель для перетаскивания
+    var dragListener: OnStartDragListener? = null
+    
     interface HabitListener {
         fun onDeleteHabit(position: Int)
         fun onUpdateProgress(position: Int, count: Int)
@@ -76,6 +84,18 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             }
             itemView.setOnClickListener(expandClickListener)
             expandArrowButton.setOnClickListener(expandClickListener)
+            
+            // Обработчик длительного нажатия на иконку перетаскивания
+            dragHandleImageView.setOnLongClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    dragListener?.onStartDrag(this)
+                }
+                true // Возвращаем true, чтобы показать, что событие обработано
+            }
+            
+            // Предотвращаем открытие слайдера при нажатии на иконку перетаскивания
+            dragHandleImageView.setOnClickListener { /* Ничего не делаем */ }
 
             // Обработчик нажатия на кнопку
             expandButton.setOnClickListener {

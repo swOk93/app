@@ -15,10 +15,11 @@ import androidx.fragment.app.commit
 import androidx.core.content.edit
 import android.view.View
 
-class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
+class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapter.OnStartDragListener {
 
     private lateinit var binding: ActivityMainBinding
     public lateinit var habitAdapter: HabitAdapter
+    private lateinit var itemTouchHelper: ItemTouchHelper
     public lateinit var progressHistory: HabitProgressHistory
     
     // Публичные методы для управления видимостью контейнеров
@@ -439,8 +440,17 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         }
         
         // Прикрепляем ItemTouchHelper к RecyclerView
-        val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
+        itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
         itemTouchHelper.attachToRecyclerView(binding.habitsRecyclerView)
+        
+        // Устанавливаем слушатель перетаскивания
+        habitAdapter.dragListener = this
+    }
+    
+    // Реализация метода из интерфейса OnStartDragListener
+    override fun onStartDrag(viewHolder: RecyclerView.ViewHolder) {
+        // Запускаем перетаскивание
+        itemTouchHelper.startDrag(viewHolder)
     }
 
 }
