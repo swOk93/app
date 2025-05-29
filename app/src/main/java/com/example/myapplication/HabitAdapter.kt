@@ -85,17 +85,13 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             itemView.setOnClickListener(expandClickListener)
             expandArrowButton.setOnClickListener(expandClickListener)
             
-            // Обработчик длительного нажатия на иконку перетаскивания
-            dragHandleImageView.setOnLongClickListener {
+            // Обработчик нажатия на иконку перетаскивания (без задержки)
+            dragHandleImageView.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     dragListener?.onStartDrag(this)
                 }
-                true // Возвращаем true, чтобы показать, что событие обработано
             }
-            
-            // Предотвращаем открытие слайдера при нажатии на иконку перетаскивания
-            dragHandleImageView.setOnClickListener { /* Ничего не делаем */ }
 
             // Обработчик нажатия на кнопку
             expandButton.setOnClickListener {

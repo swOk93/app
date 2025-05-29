@@ -12,8 +12,8 @@
 
     <ImageView
         android:id="@+id/dragHandleImageView"
-        android:layout_width="37dp"
-        android:layout_height="33dp"
+        android:layout_width="24dp"
+        android:layout_height="29dp"
         android:contentDescription="@string/drag_to_reorder"
         android:src="@android:drawable/ic_menu_sort_by_size"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -23,10 +23,11 @@
 
     <TextView
         android:id="@+id/habitNameTextView"
-        android:layout_width="267dp"
-        android:layout_height="24dp"
+        android:layout_width="257dp"
+        android:layout_height="27dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:text="@string/make_bed"
         android:textColor="@color/mint_text_primary"
         android:textSize="16sp"
