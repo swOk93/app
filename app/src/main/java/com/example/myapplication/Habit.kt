@@ -14,7 +14,8 @@ data class Habit(
     val type: HabitType,
     val target: Int = 0, // целевое значение (минуты или повторения)
     val current: Int = 0, // текущее значение
-    val createdDate: Date = Date()
+    val createdDate: Date = Date(),
+    val unit: String = "" // пользовательская единица измерения
 ) {
     fun getFormattedDate(): String {
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
@@ -24,7 +25,10 @@ data class Habit(
     fun getProgressText(): String {
         return when (type) {
             HabitType.TIME -> "$current / $target мин"
-            HabitType.REPEAT -> "$current / $target раз"
+            HabitType.REPEAT -> {
+                val unitText = if (unit.isNotEmpty()) unit else "раз"
+                "$current / $target $unitText"
+            }
             HabitType.SIMPLE -> if (current > 0) "Выполнено" else "Не выполнено"
         }
     }

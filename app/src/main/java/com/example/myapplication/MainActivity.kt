@@ -113,6 +113,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                 putInt("habit_${index}_target", habit.target)
                 putInt("habit_${index}_current", habit.current)
                 putLong("habit_${index}_date", habit.createdDate.time)
+                putString("habit_${index}_unit", habit.unit) // Сохраняем единицу измерения
             }
             
             // Сохраняем дату последнего запуска приложения
@@ -141,18 +142,19 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             val target = sharedPreferences.getInt("habit_${i}_target", 0)
             val current = sharedPreferences.getInt("habit_${i}_current", 0)
             val date = sharedPreferences.getLong("habit_${i}_date", System.currentTimeMillis())
+            val unit = sharedPreferences.getString("habit_${i}_unit", "") ?: "" // Загружаем единицу измерения
             
             val type = HabitType.entries[typeOrdinal]
             
-            val habit = Habit(name = name, type = type, target = target, current = current, createdDate = Date(date))
+            val habit = Habit(name = name, type = type, target = target, current = current, createdDate = Date(date), unit = unit)
             habitAdapter.addHabit(habit)
         }
         
         return true
     }
     
-    fun addHabit(name: String, type: HabitType, target: Int) {
-        val habit = Habit(name = name, type = type, target = target)
+    fun addHabit(name: String, type: HabitType, target: Int, unit: String = "") {
+        val habit = Habit(name = name, type = type, target = target, unit = unit)
         habitAdapter.addHabit(habit)
         saveHabits()
         Toast.makeText(this, "Привычка добавлена: $name", Toast.LENGTH_SHORT).show()
@@ -161,7 +163,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
     /**
      * Обновляет существующую привычку
      */
-    fun updateHabit(position: Int, name: String, type: HabitType, target: Int) {
+    fun updateHabit(position: Int, name: String, type: HabitType, target: Int, unit: String = "") {
         if (position >= 0 && position < habitAdapter.habits.size) {
             val oldHabit = habitAdapter.habits[position]
             // Сохраняем текущий прогресс и дату создания
@@ -170,7 +172,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                 type = type,
                 target = target,
                 current = oldHabit.current,
-                createdDate = oldHabit.createdDate
+                createdDate = oldHabit.createdDate,
+                unit = unit
             )
             habitAdapter.updateHabit(position, updatedHabit)
             saveHabits()
@@ -255,7 +258,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             type = HabitType.REPEAT, 
             target = 20, 
             current = 0, 
-            createdDate = Date()
+            createdDate = Date(),
+            unit = "раз"
         ) // 20 повторений
         
         val simpleHabit = Habit(
@@ -350,7 +354,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
                 saveHabits()
                 // Добавляем запись в историю прогресса
                 progressHistory.addProgressRecord(position, count)
-                Toast.makeText(this, "Прогресс обновлен: $count повторений", Toast.LENGTH_SHORT).show()
+                val unitText = if (habit.unit.isNotEmpty()) habit.unit else "повторений"
+                Toast.makeText(this, "Прогресс обновлен: $count $unitText", Toast.LENGTH_SHORT).show()
             }
             HabitType.SIMPLE -> {
                 // Используем метод markSimpleHabitAsCompleted для обработки простых привычек

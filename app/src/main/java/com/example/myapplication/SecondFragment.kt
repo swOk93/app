@@ -22,6 +22,7 @@ class SecondFragment : DialogFragment() {
     private var habitPosition = -1
     private var habitName = ""
     private var habitTarget = 0
+    private var habitUnit = "" // Добавляем переменную для единицы измерения
     
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -54,6 +55,7 @@ class SecondFragment : DialogFragment() {
                 habitPosition = args.getInt(ARG_HABIT_POSITION, -1)
                 habitName = args.getString(ARG_HABIT_NAME, "")
                 habitTarget = args.getInt(ARG_HABIT_TARGET, 0)
+                habitUnit = args.getString(ARG_HABIT_UNIT, "") // Получаем единицу измерения
                 currentHabitType = HabitType.entries[args.getInt(ARG_HABIT_TYPE, 0)]
                 
                 // Изменяем заголовок диалога
@@ -98,6 +100,7 @@ class SecondFragment : DialogFragment() {
                 HabitType.REPEAT -> {
                     binding.repeatRadioButton.isChecked = true
                     binding.repeatCountEditText.setText(habitTarget.toString())
+                    binding.repeatUnitEditText.setText(habitUnit) // Устанавливаем единицу измерения
                 }
                 HabitType.SIMPLE -> {
                     binding.simpleRadioButton.isChecked = true
@@ -109,6 +112,7 @@ class SecondFragment : DialogFragment() {
             binding.hoursEditText.setText("1")
             binding.minutesEditText.setText("30")
             binding.repeatCountEditText.setText("10")
+            binding.repeatUnitEditText.setText("") // Пустая единица измерения по умолчанию
             
             // По умолчанию выбираем простую привычку
             binding.simpleRadioButton.isChecked = true
@@ -143,14 +147,21 @@ class SecondFragment : DialogFragment() {
             }
             HabitType.SIMPLE -> 1
         }
+        
+        // Получаем единицу измерения для привычек типа REPEAT
+        val unitValue = if (currentHabitType == HabitType.REPEAT) {
+            binding.repeatUnitEditText.text.toString()
+        } else {
+            ""
+        }
 
         if (isEditMode && habitPosition >= 0) {
             // Обновляем существующую привычку
-            (activity as? MainActivity)?.updateHabit(habitPosition, habitName, currentHabitType, targetValue)
+            (activity as? MainActivity)?.updateHabit(habitPosition, habitName, currentHabitType, targetValue, unitValue)
             Toast.makeText(requireContext(), "Привычка обновлена", Toast.LENGTH_SHORT).show()
         } else {
             // Добавляем новую привычку
-            (activity as? MainActivity)?.addHabit(habitName, currentHabitType, targetValue)
+            (activity as? MainActivity)?.addHabit(habitName, currentHabitType, targetValue, unitValue)
         }
 
         // Закрываем диалог
@@ -168,6 +179,7 @@ class SecondFragment : DialogFragment() {
         private const val ARG_HABIT_NAME = "habit_name"
         private const val ARG_HABIT_TYPE = "habit_type"
         private const val ARG_HABIT_TARGET = "habit_target"
+        private const val ARG_HABIT_UNIT = "habit_unit" // Добавляем константу для единицы измерения
         
         /**
          * Создает новый экземпляр SecondFragment для редактирования существующей привычки
@@ -180,6 +192,7 @@ class SecondFragment : DialogFragment() {
                 putString(ARG_HABIT_NAME, habit.name)
                 putInt(ARG_HABIT_TYPE, habit.type.ordinal)
                 putInt(ARG_HABIT_TARGET, habit.target)
+                putString(ARG_HABIT_UNIT, habit.unit) // Сохраняем единицу измерения
             }
             fragment.arguments = args
             return fragment
