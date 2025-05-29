@@ -7,6 +7,8 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.databinding.ActivityMainBinding
 import java.util.Date
 import androidx.fragment.app.commit
@@ -90,6 +92,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = habitAdapter
         }
+        
+        // Настраиваем ItemTouchHelper для перетаскивания элементов
+        setupItemTouchHelper()
         
         // Загружаем сохраненные привычки или создаем стартовые, если это первый запуск
         val habitsLoaded = loadHabits()
@@ -382,6 +387,60 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener {
         } else {
             super.onBackPressed()
         }
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        saveHabits()
+    }
+    
+    // Настройка ItemTouchHelper для перетаскивания элементов
+    private fun setupItemTouchHelper() {
+        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN, // Направления для перетаскивания
+            0 // Направления для свайпа (не используем)
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val fromPosition = viewHolder.adapterPosition
+                val toPosition = target.adapterPosition
+                
+                // Перемещаем элемент в адаптере
+                habitAdapter.moveHabit(fromPosition, toPosition)
+                
+                // Сохраняем изменения
+                saveHabits()
+                
+                return true
+            }
+            
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                // Не используем свайп
+            }
+            
+            // Метод для изменения внешнего вида элемента при перетаскивании
+            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+                super.onSelectedChanged(viewHolder, actionState)
+                
+                if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                    viewHolder?.itemView?.alpha = 0.7f
+                }
+            }
+            
+            // Метод для восстановления внешнего вида элемента после перетаскивания
+            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+                super.clearView(recyclerView, viewHolder)
+                
+                viewHolder.itemView.alpha = 1.0f
+            }
+        }
+        
+        // Прикрепляем ItemTouchHelper к RecyclerView
+        val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
+        itemTouchHelper.attachToRecyclerView(binding.habitsRecyclerView)
     }
 
 }

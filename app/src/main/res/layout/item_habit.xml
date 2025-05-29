@@ -9,18 +9,30 @@
     android:elevation="2dp"
     android:padding="8dp">
 
+    <ImageView
+        android:id="@+id/dragHandleImageView"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:src="@android:drawable/ic_menu_sort_by_size"
+        android:contentDescription="@string/drag_to_reorder"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/mint_text_secondary" />
+
     <TextView
         android:id="@+id/habitNameTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:text="@string/make_bed"
         android:textColor="@color/mint_text_primary"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@+id/expandButton"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/dragHandleImageView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView

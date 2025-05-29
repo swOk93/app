@@ -11,7 +11,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class HabitAdapter(val habits: MutableList<Habit>) : 
-    RecyclerView.Adapter<HabitAdapter.HabitViewHolder>() {
+    RecyclerView.Adapter<HabitAdapter.HabitViewHolder>(), 
+    java.util.Comparator<Habit> {
     
     interface HabitListener {
         fun onDeleteHabit(position: Int)
@@ -29,6 +30,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
         val expandArrowButton: ImageButton = itemView.findViewById(R.id.expandArrowButton)
         val expandButton: CheckBox = itemView.findViewById(R.id.expandButton)
         val sliderLayout: View = itemView.findViewById(R.id.sliderLayout)
+        val dragHandleImageView: View = itemView.findViewById(R.id.dragHandleImageView)
         
         // Элементы управления ползунками
         val hoursSeekBar: SeekBar = sliderLayout.findViewById(R.id.hoursSeekBar)
@@ -316,5 +318,27 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             habits[position] = habit
             notifyItemChanged(position)
         }
+    }
+    
+    // Метод для перемещения привычки из одной позиции в другую
+    fun moveHabit(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < toPosition) {
+            // Перемещение вниз
+            for (i in fromPosition until toPosition) {
+                habits[i] = habits[i + 1].also { habits[i + 1] = habits[i] }
+            }
+        } else {
+            // Перемещение вверх
+            for (i in fromPosition downTo toPosition + 1) {
+                habits[i] = habits[i - 1].also { habits[i - 1] = habits[i] }
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition)
+    }
+    
+    // Реализация метода compare интерфейса Comparator
+    override fun compare(habit1: Habit, habit2: Habit): Int {
+        // По умолчанию сравниваем по имени
+        return habit1.name.compareTo(habit2.name)
     }
 }
