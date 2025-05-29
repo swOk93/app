@@ -5,15 +5,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.databinding.FragmentTasksBinding
+import kotlinx.coroutines.launch
 
-/**
- * A [Fragment] subclass for displaying tasks.
- */
 class TasksFragment : Fragment() {
 
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
+    private lateinit var taskAdapter: TaskAdapter
+    private lateinit var taskDao: TaskDao
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,8 +27,47 @@ class TasksFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        // Здесь будет код для работы с задачами
+
+        setupRecyclerView()
+        setupDatabase()
+        observeTasks()
+        setupAddTaskButton()
+    }
+
+    private fun setupRecyclerView() {
+        taskAdapter = TaskAdapter().apply {
+            onTaskCheckedChanged = { task, isChecked ->
+                lifecycleScope.launch {
+                    taskDao.updateTaskCompletion(task.id, isChecked)
+                }
+            }
+        }
+
+        binding.tasksRecyclerView.apply {
+            adapter = taskAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
+    }
+
+    private fun setupDatabase() {
+        val database = AppDatabase.getInstance(requireContext())
+        taskDao = database.taskDao()
+    }
+
+    private fun observeTasks() {
+        taskDao.getAllTasks().observe(viewLifecycleOwner) { tasks ->
+            taskAdapter.submitList(tasks)
+        }
+    }
+
+    private fun setupAddTaskButton() {
+        binding.addTaskFab.setOnClickListener {
+            val addTaskFragment = AddTaskFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, addTaskFragment)
+                .addToBackStack(null)
+                .commit()
+        }
     }
 
     override fun onDestroyView() {
@@ -35,8 +76,6 @@ class TasksFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance(): TasksFragment {
-            return TasksFragment()
-        }
+        fun newInstance() = TasksFragment()
     }
 }
