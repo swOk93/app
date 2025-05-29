@@ -19,8 +19,8 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/habitsRecyclerView"
-        android:layout_width="380dp"
-        android:layout_height="620dp"
+        android:layout_width="383dp"
+        android:layout_height="637dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="16dp"
