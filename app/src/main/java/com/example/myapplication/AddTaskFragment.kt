@@ -9,6 +9,8 @@ import android.widget.RadioButton
 import androidx.fragment.app.Fragment
 import com.example.myapplication.databinding.FragmentAddTaskBinding
 import java.util.Calendar
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class AddTaskFragment : Fragment() {
 
@@ -62,7 +64,7 @@ class AddTaskFragment : Fragment() {
                 R.id.oneTimeTaskRadioButton -> "onetime"
                 else -> "simple"
             }
-            val deadline = if (taskType == "onetime") binding.deadlineDateEditText.text.toString() else ""
+            val deadline = if (taskType == "onetime") binding.deadlineDateEditText.text.toString() else null
             val importance = when (binding.importanceRadioGroup.checkedRadioButtonId) {
                 R.id.lowPriorityRadioButton -> "low"
                 R.id.mediumPriorityRadioButton -> "medium"
@@ -70,9 +72,22 @@ class AddTaskFragment : Fragment() {
                 else -> "medium"
             }
 
-            // TODO: Сохранить задачу в базу данных
-            // После сохранения вернуться на предыдущий экран
-            requireActivity().supportFragmentManager.popBackStack()
+            if (taskName.isBlank()) return@setOnClickListener
+
+            val database = AppDatabase.getInstance(requireContext())
+            val taskDao = database.taskDao()
+            lifecycleScope.launch {
+                val task = Task(
+                    name = taskName,
+                    type = taskType,
+                    deadline = deadline,
+                    importance = importance
+                )
+                taskDao.insertTask(task)
+                requireActivity().runOnUiThread {
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+            }
         }
     }
 

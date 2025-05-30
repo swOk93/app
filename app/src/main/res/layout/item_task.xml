@@ -46,29 +46,25 @@
 
         <TextView
             android:id="@+id/taskNameTextView"
-            android:layout_width="260dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_width="250dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="32dp"
             android:text="@string/make_bed"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            app:layout_constraintEnd_toStartOf="@+id/expandArrowButton"
             app:layout_constraintStart_toEndOf="@+id/importanceIndicator"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/deadlineTextView"
-            android:layout_width="198dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_width="139dp"
+            android:layout_height="23dp"
+            android:layout_marginStart="32dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
             android:text="Срок: 15.6.2025"
             android:textColor="#B3FFFFFF"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/expandArrowButton"
             app:layout_constraintStart_toEndOf="@+id/importanceIndicator"
             app:layout_constraintTop_toBottomOf="@+id/taskNameTextView" />
 
