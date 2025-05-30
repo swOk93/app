@@ -5,18 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.widget.RadioButton
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.databinding.FragmentAddTaskBinding
-import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class AddTaskFragment : Fragment() {
 
     private var _binding: FragmentAddTaskBinding? = null
     private val binding get() = _binding!!
-    private lateinit var taskDao: TaskDao
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,7 +27,6 @@ class AddTaskFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        taskDao = AppDatabase.getInstance(requireContext()).taskDao()
         setupTaskTypeRadioGroup()
         setupDatePicker()
         setupSaveButton()
@@ -61,26 +57,12 @@ class AddTaskFragment : Fragment() {
     private fun setupSaveButton() {
         binding.saveTaskButton.setOnClickListener {
             val taskName = binding.taskNameEditText.text.toString()
-            if (taskName.isBlank()) {
-                Toast.makeText(context, "Введите название задачи", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
             val taskType = when (binding.taskTypeRadioGroup.checkedRadioButtonId) {
                 R.id.simpleTaskRadioButton -> "simple"
                 R.id.oneTimeTaskRadioButton -> "onetime"
                 else -> "simple"
             }
-
-            val deadline = if (taskType == "onetime") {
-                val deadlineText = binding.deadlineDateEditText.text.toString()
-                if (deadlineText.isBlank()) {
-                    Toast.makeText(context, "Выберите срок выполнения", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-                deadlineText
-            } else null
-
+            val deadline = if (taskType == "onetime") binding.deadlineDateEditText.text.toString() else ""
             val importance = when (binding.importanceRadioGroup.checkedRadioButtonId) {
                 R.id.lowPriorityRadioButton -> "low"
                 R.id.mediumPriorityRadioButton -> "medium"
@@ -88,17 +70,9 @@ class AddTaskFragment : Fragment() {
                 else -> "medium"
             }
 
-            val task = Task(
-                name = taskName,
-                type = taskType,
-                deadline = deadline,
-                importance = importance
-            )
-
-            lifecycleScope.launch {
-                taskDao.insertTask(task)
-                requireActivity().supportFragmentManager.popBackStack()
-            }
+            // TODO: Сохранить задачу в базу данных
+            // После сохранения вернуться на предыдущий экран
+            requireActivity().supportFragmentManager.popBackStack()
         }
     }
 
