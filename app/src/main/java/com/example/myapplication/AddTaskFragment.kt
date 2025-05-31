@@ -17,6 +17,19 @@ class AddTaskFragment : Fragment() {
     private var _binding: FragmentAddTaskBinding? = null
     private val binding get() = _binding!!
 
+    private var editingTask: Task? = null
+
+    companion object {
+        private const val ARG_TASK = "arg_task"
+        fun newInstance(task: Task): AddTaskFragment {
+            val fragment = AddTaskFragment()
+            val args = Bundle()
+            args.putSerializable(ARG_TASK, task)
+            fragment.arguments = args
+            return fragment
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -29,9 +42,11 @@ class AddTaskFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        editingTask = arguments?.getSerializable(ARG_TASK) as? Task
         setupTaskTypeRadioGroup()
         setupDatePicker()
         setupSaveButton()
+        if (editingTask != null) fillFields(editingTask!!)
     }
 
     private fun setupTaskTypeRadioGroup() {
@@ -77,13 +92,23 @@ class AddTaskFragment : Fragment() {
             val database = AppDatabase.getInstance(requireContext())
             val taskDao = database.taskDao()
             lifecycleScope.launch {
-                val task = Task(
-                    name = taskName,
-                    type = taskType,
-                    deadline = deadline,
-                    importance = importance
-                )
-                taskDao.insertTask(task)
+                if (editingTask == null) {
+                    val task = Task(
+                        name = taskName,
+                        type = taskType,
+                        deadline = deadline,
+                        importance = importance
+                    )
+                    taskDao.insertTask(task)
+                } else {
+                    val updated = editingTask!!.copy(
+                        name = taskName,
+                        type = taskType,
+                        deadline = deadline,
+                        importance = importance
+                    )
+                    taskDao.updateTask(updated)
+                }
                 requireActivity().runOnUiThread {
                     requireActivity().supportFragmentManager.popBackStack()
                 }
@@ -94,5 +119,24 @@ class AddTaskFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun fillFields(task: Task) {
+        binding.taskNameEditText.setText(task.name)
+        when (task.type) {
+            "simple" -> binding.simpleTaskRadioButton.isChecked = true
+            "onetime" -> binding.oneTimeTaskRadioButton.isChecked = true
+        }
+        if (task.type == "onetime") {
+            binding.deadlineLayout.visibility = View.VISIBLE
+            binding.deadlineDateEditText.setText(task.deadline ?: "")
+        } else {
+            binding.deadlineLayout.visibility = View.GONE
+        }
+        when (task.importance) {
+            "low" -> binding.lowPriorityRadioButton.isChecked = true
+            "medium" -> binding.mediumPriorityRadioButton.isChecked = true
+            "high" -> binding.highPriorityRadioButton.isChecked = true
+        }
     }
 }

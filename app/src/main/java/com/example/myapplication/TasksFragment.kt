@@ -41,6 +41,18 @@ class TasksFragment : Fragment() {
                     taskDao.updateTaskCompletion(task.id, isChecked)
                 }
             }
+            onTaskDelete = { task ->
+                lifecycleScope.launch {
+                    taskDao.deleteTask(task)
+                }
+            }
+            onTaskEdit = { task ->
+                val editTaskFragment = AddTaskFragment.newInstance(task)
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, editTaskFragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
         }
 
         binding.tasksRecyclerView.apply {
