@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity(tableName = "tasks")
 data class Task(
@@ -12,4 +13,4 @@ data class Task(
     val deadline: String?, // для разовых задач
     val importance: String, // "low", "medium", "high"
     var isCompleted: Boolean = false
-)
+): Serializable
