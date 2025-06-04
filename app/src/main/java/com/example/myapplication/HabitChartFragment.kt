@@ -91,7 +91,7 @@ class HabitChartFragment : Fragment() {
         // Получаем данные о привычке и истории прогресса
         val mainActivity = activity as MainActivity
         progressHistory = mainActivity.progressHistory
-        habit = mainActivity.habitAdapter.habits[habitPosition]
+        habit = mainActivity.habitAdapter.getHabitAt(habitPosition)
         
         lineChart = view.findViewById(R.id.lineChart)
         chartTitleTextView = view.findViewById(R.id.chartTitleTextView)

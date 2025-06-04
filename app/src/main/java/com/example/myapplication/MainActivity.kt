@@ -159,10 +159,10 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         
         sharedPreferences.edit {
             // Сохраняем количество привычек
-            putInt("habits_count", habitAdapter.habits.size)
+            putInt("habits_count", habitAdapter.getAllHabitsCount())
             
             // Сохраняем каждую привычку
-            habitAdapter.habits.forEachIndexed { index, habit ->
+            habitAdapter.getAllHabits().forEachIndexed { index, habit ->
                 putString("habit_${index}_name", habit.name)
                 putInt("habit_${index}_type", habit.type.ordinal)
                 putInt("habit_${index}_target", habit.target)
@@ -223,10 +223,11 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
      * Обновляет существующую привычку
      */
     fun updateHabit(position: Int, name: String, type: HabitType, target: Int, unit: String = "", section: HabitSection = HabitSection.ALL) {
-        if (position >= 0 && position < habitAdapter.habits.size) {
-            val oldHabit = habitAdapter.habits[position]
+        if (position >= 0 && position < habitAdapter.getItemCount()) {
+            val oldHabit = habitAdapter.getHabitAt(position)
             // Сохраняем текущий прогресс и дату создания
             val updatedHabit = Habit(
+                id = oldHabit.id,
                 name = name,
                 type = type,
                 target = target,
@@ -243,7 +244,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     
     // Метод markSimpleHabitAsCompleted используется в onUpdateProgress
     fun markSimpleHabitAsCompleted(position: Int, isCompleted: Boolean) {
-        val habit = habitAdapter.habits[position]
+        val habit = habitAdapter.getHabitAt(position)
         if (habit.type == HabitType.SIMPLE) {
             val updatedHabit = habit.copy(current = if (isCompleted) 1 else 0)
             habitAdapter.updateHabit(position, updatedHabit)
@@ -292,10 +293,17 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
      * Сбрасывает прогресс всех привычек на 0
      */
     private fun resetHabitsProgress() {
-        for (i in 0 until habitAdapter.habits.size) {
-            val habit = habitAdapter.habits[i]
+        for (i in 0 until habitAdapter.getAllHabitsCount()) {
+            val habit = habitAdapter.getAllHabits()[i]
             val updatedHabit = habit.copy(current = 0)
-            habitAdapter.updateHabit(i, updatedHabit)
+            // Находим индекс в отфильтрованном списке
+            val filteredIndex = habitAdapter.getFilteredIndexById(habit.id)
+            if (filteredIndex >= 0) {
+                habitAdapter.updateHabit(filteredIndex, updatedHabit)
+            } else {
+                // Если привычка не в отфильтрованном списке, обновляем только в полном списке
+                habitAdapter.updateHabitInAllList(habit.id, updatedHabit)
+            }
         }
         saveHabits()
     }
@@ -353,8 +361,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         val calendar = java.util.Calendar.getInstance()
         
         // Для каждой привычки
-        for (position in 0 until habitAdapter.habits.size) {
-            val habit = habitAdapter.habits[position]
+        for (position in 0 until habitAdapter.getAllHabitsCount()) {
+            val habit = habitAdapter.getAllHabits()[position]
             
             // Генерируем данные за последние 150 дней (примерно 5 месяцев)
             for (day in 149 downTo 0) {
@@ -390,8 +398,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     }
     
     override fun onEditHabit(position: Int) {
-        if (position >= 0 && position < habitAdapter.habits.size) {
-            val habit = habitAdapter.habits[position]
+        if (position >= 0 && position < habitAdapter.getItemCount()) {
+            val habit = habitAdapter.getHabitAt(position)
             // Создаем и показываем SecondFragment в режиме редактирования
             val secondFragment = SecondFragment.newInstance(position, habit)
             secondFragment.show(supportFragmentManager, "SecondFragment")
@@ -399,7 +407,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     }
     
     override fun onUpdateProgress(position: Int, count: Int) {
-        val habit = habitAdapter.habits[position]
+        val habit = habitAdapter.getHabitAt(position)
         
         when (habit.type) {
             HabitType.TIME -> {
@@ -428,6 +436,12 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     }
     
     override fun onShowChart(position: Int) {
+        // Проверяем, что позиция валидна
+        if (position < 0 || position >= habitAdapter.getItemCount()) {
+            Toast.makeText(this, getString(R.string.error_invalid_position), Toast.LENGTH_SHORT).show()
+            return
+        }
+        
         val habitChartFragment = HabitChartFragment.newInstance(position)
         supportFragmentManager.commit {
             replace(R.id.fragment_container, habitChartFragment)
@@ -437,6 +451,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         showFragmentContainer()
     }
     
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (supportFragmentManager.backStackEntryCount > 0) {
             // Получаем имя текущего фрагмента в стеке

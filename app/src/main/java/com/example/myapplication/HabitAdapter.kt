@@ -12,7 +12,7 @@ import android.widget.AutoCompleteTextView
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.ArrayAdapter
 
-class HabitAdapter(val habits: MutableList<Habit>) : 
+class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) : 
     RecyclerView.Adapter<HabitAdapter.HabitViewHolder>(), 
     java.util.Comparator<Habit> {
     
@@ -110,7 +110,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             expandButton.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    val habit = habits[position]
+                    val habit = filteredHabits[position]
                     // Для всех типов привычек переключаем статус выполнения
                     when (habit.type) {
                         HabitType.TIME, HabitType.REPEAT -> {
@@ -145,7 +145,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             plusButton.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    val habit = habits[position]
+                    val habit = filteredHabits[position]
                     val currentValue = habit.current
                     when (habit.type) {
                         HabitType.TIME -> {
@@ -178,7 +178,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             minusButton.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    val habit = habits[position]
+                    val habit = filteredHabits[position]
                     val currentValue = habit.current
                     when (habit.type) {
                         HabitType.TIME -> {
@@ -334,16 +334,65 @@ class HabitAdapter(val habits: MutableList<Habit>) :
     override fun getItemCount() = filteredHabits.size
     
     /**
+     * Перемещает привычку с одной позиции на другую
+     */
+    fun moveHabit(fromPosition: Int, toPosition: Int) {
+        // Проверяем валидность позиций
+        if (fromPosition < 0 || fromPosition >= filteredHabits.size || 
+            toPosition < 0 || toPosition >= filteredHabits.size) {
+            return
+        }
+        
+        // Получаем ссылку на перемещаемую привычку
+        val movingHabit = filteredHabits[fromPosition]
+        
+        // Удаляем привычку с исходной позиции
+        filteredHabits.removeAt(fromPosition)
+        
+        // Вставляем привычку на новую позицию
+        filteredHabits.add(toPosition, movingHabit)
+        
+        // Обновляем полный список, чтобы сохранить порядок
+        // Синхронизируем полный список с отфильтрованным
+        syncAllHabitsWithFiltered()
+        
+        // Уведомляем об изменении
+        notifyItemMoved(fromPosition, toPosition)
+    }
+    
+    /**
+     * Синхронизирует полный список с отфильтрованным списком
+     */
+    private fun syncAllHabitsWithFiltered() {
+        // Создаем временный список для хранения элементов, которые не в отфильтрованном списке
+        val nonFilteredItems = allHabits.filter { habit -> 
+            filteredHabits.none { it.id == habit.id } 
+        }
+        
+        // Очищаем полный список
+        allHabits.clear()
+        
+        // Сначала добавляем элементы из отфильтрованного списка в том же порядке
+        allHabits.addAll(filteredHabits)
+        
+        // Затем добавляем элементы, которые не в отфильтрованном списке
+        allHabits.addAll(nonFilteredItems)
+    }
+    
+    /**
      * Фильтрует привычки по указанному разделу
      */
     fun filterBySection(section: HabitSection) {
+        // Сохраняем текущий список
+        val previousItems = ArrayList(filteredHabits)
+        
         // Очищаем текущий список
         filteredHabits.clear()
         
         // Добавляем только привычки выбранного раздела
         filteredHabits.addAll(allHabits.filter { it.section == section })
         
-        // Обновляем отображение
+        // Используем DiffUtil для эффективного обновления RecyclerView
         notifyDataSetChanged()
     }
     
@@ -351,13 +400,16 @@ class HabitAdapter(val habits: MutableList<Habit>) :
      * Показывает все привычки
      */
     fun showAllHabits() {
+        // Сохраняем текущий список
+        val previousItems = ArrayList(filteredHabits)
+        
         // Очищаем текущий список
         filteredHabits.clear()
         
         // Добавляем все привычки
         filteredHabits.addAll(allHabits)
         
-        // Обновляем отображение
+        // Используем DiffUtil для эффективного обновления RecyclerView
         notifyDataSetChanged()
     }
     
@@ -365,22 +417,24 @@ class HabitAdapter(val habits: MutableList<Habit>) :
      * Добавляет привычку в список
      */
     fun addHabit(habit: Habit) {
-        // Добавляем в оба списка
+        // Добавляем в полный список
         allHabits.add(habit)
         
-        // Проверяем фильтры перед добавлением в отображаемый список
-        if (filteredHabits.size < allHabits.size) {
-            // Есть фильтрация, проверяем соответствие
-            val lastFilter = if (filteredHabits.isEmpty()) null else filteredHabits[0].section
-            if (lastFilter == null || lastFilter == HabitSection.ALL || lastFilter == habit.section) {
-                filteredHabits.add(habit)
-            }
+        // Проверяем, нужно ли добавлять в отфильтрованный список
+        val currentSection = if (filteredHabits.isNotEmpty() && filteredHabits.size < allHabits.size) {
+            filteredHabits.firstOrNull()?.section ?: HabitSection.ALL
         } else {
-            // Нет фильтрации, добавляем
-            filteredHabits.add(habit)
+            HabitSection.ALL // Если списки одинаковой длины, значит фильтрации нет
         }
         
-        notifyItemInserted(filteredHabits.size - 1)
+        // Добавляем в отфильтрованный список, если нет фильтрации или привычка соответствует фильтру
+        if (currentSection == HabitSection.ALL || currentSection == habit.section) {
+            filteredHabits.add(habit)
+            notifyItemInserted(filteredHabits.size - 1)
+        } else {
+            // Если привычка не соответствует текущему фильтру, просто уведомляем об изменении данных
+            notifyDataSetChanged()
+        }
     }
     
     /**
@@ -396,10 +450,22 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                 allHabits[allIndex] = updatedHabit
             }
             
-            // Обновляем в отфильтрованном списке
-            filteredHabits[position] = updatedHabit
+            // Проверяем, соответствует ли обновленная привычка текущему фильтру
+            val currentSection = if (filteredHabits.isNotEmpty() && filteredHabits.size < allHabits.size) {
+                filteredHabits.firstOrNull()?.section ?: HabitSection.ALL
+            } else {
+                HabitSection.ALL // Если списки одинаковой длины, значит фильтрации нет
+            }
             
-            notifyItemChanged(position)
+            if (currentSection == HabitSection.ALL || currentSection == updatedHabit.section) {
+                // Привычка соответствует фильтру, обновляем её в отфильтрованном списке
+                filteredHabits[position] = updatedHabit
+                notifyItemChanged(position)
+            } else {
+                // Привычка больше не соответствует фильтру, удаляем её из отфильтрованного списка
+                filteredHabits.removeAt(position)
+                notifyItemRemoved(position)
+            }
         }
     }
     
@@ -415,28 +481,10 @@ class HabitAdapter(val habits: MutableList<Habit>) :
             filteredHabits.removeAt(position)
             
             notifyItemRemoved(position)
+            
+            // Обновляем весь список, чтобы избежать проблем с позициями
+            notifyDataSetChanged()
         }
-    }
-    
-    /**
-     * Перемещает привычку с одной позиции на другую
-     */
-    fun moveHabit(fromPosition: Int, toPosition: Int) {
-        if (fromPosition < toPosition) {
-            for (i in fromPosition until toPosition) {
-                filteredHabits[i] = filteredHabits.set(i + 1, filteredHabits[i])
-            }
-        } else {
-            for (i in fromPosition downTo toPosition + 1) {
-                filteredHabits[i] = filteredHabits.set(i - 1, filteredHabits[i])
-            }
-        }
-        
-        // Обновляем allHabits, чтобы сохранить порядок
-        allHabits.clear()
-        allHabits.addAll(filteredHabits)
-        
-        notifyItemMoved(fromPosition, toPosition)
     }
     
     override fun compare(h1: Habit, h2: Habit): Int {
@@ -488,6 +536,45 @@ class HabitAdapter(val habits: MutableList<Habit>) :
                     notifyItemChanged(habitPosition)
                 }
             }
+        }
+    }
+    
+    /**
+     * Возвращает полный список привычек
+     */
+    fun getAllHabits(): List<Habit> {
+        return allHabits.toList()
+    }
+    
+    /**
+     * Возвращает количество привычек в полном списке
+     */
+    fun getAllHabitsCount(): Int {
+        return allHabits.size
+    }
+    
+    /**
+     * Возвращает привычку по указанной позиции в отфильтрованном списке
+     */
+    fun getHabitAt(position: Int): Habit {
+        return filteredHabits[position]
+    }
+    
+    /**
+     * Находит индекс привычки в отфильтрованном списке по id
+     * @return индекс привычки или -1, если не найдена
+     */
+    fun getFilteredIndexById(habitId: Long): Int {
+        return filteredHabits.indexOfFirst { it.id == habitId }
+    }
+    
+    /**
+     * Обновляет привычку в полном списке по id
+     */
+    fun updateHabitInAllList(habitId: Long, updatedHabit: Habit) {
+        val index = allHabits.indexOfFirst { it.id == habitId }
+        if (index >= 0) {
+            allHabits[index] = updatedHabit
         }
     }
 }
