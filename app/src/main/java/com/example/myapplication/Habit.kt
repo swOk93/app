@@ -8,6 +8,15 @@ enum class HabitType {
     TIME, REPEAT, SIMPLE
 }
 
+// Перечисление для разделов привычек
+enum class HabitSection(val displayName: String) {
+    ALL("Все привычки и задачи"),
+    SPORT("Спорт"),
+    HEALTH("Здоровье"),
+    WORK("Работа"),
+    OTHER("Другое")
+}
+
 data class Habit(
     val id: Long = System.currentTimeMillis(),
     val name: String,
@@ -15,7 +24,8 @@ data class Habit(
     val target: Int = 0, // целевое значение (минуты или повторения)
     val current: Int = 0, // текущее значение
     val createdDate: Date = Date(),
-    val unit: String = "" // пользовательская единица измерения
+    val unit: String = "", // пользовательская единица измерения
+    val section: HabitSection = HabitSection.ALL // раздел привычки
 ) {
     fun getFormattedDate(): String {
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())

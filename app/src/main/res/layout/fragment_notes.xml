@@ -22,7 +22,7 @@
         tools:listitem="@layout/item_habit" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addTaskButton"
+        android:id="@+id/addNotesButton"
         android:layout_width="77dp"
         android:layout_height="82dp"
         android:layout_marginEnd="12dp"

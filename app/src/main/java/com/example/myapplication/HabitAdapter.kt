@@ -8,11 +8,23 @@ import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.AutoCompleteTextView
 import androidx.recyclerview.widget.RecyclerView
+import android.widget.ArrayAdapter
 
 class HabitAdapter(val habits: MutableList<Habit>) : 
     RecyclerView.Adapter<HabitAdapter.HabitViewHolder>(), 
     java.util.Comparator<Habit> {
+    
+    // Храним полный список привычек и отфильтрованный список
+    private val allHabits = mutableListOf<Habit>()
+    private val filteredHabits = mutableListOf<Habit>()
+    
+    init {
+        // Инициализируем списки
+        allHabits.addAll(habits)
+        filteredHabits.addAll(habits)
+    }
     
     // Интерфейс для обработки перетаскивания
     interface OnStartDragListener {
@@ -50,6 +62,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
         val sliderDeleteButton: ImageButton = sliderLayout.findViewById(R.id.sliderDeleteButton)
         val sliderEditButton: ImageButton = sliderLayout.findViewById(R.id.sliderEditButton)
         val chartButton: ImageButton = sliderLayout.findViewById(R.id.chartButton)
+        val sectionSpinner: AutoCompleteTextView? = sliderLayout.findViewById(R.id.sectionSpinner)
         
         private var isExpanded = false
         
@@ -216,7 +229,7 @@ class HabitAdapter(val habits: MutableList<Habit>) :
     }
     
     override fun onBindViewHolder(holder: HabitViewHolder, position: Int) {
-        val habit = habits[position]
+        val habit = filteredHabits[position]
         
         holder.nameTextView.text = habit.name
         holder.dateTextView.text = habit.getFormattedDate()
@@ -232,6 +245,9 @@ class HabitAdapter(val habits: MutableList<Habit>) :
         
         // Скрываем слайдер при привязке (чтобы не оставался открытым при переиспользовании ViewHolder)
         holder.sliderLayout.visibility = View.GONE
+        
+        // Настройка выпадающего списка разделов
+        setupSectionSpinner(holder, habit)
         
         // Настройка ползунков в зависимости от типа привычки
         val hoursSeekBar = holder.hoursSeekBar
@@ -315,46 +331,163 @@ class HabitAdapter(val habits: MutableList<Habit>) :
         }
     }
     
-    override fun getItemCount() = habits.size
+    override fun getItemCount() = filteredHabits.size
     
+    /**
+     * Фильтрует привычки по указанному разделу
+     */
+    fun filterBySection(section: HabitSection) {
+        // Очищаем текущий список
+        filteredHabits.clear()
+        
+        // Добавляем только привычки выбранного раздела
+        filteredHabits.addAll(allHabits.filter { it.section == section })
+        
+        // Обновляем отображение
+        notifyDataSetChanged()
+    }
+    
+    /**
+     * Показывает все привычки
+     */
+    fun showAllHabits() {
+        // Очищаем текущий список
+        filteredHabits.clear()
+        
+        // Добавляем все привычки
+        filteredHabits.addAll(allHabits)
+        
+        // Обновляем отображение
+        notifyDataSetChanged()
+    }
+    
+    /**
+     * Добавляет привычку в список
+     */
     fun addHabit(habit: Habit) {
-        habits.add(habit)
-        notifyItemInserted(habits.size - 1)
-    }
-    
-    fun removeHabit(position: Int) {
-        if (position in 0 until habits.size) {
-            habits.removeAt(position)
-            notifyItemRemoved(position)
+        // Добавляем в оба списка
+        allHabits.add(habit)
+        
+        // Проверяем фильтры перед добавлением в отображаемый список
+        if (filteredHabits.size < allHabits.size) {
+            // Есть фильтрация, проверяем соответствие
+            val lastFilter = if (filteredHabits.isEmpty()) null else filteredHabits[0].section
+            if (lastFilter == null || lastFilter == HabitSection.ALL || lastFilter == habit.section) {
+                filteredHabits.add(habit)
+            }
+        } else {
+            // Нет фильтрации, добавляем
+            filteredHabits.add(habit)
         }
+        
+        notifyItemInserted(filteredHabits.size - 1)
     }
     
-    fun updateHabit(position: Int, habit: Habit) {
-        if (position in 0 until habits.size) {
-            habits[position] = habit
+    /**
+     * Обновляет привычку по указанной позиции
+     */
+    fun updateHabit(position: Int, updatedHabit: Habit) {
+        if (position >= 0 && position < filteredHabits.size) {
+            val originalHabit = filteredHabits[position]
+            
+            // Находим индекс в полном списке
+            val allIndex = allHabits.indexOfFirst { it.id == originalHabit.id }
+            if (allIndex >= 0) {
+                allHabits[allIndex] = updatedHabit
+            }
+            
+            // Обновляем в отфильтрованном списке
+            filteredHabits[position] = updatedHabit
+            
             notifyItemChanged(position)
         }
     }
     
-    // Метод для перемещения привычки из одной позиции в другую
+    /**
+     * Удаляет привычку по указанной позиции
+     */
+    fun removeHabit(position: Int) {
+        if (position >= 0 && position < filteredHabits.size) {
+            val habitToRemove = filteredHabits[position]
+            
+            // Удаляем из обоих списков
+            allHabits.removeAll { it.id == habitToRemove.id }
+            filteredHabits.removeAt(position)
+            
+            notifyItemRemoved(position)
+        }
+    }
+    
+    /**
+     * Перемещает привычку с одной позиции на другую
+     */
     fun moveHabit(fromPosition: Int, toPosition: Int) {
         if (fromPosition < toPosition) {
-            // Перемещение вниз
             for (i in fromPosition until toPosition) {
-                habits[i] = habits[i + 1].also { habits[i + 1] = habits[i] }
+                filteredHabits[i] = filteredHabits.set(i + 1, filteredHabits[i])
             }
         } else {
-            // Перемещение вверх
             for (i in fromPosition downTo toPosition + 1) {
-                habits[i] = habits[i - 1].also { habits[i - 1] = habits[i] }
+                filteredHabits[i] = filteredHabits.set(i - 1, filteredHabits[i])
             }
         }
+        
+        // Обновляем allHabits, чтобы сохранить порядок
+        allHabits.clear()
+        allHabits.addAll(filteredHabits)
+        
         notifyItemMoved(fromPosition, toPosition)
     }
     
-    // Реализация метода compare интерфейса Comparator
-    override fun compare(habit1: Habit, habit2: Habit): Int {
-        // По умолчанию сравниваем по имени
-        return habit1.name.compareTo(habit2.name)
+    override fun compare(h1: Habit, h2: Habit): Int {
+        // Сравниваем по дате создания (сначала новые)
+        return (h2.createdDate.time - h1.createdDate.time).toInt()
+    }
+    
+    /**
+     * Настройка выпадающего списка разделов в слайдере
+     */
+    private fun setupSectionSpinner(holder: HabitViewHolder, habit: Habit) {
+        holder.sectionSpinner?.let { spinner ->
+            // Создаем список названий разделов
+            val sections = HabitSection.values().map { it.displayName }.toTypedArray()
+            
+            // Создаем адаптер
+            val adapter = ArrayAdapter(
+                holder.itemView.context, 
+                android.R.layout.simple_dropdown_item_1line, 
+                sections
+            )
+            
+            // Устанавливаем адаптер
+            spinner.setAdapter(adapter)
+            
+            // Устанавливаем текущий выбранный раздел
+            spinner.setText(habit.section.displayName, false)
+            
+            // Устанавливаем обработчик выбора элемента
+            spinner.setOnItemClickListener { _, _, position, _ ->
+                val selectedSection = HabitSection.values()[position]
+                
+                // Получаем позицию привычки в списке
+                val habitPosition = holder.adapterPosition
+                if (habitPosition != RecyclerView.NO_POSITION) {
+                    // Создаем обновленную привычку с новым разделом
+                    val updatedHabit = habit.copy(section = selectedSection)
+                    
+                    // Обновляем привычку в обоих списках
+                    val allIndex = allHabits.indexOfFirst { it.id == habit.id }
+                    if (allIndex >= 0) {
+                        allHabits[allIndex] = updatedHabit
+                    }
+                    
+                    // Обновляем в отфильтрованном списке
+                    filteredHabits[habitPosition] = updatedHabit
+                    
+                    // Уведомляем об изменении
+                    notifyItemChanged(habitPosition)
+                }
+            }
+        }
     }
 }

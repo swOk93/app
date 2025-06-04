@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.myapplication.databinding.FragmentSecondBinding
 import com.example.myapplication.HabitType
+import com.example.myapplication.HabitSection
 
 /**
  * A [DialogFragment] subclass for adding or editing habits.
@@ -16,6 +19,7 @@ class SecondFragment : DialogFragment() {
 
     private var _binding: FragmentSecondBinding? = null
     private var currentHabitType: HabitType = HabitType.SIMPLE
+    private var currentHabitSection: HabitSection = HabitSection.ALL
     
     // Параметры для редактирования существующей привычки
     private var isEditMode = false
@@ -48,6 +52,9 @@ class SecondFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        // Настройка выпадающего списка разделов
+        setupSectionSpinner()
+        
         // Получаем аргументы, если они есть
         arguments?.let { args ->
             isEditMode = args.getBoolean(ARG_IS_EDIT_MODE, false)
@@ -57,6 +64,14 @@ class SecondFragment : DialogFragment() {
                 habitTarget = args.getInt(ARG_HABIT_TARGET, 0)
                 habitUnit = args.getString(ARG_HABIT_UNIT, "") // Получаем единицу измерения
                 currentHabitType = HabitType.entries[args.getInt(ARG_HABIT_TYPE, 0)]
+                // Получаем раздел привычки, если он есть
+                val sectionOrdinal = args.getInt(ARG_HABIT_SECTION, 0)
+                currentHabitSection = HabitSection.entries[sectionOrdinal]
+                
+                // Устанавливаем выбранный раздел в выпадающем списке
+                (binding.sectionSpinner as? AutoCompleteTextView)?.setText(
+                    currentHabitSection.displayName, false
+                )
                 
                 // Изменяем заголовок диалога
                 binding.addHabitTitleTextView.text = getString(R.string.edit_habit)
@@ -109,9 +124,9 @@ class SecondFragment : DialogFragment() {
         } else {
             // Значения по умолчанию для новой привычки
             binding.habitNameEditText.setText(getString(R.string.habit))
-        binding.hoursEditText.setText(getString(R.string.one))
-        binding.minutesEditText.setText(getString(R.string.thirty))
-        binding.repeatCountEditText.setText(getString(R.string.ten))
+            binding.hoursEditText.setText(getString(R.string.one))
+            binding.minutesEditText.setText(getString(R.string.thirty))
+            binding.repeatCountEditText.setText(getString(R.string.ten))
             binding.repeatUnitEditText.setText("") // Пустая единица измерения по умолчанию
             
             // По умолчанию выбираем простую привычку
@@ -126,6 +141,25 @@ class SecondFragment : DialogFragment() {
         // Настройка кнопки сохранения
         binding.saveButton.setOnClickListener {
             saveHabit()
+        }
+    }
+    
+    /**
+     * Настройка выпадающего списка разделов
+     */
+    private fun setupSectionSpinner() {
+        val sections = HabitSection.values().map { it.displayName }.toTypedArray()
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, sections)
+        
+        // Настраиваем AutoCompleteTextView
+        (binding.sectionSpinner as? AutoCompleteTextView)?.apply {
+            setAdapter(adapter)
+            setText(HabitSection.ALL.displayName, false)
+            
+            // Слушатель выбора элемента
+            setOnItemClickListener { _, _, position, _ ->
+                currentHabitSection = HabitSection.values()[position]
+            }
         }
     }
 
@@ -157,11 +191,11 @@ class SecondFragment : DialogFragment() {
 
         if (isEditMode && habitPosition >= 0) {
             // Обновляем существующую привычку
-            (activity as? MainActivity)?.updateHabit(habitPosition, habitName, currentHabitType, targetValue, unitValue)
+            (activity as? MainActivity)?.updateHabit(habitPosition, habitName, currentHabitType, targetValue, unitValue, currentHabitSection)
             Toast.makeText(requireContext(), getString(R.string.habit_updated), Toast.LENGTH_SHORT).show()
         } else {
             // Добавляем новую привычку
-            (activity as? MainActivity)?.addHabit(habitName, currentHabitType, targetValue, unitValue)
+            (activity as? MainActivity)?.addHabit(habitName, currentHabitType, targetValue, unitValue, currentHabitSection)
         }
 
         // Закрываем диалог
@@ -180,6 +214,7 @@ class SecondFragment : DialogFragment() {
         private const val ARG_HABIT_TYPE = "habit_type"
         private const val ARG_HABIT_TARGET = "habit_target"
         private const val ARG_HABIT_UNIT = "habit_unit" // Добавляем константу для единицы измерения
+        private const val ARG_HABIT_SECTION = "habit_section" // Добавляем константу для раздела
         
         /**
          * Создает новый экземпляр SecondFragment для редактирования существующей привычки
@@ -193,6 +228,7 @@ class SecondFragment : DialogFragment() {
                 putInt(ARG_HABIT_TYPE, habit.type.ordinal)
                 putInt(ARG_HABIT_TARGET, habit.target)
                 putString(ARG_HABIT_UNIT, habit.unit) // Сохраняем единицу измерения
+                putInt(ARG_HABIT_SECTION, habit.section.ordinal) // Сохраняем раздел
             }
             fragment.arguments = args
             return fragment

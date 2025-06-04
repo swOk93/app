@@ -37,6 +37,29 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addHabitTitleTextView" />
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/sectionSpinnerLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Раздел"
+            android:textColorHint="#80FFFFFF"
+            app:boxStrokeColor="#4285F4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/habitNameEditText">
+
+            <AutoCompleteTextView
+                android:id="@+id/sectionSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:padding="12dp"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <TextView
             android:id="@+id/habitTypeTextView"
             android:layout_width="wrap_content"
@@ -46,7 +69,7 @@
             android:textColor="#FFFFFF"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/habitNameEditText" />
+            app:layout_constraintTop_toBottomOf="@+id/sectionSpinnerLayout" />
 
         <RadioGroup
             android:id="@+id/habitTypeRadioGroup"

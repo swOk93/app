@@ -14,6 +14,8 @@ import java.util.Date
 import androidx.fragment.app.commit
 import androidx.core.content.edit
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapter.OnStartDragListener {
 
@@ -21,6 +23,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     public lateinit var habitAdapter: HabitAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
     public lateinit var progressHistory: HabitProgressHistory
+    
+    // Текущий выбранный раздел (по умолчанию - все привычки)
+    private var currentSection = HabitSection.ALL
     
     // Публичные методы для управления видимостью контейнеров
     /**
@@ -51,6 +56,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Настройка выпадающего списка разделов
+        setupSectionSpinner()
+        
         // Инициализация RecyclerView
         setupRecyclerView()
 
@@ -86,6 +94,40 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+    
+    /**
+     * Настройка выпадающего списка разделов
+     */
+    private fun setupSectionSpinner() {
+        val sections = HabitSection.values().map { it.displayName }.toTypedArray()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, sections)
+        
+        // Настраиваем AutoCompleteTextView
+        (binding.sectionSpinner as? AutoCompleteTextView)?.apply {
+            setAdapter(adapter)
+            setText(HabitSection.ALL.displayName, false)
+            
+            // Слушатель выбора элемента
+            setOnItemClickListener { _, _, position, _ ->
+                currentSection = HabitSection.values()[position]
+                // Фильтруем привычки по выбранному разделу
+                filterHabitsBySection(currentSection)
+            }
+        }
+    }
+    
+    /**
+     * Фильтрует привычки по выбранному разделу
+     */
+    private fun filterHabitsBySection(section: HabitSection) {
+        if (section == HabitSection.ALL) {
+            // Показываем все привычки
+            habitAdapter.showAllHabits()
+        } else {
+            // Фильтруем привычки по разделу
+            habitAdapter.filterBySection(section)
         }
     }
     
@@ -127,6 +169,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 putInt("habit_${index}_current", habit.current)
                 putLong("habit_${index}_date", habit.createdDate.time)
                 putString("habit_${index}_unit", habit.unit) // Сохраняем единицу измерения
+                putInt("habit_${index}_section", habit.section.ordinal) // Сохраняем раздел
             }
             
             // Сохраняем дату последнего запуска приложения
@@ -156,18 +199,21 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             val current = sharedPreferences.getInt("habit_${i}_current", 0)
             val date = sharedPreferences.getLong("habit_${i}_date", System.currentTimeMillis())
             val unit = sharedPreferences.getString("habit_${i}_unit", "") ?: "" // Загружаем единицу измерения
+            val sectionOrdinal = sharedPreferences.getInt("habit_${i}_section", 0) // Загружаем раздел
             
             val type = HabitType.entries[typeOrdinal]
+            val section = HabitSection.entries[sectionOrdinal]
             
-            val habit = Habit(name = name, type = type, target = target, current = current, createdDate = Date(date), unit = unit)
+            val habit = Habit(name = name, type = type, target = target, current = current, 
+                              createdDate = Date(date), unit = unit, section = section)
             habitAdapter.addHabit(habit)
         }
         
         return true
     }
     
-    fun addHabit(name: String, type: HabitType, target: Int, unit: String = "") {
-        val habit = Habit(name = name, type = type, target = target, unit = unit)
+    fun addHabit(name: String, type: HabitType, target: Int, unit: String = "", section: HabitSection = HabitSection.ALL) {
+        val habit = Habit(name = name, type = type, target = target, unit = unit, section = section)
         habitAdapter.addHabit(habit)
         saveHabits()
         Toast.makeText(this, getString(R.string.habit_added_format, name), Toast.LENGTH_SHORT).show()
@@ -176,7 +222,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     /**
      * Обновляет существующую привычку
      */
-    fun updateHabit(position: Int, name: String, type: HabitType, target: Int, unit: String = "") {
+    fun updateHabit(position: Int, name: String, type: HabitType, target: Int, unit: String = "", section: HabitSection = HabitSection.ALL) {
         if (position >= 0 && position < habitAdapter.habits.size) {
             val oldHabit = habitAdapter.habits[position]
             // Сохраняем текущий прогресс и дату создания
@@ -186,7 +232,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 target = target,
                 current = oldHabit.current,
                 createdDate = oldHabit.createdDate,
-                unit = unit
+                unit = unit,
+                section = section
             )
             habitAdapter.updateHabit(position, updatedHabit)
             saveHabits()
@@ -263,7 +310,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             type = HabitType.TIME, 
             target = 15, 
             current = 0, 
-            createdDate = Date()
+            createdDate = Date(),
+            section = HabitSection.HEALTH
         ) // 15 минут
         
         val repeatHabit = Habit(
@@ -272,7 +320,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             target = 20, 
             current = 0, 
             createdDate = Date(),
-            unit = getString(R.string.times)
+            unit = getString(R.string.times),
+            section = HabitSection.SPORT
         ) // 20 повторений
         
         val simpleHabit = Habit(
@@ -280,7 +329,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             type = HabitType.SIMPLE, 
             target = 1, 
             current = 0, 
-            createdDate = Date()
+            createdDate = Date(),
+            section = HabitSection.HEALTH
         ) // Просто выполнено/не выполнено
         
         // Добавляем привычки в адаптер
