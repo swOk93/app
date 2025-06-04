@@ -16,6 +16,8 @@ import androidx.core.content.edit
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.TextView
+import android.widget.ImageButton
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapter.OnStartDragListener, AddSectionFragment.OnSectionAddedListener {
 
@@ -59,8 +61,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         // Загружаем пользовательские разделы
         loadCustomSections()
         
-        // Настройка выпадающего списка разделов
-        setupSectionSpinner()
+        // Настройка списка разделов
+        setupSectionsList()
         
         // Инициализация RecyclerView
         setupRecyclerView()
@@ -101,48 +103,118 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     }
     
     /**
-     * Настройка выпадающего списка разделов
+     * Настройка списка разделов
      */
-    private fun setupSectionSpinner() {
-        // Получаем список всех разделов
-        val sectionsList = HabitSection.getAllSections().map { it.displayName }.toMutableList()
+    private fun setupSectionsList() {
+        // Получаем ссылки на компоненты
+        val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
+        val sectionHeaderTextView = sectionsListLayout.findViewById<TextView>(R.id.sectionHeaderTextView)
+        val expandSectionsButton = sectionsListLayout.findViewById<ImageButton>(R.id.expandSectionsButton)
+        val sectionsRecyclerView = sectionsListLayout.findViewById<RecyclerView>(R.id.sectionsRecyclerView)
         
-        // Добавляем специальный пункт "Добавить новый раздел"
-        sectionsList.add(getString(R.string.add_new_section))
+        // Устанавливаем текст текущего раздела
+        sectionHeaderTextView.text = currentSection.displayName
         
-        // Создаем кастомный адаптер
-        val adapter = SectionSpinnerAdapter(
-            this,
-            sectionsList,
-            getString(R.string.add_new_section)
+        // Настраиваем RecyclerView
+        sectionsRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        
+        // Создаем адаптер
+        val sectionsAdapter = SectionAdapter(
+            sections = HabitSection.getAllSections(),
+            addNewSectionText = getString(R.string.add_new_section),
+            onSectionClick = { section ->
+                // Обрабатываем выбор раздела
+                currentSection = section
+                sectionHeaderTextView.text = section.displayName
+                filterHabitsBySection(section)
+                
+                // Скрываем список
+                sectionsRecyclerView.visibility = View.GONE
+                expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
+            },
+            onDeleteClick = { section ->
+                // Обрабатываем нажатие на кнопку удаления
+                // Проверяем, является ли раздел встроенным
+                val sectionName = section.displayName
+                val isBuiltInSection = HabitSection.values().any { it.displayName == sectionName }
+                
+                if (isBuiltInSection) {
+                    Toast.makeText(this, "Нельзя удалить встроенный раздел", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Показываем диалог подтверждения
+                    AlertDialog.Builder(this)
+                        .setTitle("Удаление раздела")
+                        .setMessage("Вы уверены, что хотите удалить раздел \"$sectionName\"?")
+                        .setPositiveButton("Да") { _, _ ->
+                            // Получаем все привычки в этом разделе
+                            val habitsInSection = habitAdapter.getAllHabits().filter { 
+                                it.section.displayName == sectionName 
+                            }
+                            
+                            // Перемещаем все привычки из этого раздела в раздел "Другое"
+                            habitsInSection.forEach { habit ->
+                                val updatedHabit = habit.copy(section = HabitSection.OTHER)
+                                habitAdapter.updateHabitInAllList(habit.id, updatedHabit)
+                            }
+                            
+                            // Удаляем пользовательский раздел из списка
+                            val customSections = HabitSection.getCustomSectionNames().toMutableList()
+                            customSections.remove(sectionName)
+                            HabitSection.loadCustomSections(customSections)
+                            
+                            // Обновляем адаптер списка разделов
+                            setupSectionsList()
+                            
+                            // Если текущий раздел был удален, переключаемся на "Все привычки и задачи"
+                            if (currentSection.displayName == sectionName) {
+                                currentSection = HabitSection.ALL
+                                sectionHeaderTextView.text = currentSection.displayName
+                                filterHabitsBySection(currentSection)
+                            }
+                        }
+                        .setNegativeButton("Нет", null)
+                        .show()
+                }
+            },
+            onAddSectionClick = {
+                // Показываем диалог добавления нового раздела
+                val addSectionFragment = AddSectionFragment.newInstance()
+                addSectionFragment.sectionAddedListener = this@MainActivity
+                addSectionFragment.show(supportFragmentManager, "AddSectionFragment")
+                
+                // Скрываем список
+                sectionsRecyclerView.visibility = View.GONE
+                expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
+            }
         )
         
-        // Настраиваем AutoCompleteTextView
-        (binding.sectionSpinner as? AutoCompleteTextView)?.apply {
-            setAdapter(adapter)
-            setText(HabitSection.ALL.displayName, false)
-            
-            // Слушатель выбора элемента
-            setOnItemClickListener { _, _, position, _ ->
-                val selectedItem = sectionsList[position]
-                
-                // Проверяем, выбран ли пункт "Добавить новый раздел"
-                if (selectedItem == getString(R.string.add_new_section)) {
-                    // Показываем диалог добавления нового раздела
-                    val addSectionFragment = AddSectionFragment.newInstance()
-                    addSectionFragment.sectionAddedListener = this@MainActivity
-                    addSectionFragment.show(supportFragmentManager, "AddSectionFragment")
-                    
-                    // Восстанавливаем текущий выбранный раздел в выпадающем списке
-                    setText(currentSection.displayName, false)
-                } else {
-                    // Обычный выбор раздела
-                    currentSection = HabitSection.getSectionByName(selectedItem)
-                    // Фильтруем привычки по выбранному разделу
-                    filterHabitsBySection(currentSection)
-                }
+        // Устанавливаем адаптер
+        sectionsRecyclerView.adapter = sectionsAdapter
+        
+        // Настраиваем кнопку раскрытия списка
+        expandSectionsButton.setOnClickListener {
+            if (sectionsRecyclerView.visibility == View.VISIBLE) {
+                // Скрываем список
+                sectionsRecyclerView.visibility = View.GONE
+                expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
+            } else {
+                // Показываем список
+                sectionsRecyclerView.visibility = View.VISIBLE
+                expandSectionsButton.setImageResource(android.R.drawable.arrow_up_float)
             }
         }
+        
+        // Настраиваем нажатие на заголовок
+        sectionHeaderTextView.setOnClickListener {
+            expandSectionsButton.performClick()
+        }
+    }
+    
+    /**
+     * Обновляет список разделов
+     */
+    private fun updateSectionsList() {
+        setupSectionsList()
     }
     
     /**
@@ -613,35 +685,19 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         // Сохраняем пользовательские разделы
         saveCustomSections()
         
-        // Обновляем адаптер выпадающего списка разделов
-        updateSectionSpinnerAdapter()
+        // Обновляем список разделов
+        updateSectionsList()
         
         // Переключаемся на новый раздел
         currentSection = newSection
+        
+        // Обновляем текст в заголовке
+        val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
+        val sectionHeaderTextView = sectionsListLayout.findViewById<TextView>(R.id.sectionHeaderTextView)
+        sectionHeaderTextView.text = currentSection.displayName
+        
+        // Фильтруем привычки
         filterHabitsBySection(newSection)
-        
-        // Обновляем текст в выпадающем списке
-        (binding.sectionSpinner as? AutoCompleteTextView)?.setText(sectionName, false)
-    }
-    
-    /**
-     * Обновляет адаптер выпадающего списка разделов
-     */
-    private fun updateSectionSpinnerAdapter() {
-        // Получаем список всех разделов
-        val sectionsList = HabitSection.getAllSections().map { it.displayName }.toMutableList()
-        
-        // Добавляем специальный пункт "Добавить новый раздел"
-        sectionsList.add(getString(R.string.add_new_section))
-        
-        // Создаем кастомный адаптер
-        val adapter = SectionSpinnerAdapter(
-            this,
-            sectionsList,
-            getString(R.string.add_new_section)
-        )
-        
-        (binding.sectionSpinner as? AutoCompleteTextView)?.setAdapter(adapter)
     }
     
     /**
