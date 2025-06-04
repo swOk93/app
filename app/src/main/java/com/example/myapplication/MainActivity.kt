@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         binding.fragmentContainer.visibility = View.GONE
         binding.habitsRecyclerView.visibility = View.VISIBLE
         binding.addTaskButton.visibility = View.VISIBLE // Показываем кнопку добавления привычки
+        binding.sectionSpinnerLayout.visibility = View.VISIBLE // Показываем контейнер с разделами
         // Кнопки навигации остаются видимыми
         binding.TypeGroup.visibility = View.VISIBLE
     }
@@ -580,10 +581,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             return
         }
         
-        // Скрываем кнопку раскрытия списка разделов
-        val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
-        val expandSectionsButton = sectionsListLayout.findViewById<ImageButton>(R.id.expandSectionsButton)
-        expandSectionsButton.visibility = View.GONE
+        // Скрываем весь контейнер с разделами
+        binding.sectionSpinnerLayout.visibility = View.GONE
         
         val habitChartFragment = HabitChartFragment.newInstance(position)
         supportFragmentManager.commit {
@@ -609,14 +608,12 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             } else {
                 // Для других фрагментов (например, графика привычки) просто возвращаемся назад
                 supportFragmentManager.popBackStack()
-                // Если больше нет фрагментов в стеке, показываем список привычек и возвращаем кнопку раскрытия списка
+                // Если больше нет фрагментов в стеке, показываем список привычек и возвращаем раздел
                 if (supportFragmentManager.backStackEntryCount == 0) {
                     showHabitList()
                     
-                    // Возвращаем кнопку раскрытия списка разделов
-                    val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
-                    val expandSectionsButton = sectionsListLayout.findViewById<ImageButton>(R.id.expandSectionsButton)
-                    expandSectionsButton.visibility = View.VISIBLE
+                    // Возвращаем видимость контейнера с разделами
+                    binding.sectionSpinnerLayout.visibility = View.VISIBLE
                 }
             }
         } else {
@@ -705,10 +702,16 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             }
             // Устанавливаем кнопку "Привычки" как выбранную
             binding.TypeGroup.check(R.id.Habits)
+            
+            // Показываем контейнер с разделами
+            binding.sectionSpinnerLayout.visibility = View.VISIBLE
         }
         
         // Кнопка "Заметки"
         binding.Notes.setOnClickListener {
+            // Скрываем контейнер с разделами
+            binding.sectionSpinnerLayout.visibility = View.GONE
+            
             // Создаем и показываем фрагмент заметок
             val notesFragment = NotesFragment.newInstance()
             supportFragmentManager.commit {
