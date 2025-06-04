@@ -2,8 +2,12 @@ package com.example.myapplication
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,11 +17,11 @@ import com.example.myapplication.databinding.ActivityMainBinding
 import java.util.Date
 import androidx.fragment.app.commit
 import androidx.core.content.edit
-import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.TextView
 import android.widget.ImageButton
+import android.widget.PopupWindow
+import android.widget.TextView
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapter.OnStartDragListener, AddSectionFragment.OnSectionAddedListener {
 
@@ -110,13 +114,25 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
         val sectionHeaderTextView = sectionsListLayout.findViewById<TextView>(R.id.sectionHeaderTextView)
         val expandSectionsButton = sectionsListLayout.findViewById<ImageButton>(R.id.expandSectionsButton)
-        val sectionsRecyclerView = sectionsListLayout.findViewById<RecyclerView>(R.id.sectionsRecyclerView)
         
         // Устанавливаем текст текущего раздела
         sectionHeaderTextView.text = currentSection.displayName
         
-        // Настраиваем RecyclerView
-        sectionsRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        // Инициализируем PopupWindow для отображения списка разделов
+        val popupView = LayoutInflater.from(this).inflate(R.layout.popup_sections_list, null)
+        val sectionsRecyclerView = popupView.findViewById<RecyclerView>(R.id.sectionsRecyclerView)
+        
+        // Настройка RecyclerView
+        sectionsRecyclerView.layoutManager = LinearLayoutManager(this)
+        
+        // Создаем PopupWindow
+        val popupWindow = PopupWindow(
+            popupView,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        )
+        popupWindow.elevation = 10f
         
         // Создаем адаптер
         val sectionsAdapter = SectionAdapter(
@@ -128,9 +144,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 sectionHeaderTextView.text = section.displayName
                 filterHabitsBySection(section)
                 
-                // Скрываем список
-                sectionsRecyclerView.visibility = View.GONE
-                expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
+                // Закрываем popup
+                popupWindow.dismiss()
             },
             onDeleteClick = { section ->
                 // Обрабатываем нажатие на кнопку удаления
@@ -151,9 +166,10 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                                 it.section.displayName == sectionName 
                             }
                             
-                            // Перемещаем все привычки из этого раздела в раздел "Другое"
+                            // Все привычки останутся, но открепятся от удаляемого раздела
+                            // (переместятся в "Все привычки и задачи")
                             habitsInSection.forEach { habit ->
-                                val updatedHabit = habit.copy(section = HabitSection.OTHER)
+                                val updatedHabit = habit.copy(section = HabitSection.ALL)
                                 habitAdapter.updateHabitInAllList(habit.id, updatedHabit)
                             }
                             
@@ -171,6 +187,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                                 sectionHeaderTextView.text = currentSection.displayName
                                 filterHabitsBySection(currentSection)
                             }
+                            
+                            // Закрываем popup
+                            popupWindow.dismiss()
                         }
                         .setNegativeButton("Нет", null)
                         .show()
@@ -182,9 +201,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 addSectionFragment.sectionAddedListener = this@MainActivity
                 addSectionFragment.show(supportFragmentManager, "AddSectionFragment")
                 
-                // Скрываем список
-                sectionsRecyclerView.visibility = View.GONE
-                expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
+                // Закрываем popup
+                popupWindow.dismiss()
             }
         )
         
@@ -193,20 +211,39 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         
         // Настраиваем кнопку раскрытия списка
         expandSectionsButton.setOnClickListener {
-            if (sectionsRecyclerView.visibility == View.VISIBLE) {
-                // Скрываем список
-                sectionsRecyclerView.visibility = View.GONE
-                expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
-            } else {
-                // Показываем список
-                sectionsRecyclerView.visibility = View.VISIBLE
+            if (!popupWindow.isShowing) {
+                // Определяем положение для отображения popup
+                val location = IntArray(2)
+                binding.sectionSpinnerLayout.getLocationOnScreen(location)
+                
+                // Показываем popup под выбранным разделом
+                popupWindow.showAtLocation(
+                    binding.sectionSpinnerLayout,
+                    Gravity.TOP,
+                    0,
+                    location[1] + binding.sectionSpinnerLayout.height
+                )
+                
+                // Меняем иконку на стрелку вверх
                 expandSectionsButton.setImageResource(android.R.drawable.arrow_up_float)
+            } else {
+                // Закрываем popup
+                popupWindow.dismiss()
+                
+                // Меняем иконку на стрелку вниз
+                expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
             }
         }
         
         // Настраиваем нажатие на заголовок
         sectionHeaderTextView.setOnClickListener {
             expandSectionsButton.performClick()
+        }
+        
+        // Обработчик отмены PopupWindow
+        popupWindow.setOnDismissListener {
+            // Меняем иконку на стрелку вниз
+            expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
         }
     }
     
@@ -543,6 +580,11 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             return
         }
         
+        // Скрываем кнопку раскрытия списка разделов
+        val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
+        val expandSectionsButton = sectionsListLayout.findViewById<ImageButton>(R.id.expandSectionsButton)
+        expandSectionsButton.visibility = View.GONE
+        
         val habitChartFragment = HabitChartFragment.newInstance(position)
         supportFragmentManager.commit {
             replace(R.id.fragment_container, habitChartFragment)
@@ -567,9 +609,14 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             } else {
                 // Для других фрагментов (например, графика привычки) просто возвращаемся назад
                 supportFragmentManager.popBackStack()
-                // Если больше нет фрагментов в стеке, показываем список привычек
+                // Если больше нет фрагментов в стеке, показываем список привычек и возвращаем кнопку раскрытия списка
                 if (supportFragmentManager.backStackEntryCount == 0) {
                     showHabitList()
+                    
+                    // Возвращаем кнопку раскрытия списка разделов
+                    val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
+                    val expandSectionsButton = sectionsListLayout.findViewById<ImageButton>(R.id.expandSectionsButton)
+                    expandSectionsButton.visibility = View.VISIBLE
                 }
             }
         } else {
@@ -698,6 +745,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         
         // Фильтруем привычки
         filterHabitsBySection(newSection)
+        
+        // Показываем сообщение
+        Toast.makeText(this, getString(R.string.section_added), Toast.LENGTH_SHORT).show()
     }
     
     /**
