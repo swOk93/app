@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/rounded_card_background"
+    android:elevation="2dp"
+    android:padding="8dp">
+
+        <View
+            android:id="@+id/importanceIndicator"
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:background="#4CAF50"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <CheckBox
+            android:id="@+id/taskCheckBox"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+
+            app:buttonCompat="@drawable/custom_checkbox"
+            app:buttonTint="@color/checkbox_color_selector"
+            app:buttonTintMode="src_in"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/expandArrowButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/arrow_down_float"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/taskCheckBox"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/mint_text_primary" />
+
+        <TextView
+            android:id="@+id/taskNameTextView"
+            android:layout_width="250dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="32dp"
+            android:text="@string/make_bed"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@+id/importanceIndicator"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/deadlineTextView"
+            android:layout_width="139dp"
+            android:layout_height="23dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp"
+            android:text="Срок: 15.6.2025"
+            android:textColor="#B3FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/importanceIndicator"
+            app:layout_constraintTop_toBottomOf="@+id/taskNameTextView" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
