@@ -11,6 +11,7 @@ import androidx.fragment.app.DialogFragment
 import com.example.myapplication.databinding.FragmentSecondBinding
 import com.example.myapplication.HabitType
 import com.example.myapplication.HabitSection
+import com.example.myapplication.HabitSectionBase
 
 /**
  * A [DialogFragment] subclass for adding or editing habits.
@@ -19,7 +20,7 @@ class SecondFragment : DialogFragment() {
 
     private var _binding: FragmentSecondBinding? = null
     private var currentHabitType: HabitType = HabitType.SIMPLE
-    private var currentHabitSection: HabitSection = HabitSection.ALL
+    private var currentHabitSection: HabitSectionBase = HabitSection.ALL
     
     // Параметры для редактирования существующей привычки
     private var isEditMode = false
@@ -27,6 +28,7 @@ class SecondFragment : DialogFragment() {
     private var habitName = ""
     private var habitTarget = 0
     private var habitUnit = "" // Добавляем переменную для единицы измерения
+    private var habitSectionName = "" // Имя раздела привычки
     
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -64,9 +66,9 @@ class SecondFragment : DialogFragment() {
                 habitTarget = args.getInt(ARG_HABIT_TARGET, 0)
                 habitUnit = args.getString(ARG_HABIT_UNIT, "") // Получаем единицу измерения
                 currentHabitType = HabitType.entries[args.getInt(ARG_HABIT_TYPE, 0)]
-                // Получаем раздел привычки, если он есть
-                val sectionOrdinal = args.getInt(ARG_HABIT_SECTION, 0)
-                currentHabitSection = HabitSection.entries[sectionOrdinal]
+                // Получаем имя раздела привычки
+                habitSectionName = args.getString(ARG_HABIT_SECTION_NAME, HabitSection.ALL.displayName)
+                currentHabitSection = HabitSection.getSectionByName(habitSectionName)
                 
                 // Устанавливаем выбранный раздел в выпадающем списке
                 (binding.sectionSpinner as? AutoCompleteTextView)?.setText(
@@ -148,7 +150,7 @@ class SecondFragment : DialogFragment() {
      * Настройка выпадающего списка разделов
      */
     private fun setupSectionSpinner() {
-        val sections = HabitSection.values().map { it.displayName }.toTypedArray()
+        val sections = HabitSection.getAllSections().map { it.displayName }.toTypedArray()
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, sections)
         
         // Настраиваем AutoCompleteTextView
@@ -158,7 +160,8 @@ class SecondFragment : DialogFragment() {
             
             // Слушатель выбора элемента
             setOnItemClickListener { _, _, position, _ ->
-                currentHabitSection = HabitSection.values()[position]
+                val selectedSectionName = sections[position]
+                currentHabitSection = HabitSection.getSectionByName(selectedSectionName)
             }
         }
     }
@@ -215,6 +218,7 @@ class SecondFragment : DialogFragment() {
         private const val ARG_HABIT_TARGET = "habit_target"
         private const val ARG_HABIT_UNIT = "habit_unit" // Добавляем константу для единицы измерения
         private const val ARG_HABIT_SECTION = "habit_section" // Добавляем константу для раздела
+        private const val ARG_HABIT_SECTION_NAME = "habit_section_name" // Добавляем константу для имени раздела
         
         /**
          * Создает новый экземпляр SecondFragment для редактирования существующей привычки
@@ -228,7 +232,9 @@ class SecondFragment : DialogFragment() {
                 putInt(ARG_HABIT_TYPE, habit.type.ordinal)
                 putInt(ARG_HABIT_TARGET, habit.target)
                 putString(ARG_HABIT_UNIT, habit.unit) // Сохраняем единицу измерения
-                putInt(ARG_HABIT_SECTION, habit.section.ordinal) // Сохраняем раздел
+                // Сохраняем значение раздела
+                putInt(ARG_HABIT_SECTION, if (habit.section is HabitSection) (habit.section as HabitSection).ordinal else 0)
+                putString(ARG_HABIT_SECTION_NAME, habit.section.displayName) // Сохраняем имя раздела
             }
             fragment.arguments = args
             return fragment

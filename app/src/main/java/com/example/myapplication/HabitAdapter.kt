@@ -382,7 +382,7 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
     /**
      * Фильтрует привычки по указанному разделу
      */
-    fun filterBySection(section: HabitSection) {
+    fun filterBySection(section: HabitSectionBase) {
         // Сохраняем текущий список
         val previousItems = ArrayList(filteredHabits)
         
@@ -390,7 +390,7 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
         filteredHabits.clear()
         
         // Добавляем только привычки выбранного раздела
-        filteredHabits.addAll(allHabits.filter { it.section == section })
+        filteredHabits.addAll(allHabits.filter { it.section.displayName == section.displayName })
         
         // Используем DiffUtil для эффективного обновления RecyclerView
         notifyDataSetChanged()
@@ -428,7 +428,7 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
         }
         
         // Добавляем в отфильтрованный список, если нет фильтрации или привычка соответствует фильтру
-        if (currentSection == HabitSection.ALL || currentSection == habit.section) {
+        if (currentSection == HabitSection.ALL || currentSection.displayName == habit.section.displayName) {
             filteredHabits.add(habit)
             notifyItemInserted(filteredHabits.size - 1)
         } else {
@@ -457,7 +457,7 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
                 HabitSection.ALL // Если списки одинаковой длины, значит фильтрации нет
             }
             
-            if (currentSection == HabitSection.ALL || currentSection == updatedHabit.section) {
+            if (currentSection == HabitSection.ALL || currentSection.displayName == updatedHabit.section.displayName) {
                 // Привычка соответствует фильтру, обновляем её в отфильтрованном списке
                 filteredHabits[position] = updatedHabit
                 notifyItemChanged(position)
@@ -497,8 +497,8 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
      */
     private fun setupSectionSpinner(holder: HabitViewHolder, habit: Habit) {
         holder.sectionSpinner?.let { spinner ->
-            // Создаем список названий разделов
-            val sections = HabitSection.values().map { it.displayName }.toTypedArray()
+            // Создаем список названий разделов (встроенные + пользовательские)
+            val sections = HabitSection.getAllSections().map { it.displayName }.toTypedArray()
             
             // Создаем адаптер
             val adapter = ArrayAdapter(
@@ -515,7 +515,9 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
             
             // Устанавливаем обработчик выбора элемента
             spinner.setOnItemClickListener { _, _, position, _ ->
-                val selectedSection = HabitSection.values()[position]
+                // Получаем выбранный раздел
+                val selectedSectionName = sections[position]
+                val selectedSection = HabitSection.getSectionByName(selectedSectionName)
                 
                 // Получаем позицию привычки в списке
                 val habitPosition = holder.adapterPosition

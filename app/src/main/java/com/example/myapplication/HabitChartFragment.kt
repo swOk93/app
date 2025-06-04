@@ -401,7 +401,7 @@ class HabitChartFragment : Fragment() {
             
             // Настраиваем цвета в зависимости от типа привычки
             val mainColor = when (habit.type) {
-                HabitType.TIME -> resources.getColor(R.color.mint_primary, null) // Коралловый
+                HabitType.TIME -> resources.getColor(R.color.mint_coral, null) // Коралловый
                 HabitType.REPEAT -> resources.getColor(R.color.mint_dark, null) // Мятный
                 HabitType.SIMPLE -> resources.getColor(R.color.mint_progress, null) // Персиковый
             }

@@ -75,6 +75,12 @@
     <string name="progress_updated_format">Прогресс обновлен: %1$d %2$s</string>
     <string name="drag_to_reorder">Перетащите для изменения порядка</string>
     <string name="error_invalid_position">Ошибка: неверная позиция привычки</string>
+    <string name="section">Раздел</string>
+    <string name="add_new_section">Добавить новый раздел</string>
+    <string name="add_section">Добавление раздела</string>
+    <string name="section_name">Название раздела</string>
+    <string name="section_added">Раздел добавлен</string>
+    <string name="enter_section_name">Введите название раздела</string>
 
     <!-- Строки из SecondFragment.kt -->
     <string name="edit_habit">Редактирование привычки</string>

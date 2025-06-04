@@ -17,7 +17,7 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 
-class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapter.OnStartDragListener {
+class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapter.OnStartDragListener, AddSectionFragment.OnSectionAddedListener {
 
     private lateinit var binding: ActivityMainBinding
     public lateinit var habitAdapter: HabitAdapter
@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     public lateinit var progressHistory: HabitProgressHistory
     
     // Текущий выбранный раздел (по умолчанию - все привычки)
-    private var currentSection = HabitSection.ALL
+    private var currentSection: HabitSectionBase = HabitSection.ALL
     
     // Публичные методы для управления видимостью контейнеров
     /**
@@ -56,6 +56,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Загружаем пользовательские разделы
+        loadCustomSections()
+        
         // Настройка выпадающего списка разделов
         setupSectionSpinner()
         
@@ -101,7 +104,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
      * Настройка выпадающего списка разделов
      */
     private fun setupSectionSpinner() {
-        val sections = HabitSection.values().map { it.displayName }.toTypedArray()
+        val sections = HabitSection.getAllSections().map { it.displayName }.toTypedArray()
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, sections)
         
         // Настраиваем AutoCompleteTextView
@@ -111,17 +114,25 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             
             // Слушатель выбора элемента
             setOnItemClickListener { _, _, position, _ ->
-                currentSection = HabitSection.values()[position]
+                val selectedSectionName = sections[position]
+                currentSection = HabitSection.getSectionByName(selectedSectionName)
                 // Фильтруем привычки по выбранному разделу
                 filterHabitsBySection(currentSection)
             }
+        }
+        
+        // Настраиваем кнопку добавления раздела
+        binding.addSectionButton.setOnClickListener {
+            val addSectionFragment = AddSectionFragment.newInstance()
+            addSectionFragment.sectionAddedListener = this
+            addSectionFragment.show(supportFragmentManager, "AddSectionFragment")
         }
     }
     
     /**
      * Фильтрует привычки по выбранному разделу
      */
-    private fun filterHabitsBySection(section: HabitSection) {
+    private fun filterHabitsBySection(section: HabitSectionBase) {
         if (section == HabitSection.ALL) {
             // Показываем все привычки
             habitAdapter.showAllHabits()
@@ -169,7 +180,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 putInt("habit_${index}_current", habit.current)
                 putLong("habit_${index}_date", habit.createdDate.time)
                 putString("habit_${index}_unit", habit.unit) // Сохраняем единицу измерения
-                putInt("habit_${index}_section", habit.section.ordinal) // Сохраняем раздел
+                putString("habit_${index}_section_name", habit.section.displayName) // Сохраняем имя раздела
             }
             
             // Сохраняем дату последнего запуска приложения
@@ -199,10 +210,12 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             val current = sharedPreferences.getInt("habit_${i}_current", 0)
             val date = sharedPreferences.getLong("habit_${i}_date", System.currentTimeMillis())
             val unit = sharedPreferences.getString("habit_${i}_unit", "") ?: "" // Загружаем единицу измерения
-            val sectionOrdinal = sharedPreferences.getInt("habit_${i}_section", 0) // Загружаем раздел
+            
+            // Загружаем имя раздела и получаем объект раздела
+            val sectionName = sharedPreferences.getString("habit_${i}_section_name", HabitSection.ALL.displayName) ?: HabitSection.ALL.displayName
+            val section = HabitSection.getSectionByName(sectionName)
             
             val type = HabitType.entries[typeOrdinal]
-            val section = HabitSection.entries[sectionOrdinal]
             
             val habit = Habit(name = name, type = type, target = target, current = current, 
                               createdDate = Date(date), unit = unit, section = section)
@@ -212,7 +225,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         return true
     }
     
-    fun addHabit(name: String, type: HabitType, target: Int, unit: String = "", section: HabitSection = HabitSection.ALL) {
+    fun addHabit(name: String, type: HabitType, target: Int, unit: String = "", section: HabitSectionBase = HabitSection.ALL) {
         val habit = Habit(name = name, type = type, target = target, unit = unit, section = section)
         habitAdapter.addHabit(habit)
         saveHabits()
@@ -222,7 +235,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     /**
      * Обновляет существующую привычку
      */
-    fun updateHabit(position: Int, name: String, type: HabitType, target: Int, unit: String = "", section: HabitSection = HabitSection.ALL) {
+    fun updateHabit(position: Int, name: String, type: HabitType, target: Int, unit: String = "", section: HabitSectionBase = HabitSection.ALL) {
         if (position >= 0 && position < habitAdapter.getItemCount()) {
             val oldHabit = habitAdapter.getHabitAt(position)
             // Сохраняем текущий прогресс и дату создания
@@ -479,6 +492,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     override fun onPause() {
         super.onPause()
         saveHabits()
+        saveCustomSections()
     }
     
     // Настройка ItemTouchHelper для перетаскивания элементов
@@ -570,6 +584,76 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             showFragmentContainer()
             // Устанавливаем кнопку "Заметки" как выбранную
             binding.TypeGroup.check(R.id.Notes)
+        }
+    }
+
+    /**
+     * Реализация интерфейса OnSectionAddedListener
+     */
+    override fun onSectionAdded(sectionName: String) {
+        // Добавляем новый раздел
+        val newSection = HabitSection.addCustomSection(sectionName)
+        
+        // Сохраняем пользовательские разделы
+        saveCustomSections()
+        
+        // Обновляем адаптер выпадающего списка разделов
+        updateSectionSpinnerAdapter()
+        
+        // Переключаемся на новый раздел
+        currentSection = newSection
+        filterHabitsBySection(newSection)
+        
+        // Обновляем текст в выпадающем списке
+        (binding.sectionSpinner as? AutoCompleteTextView)?.setText(sectionName, false)
+    }
+    
+    /**
+     * Обновляет адаптер выпадающего списка разделов
+     */
+    private fun updateSectionSpinnerAdapter() {
+        val sections = HabitSection.getAllSections().map { it.displayName }.toTypedArray()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, sections)
+        (binding.sectionSpinner as? AutoCompleteTextView)?.setAdapter(adapter)
+    }
+    
+    /**
+     * Сохраняет пользовательские разделы
+     */
+    private fun saveCustomSections() {
+        val sharedPreferences = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
+        val sectionNames = HabitSection.getCustomSectionNames()
+        
+        sharedPreferences.edit {
+            // Сохраняем количество пользовательских разделов
+            putInt("custom_sections_count", sectionNames.size)
+            
+            // Сохраняем каждый раздел
+            sectionNames.forEachIndexed { index, name ->
+                putString("custom_section_${index}", name)
+            }
+        }
+    }
+    
+    /**
+     * Загружает пользовательские разделы
+     */
+    private fun loadCustomSections() {
+        val sharedPreferences = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
+        val count = sharedPreferences.getInt("custom_sections_count", 0)
+        
+        if (count > 0) {
+            val sectionNames = mutableListOf<String>()
+            
+            for (i in 0 until count) {
+                val name = sharedPreferences.getString("custom_section_${i}", null)
+                if (name != null) {
+                    sectionNames.add(name)
+                }
+            }
+            
+            // Загружаем пользовательские разделы
+            HabitSection.loadCustomSections(sectionNames)
         }
     }
 
