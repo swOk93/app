@@ -150,8 +150,18 @@ class SecondFragment : DialogFragment() {
      * Настройка выпадающего списка разделов
      */
     private fun setupSectionSpinner() {
-        val sections = HabitSection.getAllSections().map { it.displayName }.toTypedArray()
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, sections)
+        // Получаем список всех разделов
+        val sectionsList = HabitSection.getAllSections().map { it.displayName }.toMutableList()
+        
+        // Добавляем специальный пункт "Добавить новый раздел"
+        sectionsList.add(getString(R.string.add_new_section))
+        
+        // Создаем кастомный адаптер
+        val adapter = SectionSpinnerAdapter(
+            requireContext(),
+            sectionsList,
+            getString(R.string.add_new_section)
+        )
         
         // Настраиваем AutoCompleteTextView
         (binding.sectionSpinner as? AutoCompleteTextView)?.apply {
@@ -160,8 +170,21 @@ class SecondFragment : DialogFragment() {
             
             // Слушатель выбора элемента
             setOnItemClickListener { _, _, position, _ ->
-                val selectedSectionName = sections[position]
-                currentHabitSection = HabitSection.getSectionByName(selectedSectionName)
+                val selectedItem = sectionsList[position]
+                
+                // Проверяем, выбран ли пункт "Добавить новый раздел"
+                if (selectedItem == getString(R.string.add_new_section)) {
+                    // Показываем диалог добавления нового раздела
+                    val addSectionFragment = AddSectionFragment.newInstance()
+                    addSectionFragment.sectionAddedListener = activity as MainActivity
+                    addSectionFragment.show(parentFragmentManager, "AddSectionFragment")
+                    
+                    // Восстанавливаем текущий выбранный раздел в выпадающем списке
+                    setText(currentHabitSection.displayName, false)
+                } else {
+                    // Обычный выбор раздела
+                    currentHabitSection = HabitSection.getSectionByName(selectedItem)
+                }
             }
         }
     }

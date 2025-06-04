@@ -11,6 +11,7 @@ import android.widget.TextView
 import android.widget.AutoCompleteTextView
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.ArrayAdapter
+import androidx.fragment.app.FragmentActivity
 
 class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) : 
     RecyclerView.Adapter<HabitAdapter.HabitViewHolder>(), 
@@ -498,13 +499,17 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
     private fun setupSectionSpinner(holder: HabitViewHolder, habit: Habit) {
         holder.sectionSpinner?.let { spinner ->
             // Создаем список названий разделов (встроенные + пользовательские)
-            val sections = HabitSection.getAllSections().map { it.displayName }.toTypedArray()
+            val sectionsList = HabitSection.getAllSections().map { it.displayName }.toMutableList()
             
-            // Создаем адаптер
-            val adapter = ArrayAdapter(
-                holder.itemView.context, 
-                android.R.layout.simple_dropdown_item_1line, 
-                sections
+            // Добавляем специальный пункт "Добавить новый раздел"
+            val context = holder.itemView.context
+            sectionsList.add(context.getString(R.string.add_new_section))
+            
+            // Создаем кастомный адаптер
+            val adapter = SectionSpinnerAdapter(
+                context,
+                sectionsList,
+                context.getString(R.string.add_new_section)
             )
             
             // Устанавливаем адаптер
@@ -515,27 +520,48 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
             
             // Устанавливаем обработчик выбора элемента
             spinner.setOnItemClickListener { _, _, position, _ ->
-                // Получаем выбранный раздел
-                val selectedSectionName = sections[position]
-                val selectedSection = HabitSection.getSectionByName(selectedSectionName)
+                val selectedItem = sectionsList[position]
                 
-                // Получаем позицию привычки в списке
-                val habitPosition = holder.adapterPosition
-                if (habitPosition != RecyclerView.NO_POSITION) {
-                    // Создаем обновленную привычку с новым разделом
-                    val updatedHabit = habit.copy(section = selectedSection)
+                // Проверяем, выбран ли пункт "Добавить новый раздел"
+                if (selectedItem == context.getString(R.string.add_new_section)) {
+                    // Находим MainActivity
+                    val activity = (context as? FragmentActivity)?.supportFragmentManager?.findFragmentByTag("SecondFragment")?.activity ?: context as? MainActivity
                     
-                    // Обновляем привычку в обоих списках
-                    val allIndex = allHabits.indexOfFirst { it.id == habit.id }
-                    if (allIndex >= 0) {
-                        allHabits[allIndex] = updatedHabit
+                    // Показываем диалог добавления нового раздела
+                    if (activity != null) {
+                        val addSectionFragment = AddSectionFragment.newInstance()
+                        if (activity is AddSectionFragment.OnSectionAddedListener) {
+                            addSectionFragment.sectionAddedListener = activity
+                        }
+                        activity.supportFragmentManager?.let {
+                            addSectionFragment.show(it, "AddSectionFragment")
+                        }
+                        
+                        // Восстанавливаем текущий выбранный раздел в выпадающем списке
+                        spinner.setText(habit.section.displayName, false)
                     }
+                } else {
+                    // Получаем выбранный раздел
+                    val selectedSection = HabitSection.getSectionByName(selectedItem)
                     
-                    // Обновляем в отфильтрованном списке
-                    filteredHabits[habitPosition] = updatedHabit
-                    
-                    // Уведомляем об изменении
-                    notifyItemChanged(habitPosition)
+                    // Получаем позицию привычки в списке
+                    val habitPosition = holder.adapterPosition
+                    if (habitPosition != RecyclerView.NO_POSITION) {
+                        // Создаем обновленную привычку с новым разделом
+                        val updatedHabit = habit.copy(section = selectedSection)
+                        
+                        // Обновляем привычку в обоих списках
+                        val allIndex = allHabits.indexOfFirst { it.id == habit.id }
+                        if (allIndex >= 0) {
+                            allHabits[allIndex] = updatedHabit
+                        }
+                        
+                        // Обновляем в отфильтрованном списке
+                        filteredHabits[habitPosition] = updatedHabit
+                        
+                        // Уведомляем об изменении
+                        notifyItemChanged(habitPosition)
+                    }
                 }
             }
         }

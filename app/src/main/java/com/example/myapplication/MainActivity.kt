@@ -104,8 +104,18 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
      * Настройка выпадающего списка разделов
      */
     private fun setupSectionSpinner() {
-        val sections = HabitSection.getAllSections().map { it.displayName }.toTypedArray()
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, sections)
+        // Получаем список всех разделов
+        val sectionsList = HabitSection.getAllSections().map { it.displayName }.toMutableList()
+        
+        // Добавляем специальный пункт "Добавить новый раздел"
+        sectionsList.add(getString(R.string.add_new_section))
+        
+        // Создаем кастомный адаптер
+        val adapter = SectionSpinnerAdapter(
+            this,
+            sectionsList,
+            getString(R.string.add_new_section)
+        )
         
         // Настраиваем AutoCompleteTextView
         (binding.sectionSpinner as? AutoCompleteTextView)?.apply {
@@ -114,18 +124,24 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             
             // Слушатель выбора элемента
             setOnItemClickListener { _, _, position, _ ->
-                val selectedSectionName = sections[position]
-                currentSection = HabitSection.getSectionByName(selectedSectionName)
-                // Фильтруем привычки по выбранному разделу
-                filterHabitsBySection(currentSection)
+                val selectedItem = sectionsList[position]
+                
+                // Проверяем, выбран ли пункт "Добавить новый раздел"
+                if (selectedItem == getString(R.string.add_new_section)) {
+                    // Показываем диалог добавления нового раздела
+                    val addSectionFragment = AddSectionFragment.newInstance()
+                    addSectionFragment.sectionAddedListener = this@MainActivity
+                    addSectionFragment.show(supportFragmentManager, "AddSectionFragment")
+                    
+                    // Восстанавливаем текущий выбранный раздел в выпадающем списке
+                    setText(currentSection.displayName, false)
+                } else {
+                    // Обычный выбор раздела
+                    currentSection = HabitSection.getSectionByName(selectedItem)
+                    // Фильтруем привычки по выбранному разделу
+                    filterHabitsBySection(currentSection)
+                }
             }
-        }
-        
-        // Настраиваем кнопку добавления раздела
-        binding.addSectionButton.setOnClickListener {
-            val addSectionFragment = AddSectionFragment.newInstance()
-            addSectionFragment.sectionAddedListener = this
-            addSectionFragment.show(supportFragmentManager, "AddSectionFragment")
         }
     }
     
@@ -612,8 +628,19 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
      * Обновляет адаптер выпадающего списка разделов
      */
     private fun updateSectionSpinnerAdapter() {
-        val sections = HabitSection.getAllSections().map { it.displayName }.toTypedArray()
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, sections)
+        // Получаем список всех разделов
+        val sectionsList = HabitSection.getAllSections().map { it.displayName }.toMutableList()
+        
+        // Добавляем специальный пункт "Добавить новый раздел"
+        sectionsList.add(getString(R.string.add_new_section))
+        
+        // Создаем кастомный адаптер
+        val adapter = SectionSpinnerAdapter(
+            this,
+            sectionsList,
+            getString(R.string.add_new_section)
+        )
+        
         (binding.sectionSpinner as? AutoCompleteTextView)?.setAdapter(adapter)
     }
     
