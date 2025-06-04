@@ -21,6 +21,24 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/item_habit" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addTaskButton"
+        android:layout_width="77dp"
+        android:layout_height="82dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="68dp"
+        android:contentDescription="@string/add_task"
+        android:foreground="@drawable/ic_add_white_24dp"
+        android:foregroundTint="#009688"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="@color/mint_accent"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:maxImageSize="24dp"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.FAB.Circular"
+        app:tint="@color/mint_accent" />
+
     <!-- Здесь будут добавлены элементы для списка заметок -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

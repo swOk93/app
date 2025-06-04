@@ -493,20 +493,6 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             binding.TypeGroup.check(R.id.Habits)
         }
         
-        // Кнопка "Задачи"
-        binding.Tasks.setOnClickListener {
-            // Создаем и показываем фрагмент задач
-            val tasksFragment = TasksFragment.newInstance()
-            supportFragmentManager.commit {
-                replace(R.id.fragment_container, tasksFragment)
-                addToBackStack("tasks")
-            }
-            // Показываем контейнер фрагмента
-            showFragmentContainer()
-            // Устанавливаем кнопку "Задачи" как выбранную
-            binding.TypeGroup.check(R.id.Tasks)
-        }
-        
         // Кнопка "Заметки"
         binding.Notes.setOnClickListener {
             // Создаем и показываем фрагмент заметок
