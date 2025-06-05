@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/mint_background_light">
+    android:background="@color/mint_dark">
 
     <TextView
         android:id="@+id/sectionHeaderTextView"

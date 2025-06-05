@@ -4,21 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
-import com.example.myapplication.databinding.FragmentSecondBinding
-import com.example.myapplication.HabitType
-import com.example.myapplication.HabitSection
-import com.example.myapplication.HabitSectionBase
+import com.example.myapplication.databinding.FragmentAddHabitBinding
 
 /**
  * A [DialogFragment] subclass for adding or editing habits.
  */
-class SecondFragment : DialogFragment() {
+class AddHabitFragment : DialogFragment() {
 
-    private var _binding: FragmentSecondBinding? = null
+    private var _binding: FragmentAddHabitBinding? = null
     private var currentHabitType: HabitType = HabitType.SIMPLE
     private var currentHabitSection: HabitSectionBase = HabitSection.ALL
     
@@ -38,7 +33,7 @@ class SecondFragment : DialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSecondBinding.inflate(inflater, container, false)
+        _binding = FragmentAddHabitBinding.inflate(inflater, container, false)
         return binding.root
     }
     
@@ -69,11 +64,6 @@ class SecondFragment : DialogFragment() {
                 // Получаем имя раздела привычки
                 habitSectionName = args.getString(ARG_HABIT_SECTION_NAME, HabitSection.ALL.displayName)
                 currentHabitSection = HabitSection.getSectionByName(habitSectionName)
-                
-                // Устанавливаем выбранный раздел в выпадающем списке
-                (binding.sectionSpinner as? AutoCompleteTextView)?.setText(
-                    currentHabitSection.displayName, false
-                )
                 
                 // Изменяем заголовок диалога
                 binding.addHabitTitleTextView.text = getString(R.string.edit_habit)
@@ -150,43 +140,10 @@ class SecondFragment : DialogFragment() {
      * Настройка выпадающего списка разделов
      */
     private fun setupSectionSpinner() {
-        // Получаем список всех разделов
-        val sectionsList = HabitSection.getAllSections().map { it.displayName }.toMutableList()
-        
-        // Добавляем специальный пункт "Добавить новый раздел"
-        sectionsList.add(getString(R.string.add_new_section))
-        
-        // Создаем кастомный адаптер
-        val adapter = SectionSpinnerAdapter(
-            requireContext(),
-            sectionsList,
-            getString(R.string.add_new_section)
-        )
-        
-        // Настраиваем AutoCompleteTextView
-        (binding.sectionSpinner as? AutoCompleteTextView)?.apply {
-            setAdapter(adapter)
-            setText(HabitSection.ALL.displayName, false)
-            
-            // Слушатель выбора элемента
-            setOnItemClickListener { _, _, position, _ ->
-                val selectedItem = sectionsList[position]
-                
-                // Проверяем, выбран ли пункт "Добавить новый раздел"
-                if (selectedItem == getString(R.string.add_new_section)) {
-                    // Показываем диалог добавления нового раздела
-                    val addSectionFragment = AddSectionFragment.newInstance()
-                    addSectionFragment.sectionAddedListener = activity as MainActivity
-                    addSectionFragment.show(parentFragmentManager, "AddSectionFragment")
-                    
-                    // Восстанавливаем текущий выбранный раздел в выпадающем списке
-                    setText(currentHabitSection.displayName, false)
-                } else {
-                    // Обычный выбор раздела
-                    currentHabitSection = HabitSection.getSectionByName(selectedItem)
-                }
-            }
-        }
+        // Используем включенный макет для списка разделов
+        val sectionsListLayout = binding.sectionsListLayout
+        // Настройка списка разделов через MainActivity или другой подходящий метод
+        (activity as? MainActivity)?.setupSectionsList(sectionsListLayout.root)
     }
 
     private fun saveHabit() {
@@ -233,34 +190,45 @@ class SecondFragment : DialogFragment() {
         _binding = null
     }
     
+    /**
+     * Обновляет выбранный раздел
+     */
+    fun updateSelectedSection(section: HabitSectionBase) {
+        currentHabitSection = section
+    }
+    
+    /**
+     * Возвращает имя текущего выбранного раздела
+     */
+    fun getCurrentSectionName(): String {
+        return currentHabitSection.displayName
+    }
+    
     companion object {
         private const val ARG_IS_EDIT_MODE = "is_edit_mode"
         private const val ARG_HABIT_POSITION = "habit_position"
         private const val ARG_HABIT_NAME = "habit_name"
         private const val ARG_HABIT_TYPE = "habit_type"
         private const val ARG_HABIT_TARGET = "habit_target"
-        private const val ARG_HABIT_UNIT = "habit_unit" // Добавляем константу для единицы измерения
-        private const val ARG_HABIT_SECTION = "habit_section" // Добавляем константу для раздела
-        private const val ARG_HABIT_SECTION_NAME = "habit_section_name" // Добавляем константу для имени раздела
+        private const val ARG_HABIT_UNIT = "habit_unit" // Константа для единицы измерения
+        private const val ARG_HABIT_SECTION = "habit_section" // Константа для раздела
+        private const val ARG_HABIT_SECTION_NAME = "habit_section_name" // Константа для имени раздела
         
         /**
-         * Создает новый экземпляр SecondFragment для редактирования существующей привычки
+         * Создает новый экземпляр AddHabitFragment для редактирования существующей привычки
          */
-        fun newInstance(position: Int, habit: Habit): SecondFragment {
-            val fragment = SecondFragment()
-            val args = Bundle().apply {
-                putBoolean(ARG_IS_EDIT_MODE, true)
-                putInt(ARG_HABIT_POSITION, position)
-                putString(ARG_HABIT_NAME, habit.name)
-                putInt(ARG_HABIT_TYPE, habit.type.ordinal)
-                putInt(ARG_HABIT_TARGET, habit.target)
-                putString(ARG_HABIT_UNIT, habit.unit) // Сохраняем единицу измерения
-                // Сохраняем значение раздела
-                putInt(ARG_HABIT_SECTION, if (habit.section is HabitSection) (habit.section as HabitSection).ordinal else 0)
-                putString(ARG_HABIT_SECTION_NAME, habit.section.displayName) // Сохраняем имя раздела
-            }
+        fun newInstance(position: Int, habit: Habit): AddHabitFragment {
+            val fragment = AddHabitFragment()
+            val args = Bundle()
+            args.putBoolean(ARG_IS_EDIT_MODE, true)
+            args.putInt(ARG_HABIT_POSITION, position)
+            args.putString(ARG_HABIT_NAME, habit.name)
+            args.putInt(ARG_HABIT_TYPE, habit.type.ordinal)
+            args.putInt(ARG_HABIT_TARGET, habit.target)
+            args.putString(ARG_HABIT_UNIT, habit.unit)
+            args.putString(ARG_HABIT_SECTION_NAME, habit.section.displayName)
             fragment.arguments = args
             return fragment
         }
     }
-}
+} 

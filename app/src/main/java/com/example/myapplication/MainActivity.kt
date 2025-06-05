@@ -74,9 +74,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
 
         // Настройка кнопки добавления задачи
         binding.addTaskButton.setOnClickListener {
-            // Показываем SecondFragment как диалог
-            val secondFragment = SecondFragment()
-            secondFragment.show(supportFragmentManager, "SecondFragment")
+            // Показываем AddHabitFragment как диалог
+            val addHabitFragment = AddHabitFragment()
+            addHabitFragment.show(supportFragmentManager, "AddHabitFragment")
         }
         
         // Настройка кнопок переключения между разделами
@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     /**
      * Настройка списка разделов
      */
-    private fun setupSectionsList() {
+    fun setupSectionsList() {
         // Получаем ссылки на компоненты
         val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
         val sectionHeaderTextView = sectionsListLayout.findViewById<TextView>(R.id.sectionHeaderTextView)
@@ -223,6 +223,148 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                     Gravity.TOP,
                     0,
                     location[1] + binding.sectionSpinnerLayout.height
+                )
+                
+                // Меняем иконку на стрелку вверх
+                expandSectionsButton.setImageResource(android.R.drawable.arrow_up_float)
+            } else {
+                // Закрываем popup
+                popupWindow.dismiss()
+                
+                // Меняем иконку на стрелку вниз
+                expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
+            }
+        }
+        
+        // Настраиваем нажатие на заголовок
+        sectionHeaderTextView.setOnClickListener {
+            expandSectionsButton.performClick()
+        }
+        
+        // Обработчик отмены PopupWindow
+        popupWindow.setOnDismissListener {
+            // Меняем иконку на стрелку вниз
+            expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
+        }
+    }
+    
+    /**
+     * Настройка списка разделов для переданного view
+     * Используется в AddHabitFragment
+     */
+    fun setupSectionsList(view: View) {
+        // Получаем ссылки на компоненты
+        val sectionHeaderTextView = view.findViewById<TextView>(R.id.sectionHeaderTextView)
+        val expandSectionsButton = view.findViewById<ImageButton>(R.id.expandSectionsButton)
+        
+        // Устанавливаем текст текущего раздела
+        sectionHeaderTextView.text = HabitSection.ALL.displayName
+        
+        // Инициализируем PopupWindow для отображения списка разделов
+        val popupView = LayoutInflater.from(this).inflate(R.layout.popup_sections_list, null)
+        val sectionsRecyclerView = popupView.findViewById<RecyclerView>(R.id.sectionsRecyclerView)
+        
+        // Настройка RecyclerView
+        sectionsRecyclerView.layoutManager = LinearLayoutManager(this)
+        
+        // Создаем PopupWindow
+        val popupWindow = PopupWindow(
+            popupView,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        )
+        popupWindow.elevation = 10f
+        
+        // Создаем адаптер
+        val sectionsAdapter = SectionAdapter(
+            sections = HabitSection.getAllSections(),
+            addNewSectionText = getString(R.string.add_new_section),
+            onSectionClick = { section ->
+                // Обрабатываем выбор раздела
+                sectionHeaderTextView.text = section.displayName
+                
+                // Закрываем popup
+                popupWindow.dismiss()
+                
+                // Обновляем currentHabitSection в AddHabitFragment
+                val addHabitFragment = supportFragmentManager.findFragmentByTag("AddHabitFragment") as? AddHabitFragment
+                addHabitFragment?.updateSelectedSection(section)
+            },
+            onDeleteClick = { section ->
+                // Обрабатываем нажатие на кнопку удаления
+                // Проверяем, является ли раздел встроенным
+                val sectionName = section.displayName
+                val isBuiltInSection = HabitSection.values().any { it.displayName == sectionName }
+                
+                if (isBuiltInSection) {
+                    Toast.makeText(this, "Нельзя удалить встроенный раздел", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Показываем диалог подтверждения
+                    AlertDialog.Builder(this)
+                        .setTitle("Удаление раздела")
+                        .setMessage("Вы уверены, что хотите удалить раздел \"$sectionName\"?")
+                        .setPositiveButton("Да") { _, _ ->
+                            // Получаем все привычки в этом разделе
+                            val habitsInSection = habitAdapter.getAllHabits().filter { 
+                                it.section.displayName == sectionName 
+                            }
+                            
+                            // Все привычки останутся, но открепятся от удаляемого раздела
+                            // (переместятся в "Все привычки и задачи")
+                            habitsInSection.forEach { habit ->
+                                val updatedHabit = habit.copy(section = HabitSection.ALL)
+                                habitAdapter.updateHabitInAllList(habit.id, updatedHabit)
+                            }
+                            
+                            // Удаляем пользовательский раздел из списка
+                            val customSections = HabitSection.getCustomSectionNames().toMutableList()
+                            customSections.remove(sectionName)
+                            HabitSection.loadCustomSections(customSections)
+                            
+                            // Обновляем адаптер списка разделов
+                            setupSectionsList()
+                            
+                            // Обновляем currentHabitSection в AddHabitFragment если текущий раздел был удален
+                            val addHabitFragment = supportFragmentManager.findFragmentByTag("AddHabitFragment") as? AddHabitFragment
+                            if (addHabitFragment?.getCurrentSectionName() == sectionName) {
+                                addHabitFragment.updateSelectedSection(HabitSection.ALL)
+                            }
+                            
+                            // Закрываем popup
+                            popupWindow.dismiss()
+                        }
+                        .setNegativeButton("Нет", null)
+                        .show()
+                }
+            },
+            onAddSectionClick = {
+                // Показываем диалог добавления нового раздела
+                val addSectionFragment = AddSectionFragment.newInstance()
+                addSectionFragment.sectionAddedListener = this@MainActivity
+                addSectionFragment.show(supportFragmentManager, "AddSectionFragment")
+                
+                // Закрываем popup
+                popupWindow.dismiss()
+            }
+        )
+        
+        // Устанавливаем адаптер
+        sectionsRecyclerView.adapter = sectionsAdapter
+        
+        // Настраиваем кнопку раскрытия списка
+        expandSectionsButton.setOnClickListener {
+            if (!popupWindow.isShowing) {
+                // Определяем положение для отображения popup
+                val location = IntArray(2)
+                view.getLocationOnScreen(location)
+                
+                // Показываем popup под выбранным разделом
+                popupWindow.showAtLocation(
+                    view,
+                    Gravity.TOP,
+                    0,
+                    location[1] + view.height
                 )
                 
                 // Меняем иконку на стрелку вверх
@@ -539,9 +681,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     override fun onEditHabit(position: Int) {
         if (position >= 0 && position < habitAdapter.getItemCount()) {
             val habit = habitAdapter.getHabitAt(position)
-            // Создаем и показываем SecondFragment в режиме редактирования
-            val secondFragment = SecondFragment.newInstance(position, habit)
-            secondFragment.show(supportFragmentManager, "SecondFragment")
+            // Создаем и показываем AddHabitFragment в режиме редактирования
+            val addHabitFragment = AddHabitFragment.newInstance(position, habit)
+            addHabitFragment.show(supportFragmentManager, "AddHabitFragment")
         }
     }
     

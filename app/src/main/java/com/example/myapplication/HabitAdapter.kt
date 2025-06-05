@@ -525,7 +525,7 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
                 // Проверяем, выбран ли пункт "Добавить новый раздел"
                 if (selectedItem == context.getString(R.string.add_new_section)) {
                     // Находим MainActivity
-                    val activity = (context as? FragmentActivity)?.supportFragmentManager?.findFragmentByTag("SecondFragment")?.activity ?: context as? MainActivity
+                    val activity = (context as? FragmentActivity)?.supportFragmentManager?.findFragmentByTag("AddHabitFragment")?.activity ?: context as? MainActivity
                     
                     // Показываем диалог добавления нового раздела
                     if (activity != null) {
