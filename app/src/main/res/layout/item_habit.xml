@@ -19,7 +19,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/mint_text_secondary" />
+        app:tint="@color/mint_dark" />
 
     <TextView
         android:id="@+id/habitNameTextView"
@@ -29,7 +29,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/make_bed"
-        android:textColor="@color/mint_text_primary"
+        android:textColor="@color/mint_background_light"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@+id/expandArrowButton"
         app:layout_constraintStart_toEndOf="@+id/dragHandleImageView"
@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="@string/created_date_format"
-        android:textColor="@color/mint_text_secondary"
+        android:textColor="@color/mint_background_light"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/habitNameTextView"
         app:layout_constraintTop_toBottomOf="@+id/habitNameTextView" />
@@ -73,7 +73,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/habitDateTextView"
         app:layout_constraintEnd_toStartOf="@+id/expandButton"
         app:layout_constraintTop_toTopOf="@+id/habitNameTextView"
-        app:tint="@color/mint_text_primary" />
+        app:tint="@color/mint_dark" />
 
     <CheckBox
         android:id="@+id/expandButton"
