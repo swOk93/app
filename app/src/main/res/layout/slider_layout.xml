@@ -49,43 +49,42 @@
 
     <TextView
         android:id="@+id/minutesTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="67dp"
+        android:layout_height="18dp"
         android:text="@string/minutes"
         android:textColor="@color/mint_accent"
         android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/minutesSeekBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sliderEditButton" />
+        app:layout_constraintBottom_toTopOf="@+id/minutesValueTextView"
+        app:layout_constraintTop_toBottomOf="@+id/hoursValueTextView"
+        app:layout_constraintVertical_bias="0.666"
+        tools:layout_editor_absoluteX="158dp" />
 
     <SeekBar
         android:id="@+id/minutesSeekBar"
-        android:layout_width="130dp"
-        android:layout_height="25dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="300dp"
+        android:layout_height="30dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
         android:max="59"
         android:progress="0"
         android:progressTint="@color/mint_accent"
         android:thumbTint="@color/mint_accent"
-        app:layout_constraintEnd_toStartOf="@+id/sectionSpinnerLayout"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/sliderDeleteButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.493"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sliderEditButton" />
-        
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/sectionSpinnerLayout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:layout_width="70dp"
-        android:layout_height="wrap_content"
+        android:layout_width="350dp"
+        android:layout_height="52dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
         android:hint="Раздел"
         app:boxStrokeColor="@color/mint_accent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sliderEditButton">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/minutesSeekBar">
 
         <AutoCompleteTextView
             android:id="@+id/sectionSpinner"
@@ -127,9 +126,12 @@
         android:text="@string/zero"
         android:textColor="@color/mint_text_primary"
         android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/minutesSeekBar"
         app:layout_constraintEnd_toEndOf="@+id/minutesSeekBar"
+        app:layout_constraintHorizontal_bias="0.505"
         app:layout_constraintStart_toStartOf="@+id/minutesSeekBar"
-        app:layout_constraintTop_toBottomOf="@+id/minutesSeekBar" />
+        app:layout_constraintTop_toBottomOf="@+id/hoursValueTextView"
+        app:layout_constraintVertical_bias="0.851" />
 
     <ImageButton
         android:id="@+id/sliderDeleteButton"
