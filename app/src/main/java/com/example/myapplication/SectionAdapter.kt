@@ -39,10 +39,9 @@ class SectionAdapter(
             val section = sections[position]
             holder.sectionNameTextView.text = section.displayName
             
-            // Проверяем, является ли раздел встроенным
+            // Скрываем кнопку удаления только для встроенных разделов (HabitSection)
+            // Для пользовательских разделов (HabitSectionCustom) показываем кнопки удаления
             val isBuiltIn = section is HabitSection
-            
-            // Скрываем кнопку удаления для всех встроенных разделов (HabitSection)
             holder.deleteButton.visibility = if (isBuiltIn) View.GONE else View.VISIBLE
             
             holder.itemView.setOnClickListener {

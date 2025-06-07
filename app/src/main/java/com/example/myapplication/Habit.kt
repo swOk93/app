@@ -16,9 +16,6 @@ interface HabitSectionBase {
 // Перечисление для встроенных разделов привычек
 enum class HabitSection(override val displayName: String) : HabitSectionBase {
     ALL("Все привычки и задачи"),
-    SPORT("Спорт"),
-    HEALTH("Здоровье"),
-    WORK("Работа"),
     OTHER("Другое");
     
     companion object {
@@ -27,6 +24,12 @@ enum class HabitSection(override val displayName: String) : HabitSectionBase {
         
         // Метод для добавления пользовательского раздела
         fun addCustomSection(name: String): HabitSectionCustom {
+            // Проверяем, не существует ли уже такой раздел
+            val existingSection = customSections.find { it.displayName == name }
+            if (existingSection != null) {
+                return existingSection
+            }
+            
             val newSection = HabitSectionCustom(name)
             customSections.add(newSection)
             return newSection
@@ -64,6 +67,18 @@ enum class HabitSection(override val displayName: String) : HabitSectionBase {
         // Метод для получения списка имен пользовательских разделов
         fun getCustomSectionNames(): List<String> {
             return customSections.map { it.displayName }
+        }
+        
+        // Метод для создания стандартных разделов при первом запуске
+        fun createDefaultSections() {
+            addCustomSection("Спорт")
+            addCustomSection("Здоровье")
+            addCustomSection("Работа")
+        }
+        
+        // Проверка, является ли имя раздела стандартным пользовательским разделом
+        fun isDefaultCustomSection(name: String): Boolean {
+            return name == "Спорт" || name == "Здоровье" || name == "Работа"
         }
     }
 }

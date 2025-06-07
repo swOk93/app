@@ -226,12 +226,11 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 // Устанавливаем ширину PopupWindow равной ширине sectionsListLayout
                 popupWindow.width = sectionsListLayout.width
                 
-                // Показываем popup под выбранным разделом
-                popupWindow.showAtLocation(
-                    binding.sectionSpinnerLayout,
-                    Gravity.TOP,
-                    location[0], // X координата (для точного совпадения с кнопкой)
-                    location[1] + binding.sectionSpinnerLayout.height
+                // Показываем popup точно под кнопкой
+                popupWindow.showAsDropDown(
+                    sectionsListLayout,
+                    0, 
+                    0
                 )
                 
                 // Меняем иконку на стрелку вверх
@@ -371,12 +370,11 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 // Устанавливаем ширину PopupWindow равной ширине view
                 popupWindow.width = view.width
                 
-                // Показываем popup под выбранным разделом
-                popupWindow.showAtLocation(
+                // Показываем popup точно под кнопкой
+                popupWindow.showAsDropDown(
                     view,
-                    Gravity.TOP,
-                    location[0], // X координата (для точного совпадения с кнопкой)
-                    location[1] + view.height
+                    0, 
+                    0
                 )
                 
                 // Меняем иконку на стрелку вверх
@@ -602,9 +600,13 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
     }
     
     /**
-     * Создает три тестовые привычки разных типов с историей за неделю
+     * Создает тестовые привычки разных типов с историей за неделю
      */
     private fun createSampleHabits() {
+        // Создаем пользовательские разделы, если их еще нет
+        val healthSection = HabitSection.addCustomSection("Здоровье")
+        val sportSection = HabitSection.addCustomSection("Спорт")
+        
         // Создаем привычки разных типов
         val timeHabit = Habit(
             name = getString(R.string.meditation), 
@@ -612,7 +614,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             target = 15, 
             current = 0, 
             createdDate = Date(),
-            section = HabitSection.HEALTH
+            section = healthSection
         ) // 15 минут
         
         val repeatHabit = Habit(
@@ -622,7 +624,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             current = 0, 
             createdDate = Date(),
             unit = getString(R.string.times),
-            section = HabitSection.SPORT
+            section = sportSection
         ) // 20 повторений
         
         val simpleHabit = Habit(
@@ -631,7 +633,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             target = 1, 
             current = 0, 
             createdDate = Date(),
-            section = HabitSection.HEALTH
+            section = healthSection
         ) // Просто выполнено/не выполнено
         
         // Добавляем привычки в адаптер
@@ -642,8 +644,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         // Генерируем историю за неделю для каждой привычки
         generateWeekHistory()
         
-        // Сохраняем привычки
+        // Сохраняем привычки и разделы
         saveHabits()
+        saveCustomSections()
     }
     
     /**
@@ -930,9 +933,10 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
      */
     private fun loadCustomSections() {
         val sharedPreferences = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
-        val count = sharedPreferences.getInt("custom_sections_count", 0)
+        val count = sharedPreferences.getInt("custom_sections_count", -1)
         
         if (count > 0) {
+            // Если есть сохраненные разделы, загружаем их
             val sectionNames = mutableListOf<String>()
             
             for (i in 0 until count) {
@@ -944,6 +948,17 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             
             // Загружаем пользовательские разделы
             HabitSection.loadCustomSections(sectionNames)
+        } else if (count == -1) {
+            // Это первый запуск, создаем стандартные разделы
+            HabitSection.createDefaultSections()
+            
+            // Сохраняем пользовательские разделы
+            saveCustomSections()
+            
+            // Устанавливаем флаг, что это уже не первый запуск
+            sharedPreferences.edit {
+                putInt("custom_sections_count", HabitSection.getCustomSectionNames().size)
+            }
         }
     }
 
