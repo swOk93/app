@@ -55,9 +55,10 @@
         android:textColor="@color/mint_accent"
         android:textSize="14sp"
         app:layout_constraintBottom_toTopOf="@+id/minutesValueTextView"
+        app:layout_constraintEnd_toStartOf="@+id/NotesButton"
+        app:layout_constraintStart_toEndOf="@+id/sliderEditButton"
         app:layout_constraintTop_toBottomOf="@+id/hoursValueTextView"
-        app:layout_constraintVertical_bias="0.666"
-        tools:layout_editor_absoluteX="158dp" />
+        app:layout_constraintVertical_bias="0.666" />
 
     <SeekBar
         android:id="@+id/minutesSeekBar"
@@ -112,7 +113,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/zero"
-        android:textColor="@color/mint_text_primary"
+        android:textColor="@color/mint_accent"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="@+id/hoursSeekBar"
         app:layout_constraintStart_toStartOf="@+id/hoursSeekBar"
@@ -123,7 +124,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/zero"
-        android:textColor="@color/mint_text_primary"
+        android:textColor="@color/mint_accent"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/minutesSeekBar"
         app:layout_constraintEnd_toEndOf="@+id/minutesSeekBar"

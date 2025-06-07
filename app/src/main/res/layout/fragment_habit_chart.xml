@@ -17,7 +17,7 @@
         android:src="@drawable/ic_arrow_back_24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/mint_text_primary" />
+        app:tint="@color/mint_accent" />
 
     <TextView
         android:id="@+id/chartTitleTextView"
@@ -25,6 +25,7 @@
         android:layout_height="45dp"
         android:layout_marginTop="16dp"
         android:text="@string/progress_chart_title"
+        android:textColor="@color/mint_accent"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -57,8 +58,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/normal_mode"
+            android:textColor="@color/black"
             android:textSize="12sp"
-            app:backgroundTint="#009688"/>
+            app:backgroundTint="#009688" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/cumulativeModeButton"
@@ -66,8 +68,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/cumulative_mode"
+            android:textColor="@color/black"
             android:textSize="12sp"
-            app:backgroundTint="#009688"/>
+            app:backgroundTint="#009688" />
 
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
@@ -87,8 +90,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/seven_days"
+            android:textColor="@color/black"
             android:textSize="12sp"
-            app:backgroundTint="#009688"/>
+            app:backgroundTint="#009688" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/monthButton"
@@ -96,8 +100,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/thirty_days"
+            android:textColor="@color/black"
             android:textSize="12sp"
-            app:backgroundTint="#009688"/>
+            app:backgroundTint="#009688" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/allTimeButton"
@@ -105,8 +110,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/all_time"
+            android:textColor="@color/black"
             android:textSize="12sp"
-            app:backgroundTint="#009688"/>
+            app:backgroundTint="#009688" />
 
     </com.google.android.material.button.MaterialButtonToggleGroup>
 

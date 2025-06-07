@@ -180,7 +180,7 @@ class HabitChartFragment : Fragment() {
         
         if (records.isEmpty()) {
             lineChart.setNoDataText(getString(R.string.no_progress_data))
-            lineChart.setNoDataTextColor(resources.getColor(R.color.mint_text_primary, null))
+            lineChart.setNoDataTextColor(resources.getColor(R.color.mint_accent, null))
             lineChart.invalidate()
             return
         }
@@ -415,7 +415,7 @@ class HabitChartFragment : Fragment() {
             
             setColor(mainColor)
             setCircleColor(mainColor)
-            valueTextColor = mainColor
+            valueTextColor = resources.getColor(R.color.mint_accent, null)
             valueTextSize = 12f
             
             // Настройка выделения точек
@@ -438,7 +438,7 @@ class HabitChartFragment : Fragment() {
                 }
             }
             granularity = 1f
-            textColor = resources.getColor(R.color.mint_text_primary, null)
+            textColor = resources.getColor(R.color.mint_accent, null)
             textSize = 12f
             setDrawGridLines(false)
         }
@@ -452,7 +452,7 @@ class HabitChartFragment : Fragment() {
         
         lineChart.axisLeft.apply {
             axisMinimum = 0f
-            textColor = resources.getColor(R.color.mint_text_primary, null)
+            textColor = resources.getColor(R.color.mint_accent, null)
             textSize = 12f
             setDrawGridLines(true)
             gridColor = resources.getColor(R.color.mint_text_secondary, null)
@@ -478,7 +478,7 @@ class HabitChartFragment : Fragment() {
             val targetLine = LimitLine(habit.target.toFloat(), getString(R.string.target))
             targetLine.lineColor = resources.getColor(R.color.mint_delete, null) // Лавандовый
             targetLine.lineWidth = 2f
-            targetLine.textColor = resources.getColor(R.color.mint_text_primary, null)
+            targetLine.textColor = resources.getColor(R.color.mint_accent, null)
             targetLine.textSize = 12f
             lineChart.axisLeft.addLimitLine(targetLine)
         }
@@ -489,7 +489,7 @@ class HabitChartFragment : Fragment() {
             desc.isEnabled = false
             description = desc
             legend.isEnabled = true
-            legend.textColor = resources.getColor(R.color.mint_text_primary, null)
+            legend.textColor = resources.getColor(R.color.mint_accent, null)
             setTouchEnabled(true)
             isDragEnabled = true
             setScaleEnabled(true)
