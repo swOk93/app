@@ -69,8 +69,14 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Устанавливаем текущий раздел на "Все привычки и задачи" при запуске
+        currentSection = HabitSection.ALL
+        
         // Загружаем пользовательские разделы
         loadCustomSections()
+        
+        // Принудительно устанавливаем "Все привычки и задачи" как текущий раздел
+        currentSection = HabitSection.ALL
         
         // Настройка списка разделов
         setupSectionsList()
@@ -92,6 +98,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         
         // Проверяем, нужно ли сбросить прогресс привычек
         checkAndResetHabits()
+        
+        // Применяем фильтр по текущему разделу (по умолчанию - Все привычки и задачи)
+        filterHabitsBySection(currentSection)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -441,6 +450,9 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
             // Если привычки не были загружены (первый запуск), создаем стартовые
             createSampleHabits()
         }
+        
+        // Показываем все привычки при запуске
+        habitAdapter.showAllHabits()
     }
     
     private fun saveHabits() {
@@ -782,6 +794,12 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         super.onPause()
         saveHabits()
         saveCustomSections()
+        
+        // Сохраняем текущий раздел
+        val sharedPreferences = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
+        sharedPreferences.edit {
+            putString("current_section", HabitSection.ALL.displayName)
+        }
     }
     
     // Настройка ItemTouchHelper для перетаскивания элементов
