@@ -22,6 +22,12 @@ import android.widget.AutoCompleteTextView
 import android.widget.ImageButton
 import android.widget.PopupWindow
 import android.widget.TextView
+import android.content.Context
+
+// Extension функция для конвертации dp в пиксели
+fun Int.dpToPx(context: Context): Int {
+    return (this * context.resources.displayMetrics.density).toInt()
+}
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapter.OnStartDragListener, AddSectionFragment.OnSectionAddedListener {
 
@@ -129,7 +135,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         // Создаем PopupWindow
         val popupWindow = PopupWindow(
             popupView,
-            ViewGroup.LayoutParams.MATCH_PARENT,
+            240.dpToPx(this),
             ViewGroup.LayoutParams.WRAP_CONTENT,
             true
         )
@@ -270,7 +276,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         // Создаем PopupWindow
         val popupWindow = PopupWindow(
             popupView,
-            ViewGroup.LayoutParams.MATCH_PARENT,
+            240.dpToPx(this),
             ViewGroup.LayoutParams.WRAP_CONTENT,
             true
         )

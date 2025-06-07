@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/mint_background"
+    tools:context=".SecondFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/addHabitTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_habit"
+            android:textColor="@color/mint_text_primary"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/habitNameEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/edit_text_background"
+            android:hint="@string/habit_name"
+            android:padding="12dp"
+            android:textColor="@color/mint_text_primary"
+            android:textColorHint="@color/mint_text_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addHabitTitleTextView" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/sectionSpinnerLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/mint_card"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/habitNameEditText">
+
+            <include
+                android:id="@+id/sectionsListLayout"
+                layout="@layout/layout_sections_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/habitTypeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/habit_type"
+            android:textColor="@color/mint_text_primary"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/sectionSpinnerLayout" />
+
+        <RadioGroup
+            android:id="@+id/habitTypeRadioGroup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/habitTypeTextView">
+
+            <RadioButton
+                android:id="@+id/timeRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/time"
+                android:textColor="@color/mint_text_primary"
+                android:buttonTint="@color/mint_accent" />
+
+            <RadioButton
+                android:id="@+id/repeatRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/quantity"
+                android:textColor="@color/mint_text_primary"
+                android:buttonTint="@color/mint_accent" />
+
+            <RadioButton
+                android:id="@+id/simpleRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/simple"
+                android:textColor="@color/mint_text_primary"
+                android:buttonTint="@color/mint_accent" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:id="@+id/repeatSettingsLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/habitTypeRadioGroup">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/quantity"
+                    android:textColor="@color/mint_text_primary" />
+
+                <EditText
+                    android:id="@+id/repeatUnitEditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="@string/unit"
+                    android:padding="4dp"
+                    android:textColor="@color/mint_text_primary"
+                    android:textColorHint="@color/mint_text_secondary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/repeatCountEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/edit_text_background"
+                android:hint="@string/quantity"
+                android:inputType="number"
+                android:padding="12dp"
+                android:textColor="@color/mint_text_primary"
+                android:textColorHint="@color/mint_text_secondary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/timeSettingsLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/habitTypeRadioGroup">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/time_hours_minutes"
+                android:textColor="@color/mint_text_primary" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+
+                <EditText
+                    android:id="@+id/hoursEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="@string/hours"
+                    android:inputType="number"
+                    android:padding="12dp"
+                    android:textColor="@color/mint_text_primary"
+                    android:textColorHint="@color/mint_text_secondary" />
+
+                <EditText
+                    android:id="@+id/minutesEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="@string/minutes"
+                    android:inputType="number"
+                    android:padding="12dp"
+                    android:textColor="@color/mint_text_primary"
+                    android:textColorHint="@color/mint_text_secondary" />
+            </LinearLayout>
+        </LinearLayout>
+        <!-- Барьер для объединения двух LinearLayout, который отслеживает нижнюю границу обоих блоков настроек -->
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/settingsBarrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="timeSettingsLayout,repeatSettingsLayout" />
+            
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/settingsBarrier"> <!-- привязка блока с кнопками к этому барьеру вместо конкретного блока настроек -->
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/rounded_button_background"
+                app:backgroundTint="@color/mint_dark"
+                android:text="@string/cancel"
+                android:textColor="@color/mint_background_light" />
+
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/rounded_button_background"
+                android:text="@string/save"
+                android:textColor="@color/mint_background_light"
+                android:textColorLink="#673AB7" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
