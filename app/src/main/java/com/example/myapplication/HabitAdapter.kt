@@ -1,17 +1,22 @@
 package com.example.myapplication
 
+import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
+import android.widget.PopupWindow
 import android.widget.SeekBar
 import android.widget.TextView
-import android.widget.AutoCompleteTextView
-import androidx.recyclerview.widget.RecyclerView
-import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import java.util.Comparator
+import java.util.Date
 
 class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) : 
     RecyclerView.Adapter<HabitAdapter.HabitViewHolder>(), 
@@ -63,7 +68,12 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
         val sliderDeleteButton: ImageButton = sliderLayout.findViewById(R.id.sliderDeleteButton)
         val sliderEditButton: ImageButton = sliderLayout.findViewById(R.id.sliderEditButton)
         val chartButton: ImageButton = sliderLayout.findViewById(R.id.chartButton)
-        val sectionSpinner: AutoCompleteTextView? = sliderLayout.findViewById(R.id.sectionSpinner)
+        
+        // Элементы для выбора раздела (новая реализация)
+        val sectionSpinnerLayout: View = sliderLayout.findViewById(R.id.sectionSpinnerLayout)
+        val sectionsListLayout: View? = sliderLayout.findViewById(R.id.sectionsListLayout)
+        val sectionHeaderTextView: TextView? = sectionsListLayout?.findViewById(R.id.sectionHeaderTextView)
+        val expandSectionsButton: ImageButton? = sectionsListLayout?.findViewById(R.id.expandSectionsButton)
         
         private var isExpanded = false
         
@@ -497,58 +507,38 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
      * Настройка выпадающего списка разделов в слайдере
      */
     private fun setupSectionSpinner(holder: HabitViewHolder, habit: Habit) {
-        holder.sectionSpinner?.let { spinner ->
-            // Создаем список названий разделов (встроенные + пользовательские)
-            val sectionsList = HabitSection.getAllSections().map { it.displayName }.toMutableList()
+        // Устанавливаем текущий раздел в заголовке
+        holder.sectionHeaderTextView?.text = habit.section.displayName
+        
+        // Настраиваем выпадающий список
+        val context = holder.itemView.context
+        if (context is MainActivity) {
+            // Инициализируем PopupWindow для отображения списка разделов
+            val popupView = LayoutInflater.from(context).inflate(R.layout.popup_sections_list, null)
+            val sectionsRecyclerView = popupView.findViewById<RecyclerView>(R.id.sectionsRecyclerView)
             
-            // Добавляем специальный пункт "Добавить новый раздел"
-            val context = holder.itemView.context
-            sectionsList.add(context.getString(R.string.add_new_section))
+            // Настройка RecyclerView
+            sectionsRecyclerView.layoutManager = LinearLayoutManager(context)
             
-            // Создаем кастомный адаптер
-            val adapter = SectionSpinnerAdapter(
-                context,
-                sectionsList,
-                context.getString(R.string.add_new_section)
+            // Создаем PopupWindow с временной шириной
+            val popupWindow = PopupWindow(
+                popupView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                true
             )
+            popupWindow.elevation = 10f
             
-            // Устанавливаем адаптер
-            spinner.setAdapter(adapter)
-            
-            // Устанавливаем текущий выбранный раздел
-            spinner.setText(habit.section.displayName, false)
-            
-            // Устанавливаем обработчик выбора элемента
-            spinner.setOnItemClickListener { _, _, position, _ ->
-                val selectedItem = sectionsList[position]
-                
-                // Проверяем, выбран ли пункт "Добавить новый раздел"
-                if (selectedItem == context.getString(R.string.add_new_section)) {
-                    // Находим MainActivity
-                    val activity = (context as? FragmentActivity)?.supportFragmentManager?.findFragmentByTag("AddHabitFragment")?.activity ?: context as? MainActivity
-                    
-                    // Показываем диалог добавления нового раздела
-                    if (activity != null) {
-                        val addSectionFragment = AddSectionFragment.newInstance()
-                        if (activity is AddSectionFragment.OnSectionAddedListener) {
-                            addSectionFragment.sectionAddedListener = activity
-                        }
-                        activity.supportFragmentManager?.let {
-                            addSectionFragment.show(it, "AddSectionFragment")
-                        }
-                        
-                        // Восстанавливаем текущий выбранный раздел в выпадающем списке
-                        spinner.setText(habit.section.displayName, false)
-                    }
-                } else {
-                    // Получаем выбранный раздел
-                    val selectedSection = HabitSection.getSectionByName(selectedItem)
-                    
-                    // Получаем позицию привычки в списке
+            // Создаем адаптер
+            val sectionsAdapter = SectionAdapter(
+                sections = HabitSection.getAllSections(),
+                addNewSectionText = context.getString(R.string.add_new_section),
+                onSectionClick = { section ->
+                    // Обновляем привычку с новым разделом
                     val habitPosition = holder.adapterPosition
                     if (habitPosition != RecyclerView.NO_POSITION) {
                         // Создаем обновленную привычку с новым разделом
-                        val updatedHabit = habit.copy(section = selectedSection)
+                        val updatedHabit = habit.copy(section = section)
                         
                         // Обновляем привычку в обоих списках
                         val allIndex = allHabits.indexOfFirst { it.id == habit.id }
@@ -559,10 +549,127 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
                         // Обновляем в отфильтрованном списке
                         filteredHabits[habitPosition] = updatedHabit
                         
+                        // Обновляем заголовок с названием раздела
+                        holder.sectionHeaderTextView?.text = section.displayName
+                        
                         // Уведомляем об изменении
                         notifyItemChanged(habitPosition)
                     }
+                    
+                    // Закрываем popup
+                    popupWindow.dismiss()
+                },
+                onDeleteClick = { section ->
+                    // Обработка удаления раздела - делегируем в MainActivity
+                    val sectionName = section.displayName
+                    val isBuiltInSection = HabitSection.values().any { it.displayName == sectionName }
+                    
+                    if (isBuiltInSection) {
+                        Toast.makeText(context, "Нельзя удалить встроенный раздел", Toast.LENGTH_SHORT).show()
+                    } else {
+                        // Показываем диалог подтверждения
+                        AlertDialog.Builder(context)
+                            .setTitle("Удаление раздела")
+                            .setMessage("Вы уверены, что хотите удалить раздел \"$sectionName\"?")
+                            .setPositiveButton("Да") { _, _ ->
+                                // Получаем все привычки в этом разделе
+                                val habitsInSection = getAllHabits().filter { 
+                                    it.section.displayName == sectionName 
+                                }
+                                
+                                // Все привычки останутся, но открепятся от удаляемого раздела
+                                // (переместятся в "Все привычки и задачи")
+                                habitsInSection.forEach { h ->
+                                    val updatedHabit = h.copy(section = HabitSection.ALL)
+                                    updateHabitInAllList(h.id, updatedHabit)
+                                }
+                                
+                                // Удаляем пользовательский раздел из списка через MainActivity
+                                val customSections = HabitSection.getCustomSectionNames().toMutableList()
+                                customSections.remove(sectionName)
+                                HabitSection.loadCustomSections(customSections)
+                                
+                                // Обновляем список
+                                notifyDataSetChanged()
+                                
+                                // Если текущий раздел был удален, переключаемся на "Все привычки и задачи"
+                                if (habit.section.displayName == sectionName) {
+                                    // Обновляем привычку с новым разделом ALL
+                                    val habitPosition = holder.adapterPosition
+                                    if (habitPosition != RecyclerView.NO_POSITION) {
+                                        // Создаем обновленную привычку с разделом ALL
+                                        val updatedHabit = habit.copy(section = HabitSection.ALL)
+                                        
+                                        // Обновляем привычку в обоих списках
+                                        val allIndex = allHabits.indexOfFirst { it.id == habit.id }
+                                        if (allIndex >= 0) {
+                                            allHabits[allIndex] = updatedHabit
+                                        }
+                                        
+                                        // Обновляем в отфильтрованном списке
+                                        filteredHabits[habitPosition] = updatedHabit
+                                        
+                                        // Обновляем заголовок с названием раздела
+                                        holder.sectionHeaderTextView?.text = HabitSection.ALL.displayName
+                                    }
+                                }
+                                
+                                // Закрываем popup
+                                popupWindow.dismiss()
+                            }
+                            .setNegativeButton("Нет", null)
+                            .show()
+                    }
+                },
+                onAddSectionClick = {
+                    // Показываем диалог добавления нового раздела через MainActivity
+                    val addSectionFragment = AddSectionFragment.newInstance()
+                    if (context is AddSectionFragment.OnSectionAddedListener) {
+                        addSectionFragment.sectionAddedListener = context
+                    }
+                    addSectionFragment.show(context.supportFragmentManager, "AddSectionFragment")
+                    
+                    // Закрываем popup
+                    popupWindow.dismiss()
                 }
+            )
+            
+            // Устанавливаем адаптер
+            sectionsRecyclerView.adapter = sectionsAdapter
+            
+            // Настраиваем кнопку раскрытия списка
+            holder.expandSectionsButton?.setOnClickListener {
+                if (!popupWindow.isShowing) {
+                    // Устанавливаем ширину PopupWindow равной ширине sectionSpinnerLayout
+                    popupWindow.width = holder.sectionSpinnerLayout.width
+                    
+                    // Показываем popup точно под кнопкой
+                    popupWindow.showAsDropDown(
+                        holder.sectionSpinnerLayout,
+                        0, 
+                        0
+                    )
+                    
+                    // Меняем иконку на стрелку вверх
+                    holder.expandSectionsButton.setImageResource(android.R.drawable.arrow_up_float)
+                } else {
+                    // Закрываем popup
+                    popupWindow.dismiss()
+                    
+                    // Меняем иконку на стрелку вниз
+                    holder.expandSectionsButton.setImageResource(android.R.drawable.arrow_down_float)
+                }
+            }
+            
+            // Настраиваем нажатие на заголовок
+            holder.sectionHeaderTextView?.setOnClickListener {
+                holder.expandSectionsButton?.performClick()
+            }
+            
+            // Обработчик отмены PopupWindow
+            popupWindow.setOnDismissListener {
+                // Меняем иконку на стрелку вниз
+                holder.expandSectionsButton?.setImageResource(android.R.drawable.arrow_down_float)
             }
         }
     }
