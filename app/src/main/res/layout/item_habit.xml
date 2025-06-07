@@ -12,10 +12,10 @@
 
     <ImageView
         android:id="@+id/dragHandleImageView"
-        android:layout_width="24dp"
+        android:layout_width="0dp"
         android:layout_height="29dp"
         android:contentDescription="@string/drag_to_reorder"
-        android:src="@android:drawable/ic_menu_sort_by_size"
+        app:srcCompat="@android:drawable/ic_menu_sort_by_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -23,7 +23,7 @@
 
     <TextView
         android:id="@+id/habitNameTextView"
-        android:layout_width="257dp"
+        android:layout_width="0dp"
         android:layout_height="27dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
