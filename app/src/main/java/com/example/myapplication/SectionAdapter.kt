@@ -41,7 +41,9 @@ class SectionAdapter(
             
             // Проверяем, является ли раздел встроенным
             val isBuiltIn = section is HabitSection
-            holder.deleteButton.visibility = if (isBuiltIn) View.VISIBLE else View.VISIBLE
+            
+            // Скрываем кнопку удаления для всех встроенных разделов (HabitSection)
+            holder.deleteButton.visibility = if (isBuiltIn) View.GONE else View.VISIBLE
             
             holder.itemView.setOnClickListener {
                 onSectionClick.invoke(section)

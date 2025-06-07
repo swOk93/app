@@ -132,10 +132,10 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         // Настройка RecyclerView
         sectionsRecyclerView.layoutManager = LinearLayoutManager(this)
         
-        // Создаем PopupWindow
+        // Создаем PopupWindow с временной шириной
         val popupWindow = PopupWindow(
             popupView,
-            240.dpToPx(this),
+            ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
             true
         )
@@ -223,11 +223,14 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 val location = IntArray(2)
                 binding.sectionSpinnerLayout.getLocationOnScreen(location)
                 
+                // Устанавливаем ширину PopupWindow равной ширине sectionsListLayout
+                popupWindow.width = sectionsListLayout.width
+                
                 // Показываем popup под выбранным разделом
                 popupWindow.showAtLocation(
                     binding.sectionSpinnerLayout,
                     Gravity.TOP,
-                    0,
+                    location[0], // X координата (для точного совпадения с кнопкой)
                     location[1] + binding.sectionSpinnerLayout.height
                 )
                 
@@ -273,10 +276,10 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         // Настройка RecyclerView
         sectionsRecyclerView.layoutManager = LinearLayoutManager(this)
         
-        // Создаем PopupWindow
+        // Создаем PopupWindow с временной шириной
         val popupWindow = PopupWindow(
             popupView,
-            240.dpToPx(this),
+            ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
             true
         )
@@ -365,11 +368,14 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 val location = IntArray(2)
                 view.getLocationOnScreen(location)
                 
+                // Устанавливаем ширину PopupWindow равной ширине view
+                popupWindow.width = view.width
+                
                 // Показываем popup под выбранным разделом
                 popupWindow.showAtLocation(
                     view,
                     Gravity.TOP,
-                    0,
+                    location[0], // X координата (для точного совпадения с кнопкой)
                     location[1] + view.height
                 )
                 
