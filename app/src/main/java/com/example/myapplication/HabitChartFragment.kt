@@ -345,8 +345,8 @@ class HabitChartFragment : Fragment() {
                     for (record in sortedRecords) {
                         val dayIndex = ((record.timestamp - firstTimestamp) / (24 * 60 * 60 * 1000L)).toInt()
                         val pointIndex = dayIndex / daysPerPoint
-                        
-                        if (pointIndex < numPoints) {
+                        // Проверка на отрицательный индекс и выход за границы массива
+                        if (pointIndex in 0 until numPoints) {
                             if (habit.type == HabitType.SIMPLE) {
                                 // Для простой привычки берем максимальное значение в группе дней
                                 aggregatedData[pointIndex] = kotlin.math.max(aggregatedData[pointIndex], record.count.toFloat())
@@ -356,6 +356,9 @@ class HabitChartFragment : Fragment() {
                                 aggregatedData[pointIndex] += record.count.toFloat()
                                 pointCounts[pointIndex]++
                             }
+                        } else {
+                            // Логируем ошибку, если индекс некорректный
+                            android.util.Log.e("HabitChartFragment", "Некорректный pointIndex: $pointIndex, dayIndex: $dayIndex, numPoints: $numPoints")
                         }
                     }
                     

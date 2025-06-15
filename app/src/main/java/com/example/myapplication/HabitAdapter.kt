@@ -26,6 +26,9 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
     private val allHabits = mutableListOf<Habit>()
     private val filteredHabits = mutableListOf<Habit>()
     
+    // Храним позицию раскрытого элемента (только один раскрыт одновременно)
+    private var expandedPosition: Int = RecyclerView.NO_POSITION
+    
     init {
         // Инициализируем списки
         allHabits.addAll(habits)
@@ -75,8 +78,6 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
         val sectionHeaderTextView: TextView? = sectionsListLayout?.findViewById(R.id.sectionHeaderTextView)
         val expandSectionsButton: ImageButton? = sectionsListLayout?.findViewById(R.id.expandSectionsButton)
         
-        private var isExpanded = false
-        
         init {
             sliderDeleteButton.setOnClickListener {
                 val position = adapterPosition
@@ -103,7 +104,13 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
             val expandClickListener = View.OnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    toggleExpand()
+                    // Если клик по карточке или стрелке — раскрываем/сворачиваем
+                    if (expandedPosition == position) {
+                        expandedPosition = RecyclerView.NO_POSITION
+                    } else {
+                        expandedPosition = position
+                    }
+                    notifyDataSetChanged() // обновить все, чтобы скрыть старый и показать новый
                 }
             }
             itemView.setOnClickListener(expandClickListener)
@@ -122,7 +129,6 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     val habit = filteredHabits[position]
-                    // Для всех типов привычек переключаем статус выполнения
                     when (habit.type) {
                         HabitType.TIME, HabitType.REPEAT -> {
                             val newValue = if (habit.isCompleted()) 0 else habit.target
@@ -133,7 +139,7 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
                             listener?.onUpdateProgress(position, newValue)
                         }
                     }
-                    toggleExpand()
+                    // Никакого toggleExpand и notifyDataSetChanged тут!
                 }
             }
             
@@ -171,7 +177,6 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
                                 minutesSeekBar.progress = 0
                                 // И вызываем обновление прогресса
                                 listener?.onUpdateProgress(position, newValue)
-                                toggleExpand()
                             }
                         }
                         HabitType.REPEAT -> {
@@ -205,7 +210,6 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
                                 
                                 // И вызываем обновление прогресса
                                 listener?.onUpdateProgress(position, newValue)
-                                toggleExpand()
                             }
                         }
                         HabitType.REPEAT -> {
@@ -221,11 +225,8 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
             }
         }
         
-        fun toggleExpand() {
-            isExpanded = !isExpanded
+        fun bindExpandedState(isExpanded: Boolean) {
             sliderLayout.visibility = if (isExpanded) View.VISIBLE else View.GONE
-            
-            // Обновляем иконку стрелки
             expandArrowButton.setImageResource(
                 if (isExpanded) android.R.drawable.arrow_up_float 
                 else android.R.drawable.arrow_down_float
@@ -253,9 +254,6 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
             R.drawable.progress_indicator_red_background
         }
         holder.progressTextView.setBackgroundResource(backgroundResource)
-        
-        // Скрываем слайдер при привязке (чтобы не оставался открытым при переиспользовании ViewHolder)
-        holder.sliderLayout.visibility = View.GONE
         
         // Настройка выпадающего списка разделов
         setupSectionSpinner(holder, habit)
@@ -340,6 +338,9 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
                 holder.expandButton.isChecked = habit.current > 0
             }
         }
+        
+        // Вместо toggleExpand и isExpanded внутри ViewHolder:
+        holder.bindExpandedState(position == expandedPosition)
     }
     
     override fun getItemCount() = filteredHabits.size
