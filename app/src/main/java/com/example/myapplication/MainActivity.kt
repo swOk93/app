@@ -184,20 +184,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                             val customSections = HabitSection.getCustomSectionNames().toMutableList()
                             customSections.remove(sectionName)
                             HabitSection.loadCustomSections(customSections)
-                            // Persist changes: save sections and updated habits
-                            saveCustomSections()
-                            saveHabits()
-                            
-                            // Обновляем адаптер списка разделов
-                            setupSectionsList()
-                            
-                            // Если текущий раздел был удален, переключаемся на "Все привычки и задачи"
-                            if (currentSection.displayName == sectionName) {
-                                currentSection = HabitSection.ALL
-                                sectionHeaderTextView.text = currentSection.displayName
-                                filterHabitsBySection(currentSection)
-                            }
-                            
+                            // Применяем обновление UI единым способом
+                            applySectionsChange(selectSection = null, deletedSectionName = sectionName)
                             // Закрываем popup
                             popupWindow.dismiss()
                         }
@@ -336,15 +324,8 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                             saveCustomSections()
                             saveHabits()
                             
-                            // Обновляем адаптер списка разделов
-                            setupSectionsList()
-                            
-                            // Обновляем currentHabitSection в AddHabitFragment если текущий раздел был удален
-                            val addHabitFragment = supportFragmentManager.findFragmentByTag("AddHabitFragment") as? AddHabitFragment
-                            if (addHabitFragment?.getCurrentSectionName() == sectionName) {
-                                addHabitFragment.updateSelectedSection(HabitSection.ALL)
-                            }
-                            
+                            // Применяем обновление UI единым способом
+                            applySectionsChange(selectSection = null, deletedSectionName = sectionName)
                             // Закрываем popup
                             popupWindow.dismiss()
                         }
@@ -411,6 +392,43 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
      */
     private fun updateSectionsList() {
         setupSectionsList()
+    }
+
+    /**
+     * Применяет изменения разделов: сохраняет, обновляет UI и выбор везде.
+     * selectSection — какой раздел выбрать после изменения (если null — сохраняем текущий/ALL при удалении текущего)
+     * deletedSectionName — имя удалённого раздела, чтобы при необходимости сбросить выбор
+     */
+    private fun applySectionsChange(selectSection: HabitSectionBase? = null, deletedSectionName: String? = null) {
+        // Сохраняем персистентно
+        saveCustomSections()
+        saveHabits()
+
+        // Обновляем список разделов в шапке
+        setupSectionsList()
+
+        // Переключение текущего раздела при удалении выбранного
+        if (deletedSectionName != null && currentSection.displayName == deletedSectionName) {
+            currentSection = HabitSection.ALL
+        }
+
+        val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
+        val sectionHeaderTextView = sectionsListLayout.findViewById<TextView>(R.id.sectionHeaderTextView)
+
+        val targetSection = selectSection ?: currentSection
+        sectionHeaderTextView.text = targetSection.displayName
+        filterHabitsBySection(targetSection)
+
+        // Обновляем AddHabitFragment, если он открыт
+        val addHabitFragment = supportFragmentManager.findFragmentByTag("AddHabitFragment") as? AddHabitFragment
+        addHabitFragment?.updateSelectedSection(targetSection)
+        val addHabitView = addHabitFragment?.view
+        val addHabitSectionsInclude = addHabitView?.findViewById<View>(R.id.sectionsListLayout)
+        if (addHabitSectionsInclude != null) {
+            setupSectionsList(addHabitSectionsInclude)
+            val addHeader = addHabitSectionsInclude.findViewById<TextView>(R.id.sectionHeaderTextView)
+            addHeader.text = targetSection.displayName
+        }
     }
     
     /**
@@ -905,35 +923,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         val newSection = HabitSection.addCustomSection(sectionName)
         
         // Сохраняем пользовательские разделы
-        saveCustomSections()
-        
-        // Обновляем список разделов
-        updateSectionsList()
-        
-        // Переключаемся на новый раздел
-        currentSection = newSection
-        
-        // Обновляем текст в заголовке
-        val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
-        val sectionHeaderTextView = sectionsListLayout.findViewById<TextView>(R.id.sectionHeaderTextView)
-        sectionHeaderTextView.text = currentSection.displayName
-        
-        // Фильтруем привычки
-        filterHabitsBySection(newSection)
-        
-        // Если открыт AddHabitFragment, обновляем его список разделов и выбираем новый раздел
-        val addHabitFragment = supportFragmentManager.findFragmentByTag("AddHabitFragment") as? AddHabitFragment
-        addHabitFragment?.updateSelectedSection(newSection)
-        val addHabitView = addHabitFragment?.view
-        val addHabitSectionsInclude = addHabitView?.findViewById<View>(R.id.sectionsListLayout)
-        if (addHabitSectionsInclude != null) {
-            // Пересобираем список секций в окне добавления привычки
-            setupSectionsList(addHabitSectionsInclude)
-            // Обновляем заголовок выбранного раздела на новый
-            val addHeader = addHabitSectionsInclude.findViewById<TextView>(R.id.sectionHeaderTextView)
-            addHeader.text = newSection.displayName
-        }
-        
+        applySectionsChange(selectSection = newSection, deletedSectionName = null)
         // Показываем сообщение
         Toast.makeText(this, getString(R.string.section_added), Toast.LENGTH_SHORT).show()
     }
