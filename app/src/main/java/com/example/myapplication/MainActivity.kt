@@ -2,7 +2,6 @@ package com.example.myapplication
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -17,17 +16,10 @@ import com.example.myapplication.databinding.ActivityMainBinding
 import java.util.Date
 import androidx.fragment.app.commit
 import androidx.core.content.edit
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.ImageButton
 import android.widget.PopupWindow
 import android.widget.TextView
 import android.content.Context
-
-// Extension функция для конвертации dp в пиксели
-fun Int.dpToPx(context: Context): Int {
-    return (this * context.resources.displayMetrics.density).toInt()
-}
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapter.OnStartDragListener, AddSectionFragment.OnSectionAddedListener {
 
@@ -167,7 +159,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 // Обрабатываем нажатие на кнопку удаления
                 // Проверяем, является ли раздел встроенным
                 val sectionName = section.displayName
-                val isBuiltInSection = HabitSection.values().any { it.displayName == sectionName }
+                val isBuiltInSection = HabitSection.entries.any { it.displayName == sectionName }
                 
                 if (isBuiltInSection) {
                     Toast.makeText(this, "Нельзя удалить встроенный раздел", Toast.LENGTH_SHORT).show()
@@ -315,7 +307,7 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
                 // Обрабатываем нажатие на кнопку удаления
                 // Проверяем, является ли раздел встроенным
                 val sectionName = section.displayName
-                val isBuiltInSection = HabitSection.values().any { it.displayName == sectionName }
+                val isBuiltInSection = HabitSection.entries.any { it.displayName == sectionName }
                 
                 if (isBuiltInSection) {
                     Toast.makeText(this, "Нельзя удалить встроенный раздел", Toast.LENGTH_SHORT).show()
@@ -929,6 +921,19 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         
         // Фильтруем привычки
         filterHabitsBySection(newSection)
+        
+        // Если открыт AddHabitFragment, обновляем его список разделов и выбираем новый раздел
+        val addHabitFragment = supportFragmentManager.findFragmentByTag("AddHabitFragment") as? AddHabitFragment
+        addHabitFragment?.updateSelectedSection(newSection)
+        val addHabitView = addHabitFragment?.view
+        val addHabitSectionsInclude = addHabitView?.findViewById<View>(R.id.sectionsListLayout)
+        if (addHabitSectionsInclude != null) {
+            // Пересобираем список секций в окне добавления привычки
+            setupSectionsList(addHabitSectionsInclude)
+            // Обновляем заголовок выбранного раздела на новый
+            val addHeader = addHabitSectionsInclude.findViewById<TextView>(R.id.sectionHeaderTextView)
+            addHeader.text = newSection.displayName
+        }
         
         // Показываем сообщение
         Toast.makeText(this, getString(R.string.section_added), Toast.LENGTH_SHORT).show()
