@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/rounded_card_background"
+    android:elevation="2dp"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/dragHandleImageView"
+        android:layout_width="0dp"
+        android:layout_height="29dp"
+        android:contentDescription="@string/drag_to_reorder"
+        app:srcCompat="@android:drawable/ic_menu_sort_by_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/mint_dark" />
+
+    <TextView
+        android:id="@+id/habitNameTextView"
+        android:layout_width="0dp"
+        android:layout_height="27dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/make_bed"
+        android:textColor="@color/mint_background_light"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/expandArrowButton"
+        app:layout_constraintStart_toEndOf="@+id/dragHandleImageView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/habitDateTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/created_date_format"
+        android:textColor="@color/mint_background_light"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/habitNameTextView"
+        app:layout_constraintTop_toBottomOf="@+id/habitNameTextView" />
+
+    <TextView
+        android:id="@+id/habitProgressTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/rounded_progress_background"
+        android:paddingStart="8dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="2dp"
+        android:text="@string/progress_format"
+        android:textColor="@color/mint_text_primary"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/habitDateTextView"
+        app:layout_constraintStart_toEndOf="@+id/habitDateTextView"
+        app:layout_constraintTop_toTopOf="@+id/habitDateTextView" />
+
+    <ImageButton
+        android:id="@+id/expandArrowButton"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/arrow_down_float"
+        app:layout_constraintBottom_toBottomOf="@+id/habitDateTextView"
+        app:layout_constraintEnd_toStartOf="@+id/expandButton"
+        app:layout_constraintTop_toTopOf="@+id/habitNameTextView"
+        app:tint="@color/mint_dark" />
+
+    <CheckBox
+        android:id="@+id/expandButton"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+
+        app:buttonCompat="@drawable/custom_checkbox"
+        app:buttonTint="@color/checkbox_color_selector"
+        app:buttonTintMode="src_in"
+
+        app:layout_constraintBottom_toBottomOf="@+id/habitDateTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/habitNameTextView" />
+
+
+    <include
+        android:id="@+id/sliderLayout"
+        layout="@layout/slider_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/habitDateTextView" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

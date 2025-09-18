@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Цветовая схема мятной темы -->
+    <color name="mint_primary">#26A69A</color>
+    <color name="mint_primary_dark">#00897B</color>
+    <color name="mint_accent">#00BFA5</color>
+    <color name="mint_background">#1A2E29</color>
+    <color name="mint_background_light">#F5FFFA</color>
+    <color name="mint_card">#243B36</color>
+    <color name="mint_text_primary">#263238</color>
+    <color name="mint_text_secondary">#546E7A</color>
+
+    <!-- Дополнительные цвета -->
+    <color name="mint_coral">#E27D60</color> <!-- Коралловый -->
+    <color name="mint_dark">#41B3A3</color> <!-- Мятный -->
+    <color name="mint_light">#85CDCB</color> <!-- Бирюзовый -->
+    <color name="mint_progress">#E8A87C</color> <!-- Персиковый -->
+    <color name="mint_delete">#C38D9E</color> <!-- Лавандовый -->
+    <color name="colorGreen">#4CAF50</color><!-- цвет для состояния ON -->
+    <color name="colorGray">#9E9E9E</color><!-- цвет для состояния OFF -->
+
+
+</resources>

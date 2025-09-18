@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rounded_card_background"
+    android:elevation="2dp"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/minusButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/circle_button_background"
+        android:foreground="@drawable/remove_24"
+        android:foregroundTint="#009688"
+        android:foregroundGravity="center"
+        app:backgroundTint="@color/mint_dark"
+        app:layout_constraintBottom_toBottomOf="@+id/hoursSeekBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/hoursSeekBar" />
+
+    <TextView
+        android:id="@+id/hoursTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/hours"
+        android:textColor="@color/mint_accent"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/hoursSeekBar"
+        app:layout_constraintStart_toStartOf="@+id/hoursSeekBar"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <SeekBar
+        android:id="@+id/hoursSeekBar"
+        android:layout_width="228dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:max="10"
+        android:progress="0"
+        android:progressTint="@color/mint_accent"
+        android:thumbTint="@color/mint_accent"
+        app:layout_constraintEnd_toStartOf="@+id/plusButton"
+        app:layout_constraintStart_toEndOf="@+id/minusButton"
+        app:layout_constraintTop_toBottomOf="@+id/hoursTextView" />
+
+    <TextView
+        android:id="@+id/minutesTextView"
+        android:layout_width="67dp"
+        android:layout_height="18dp"
+        android:text="@string/minutes"
+        android:textColor="@color/mint_accent"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/minutesValueTextView"
+        app:layout_constraintEnd_toStartOf="@+id/NotesButton"
+        app:layout_constraintStart_toEndOf="@+id/sliderEditButton"
+        app:layout_constraintTop_toBottomOf="@+id/hoursValueTextView"
+        app:layout_constraintVertical_bias="0.666" />
+
+    <SeekBar
+        android:id="@+id/minutesSeekBar"
+        android:layout_width="300dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:max="59"
+        android:progress="0"
+        android:progressTint="@color/mint_accent"
+        android:thumbTint="@color/mint_accent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.493"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sliderEditButton" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/sectionSpinnerLayout"
+        android:layout_width="306dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="@color/mint_card"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/minutesSeekBar">
+
+        <include
+            android:id="@+id/sectionsListLayout"
+            layout="@layout/layout_sections_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <Button
+        android:id="@+id/plusButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/circle_button_background"
+        android:foreground="@drawable/ic_add_white_24dp"
+        android:foregroundTint="#009688"
+        android:foregroundGravity="center"
+        app:backgroundTint="@color/mint_accent"
+        app:layout_constraintBottom_toBottomOf="@+id/hoursSeekBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/hoursSeekBar" />
+
+    <TextView
+        android:id="@+id/hoursValueTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/zero"
+        android:textColor="@color/mint_accent"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/hoursSeekBar"
+        app:layout_constraintStart_toStartOf="@+id/hoursSeekBar"
+        app:layout_constraintTop_toBottomOf="@+id/hoursSeekBar" />
+
+    <TextView
+        android:id="@+id/minutesValueTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/zero"
+        android:textColor="@color/mint_accent"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/minutesSeekBar"
+        app:layout_constraintEnd_toEndOf="@+id/minutesSeekBar"
+        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintStart_toStartOf="@+id/minutesSeekBar"
+        app:layout_constraintTop_toBottomOf="@+id/hoursValueTextView"
+        app:layout_constraintVertical_bias="0.851" />
+
+    <ImageButton
+        android:id="@+id/sliderDeleteButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/ic_menu_delete"
+        app:layout_constraintStart_toStartOf="@+id/minusButton"
+        app:layout_constraintTop_toBottomOf="@+id/minusButton"
+        app:tint="@color/mint_delete" />
+
+    <ImageButton
+        android:id="@+id/sliderEditButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/ic_menu_edit"
+        app:layout_constraintEnd_toStartOf="@+id/chartButton"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/sliderDeleteButton"
+        app:layout_constraintTop_toBottomOf="@+id/minusButton"
+        app:tint="@color/mint_accent" />
+
+    <ImageButton
+        android:id="@+id/NotesButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:padding="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/baseline_edit_note_24"
+        app:layout_constraintEnd_toStartOf="@+id/chartButton"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/sliderDeleteButton"
+        app:layout_constraintTop_toBottomOf="@+id/minusButton"
+        app:tint="@color/mint_accent" />
+
+    <ImageButton
+        android:id="@+id/chartButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/transparent"
+        android:padding="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/outline_chart_data_24"
+        app:layout_constraintEnd_toEndOf="@+id/plusButton"
+        app:layout_constraintTop_toBottomOf="@+id/plusButton"
+        app:tint="@color/mint_accent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
