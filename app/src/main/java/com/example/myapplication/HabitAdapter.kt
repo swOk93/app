@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
@@ -12,13 +11,10 @@ import android.widget.PopupWindow
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.util.Comparator
-import java.util.Date
 
-class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) : 
+class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
     RecyclerView.Adapter<HabitAdapter.HabitViewHolder>(), 
     java.util.Comparator<Habit> {
     
@@ -395,9 +391,6 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
      * Фильтрует привычки по указанному разделу
      */
     fun filterBySection(section: HabitSectionBase) {
-        // Сохраняем текущий список
-        val previousItems = ArrayList(filteredHabits)
-        
         // Очищаем текущий список
         filteredHabits.clear()
         
@@ -412,9 +405,7 @@ class HabitAdapter(private val habits: MutableList<Habit> = mutableListOf()) :
      * Показывает все привычки
      */
     fun showAllHabits() {
-        // Сохраняем текущий список
-        val previousItems = ArrayList(filteredHabits)
-        
+
         // Очищаем текущий список
         filteredHabits.clear()
         

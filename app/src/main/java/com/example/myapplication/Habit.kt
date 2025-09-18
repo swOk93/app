@@ -39,7 +39,7 @@ enum class HabitSection(override val displayName: String) : HabitSectionBase {
         fun getAllSections(): List<HabitSectionBase> {
             val result = mutableListOf<HabitSectionBase>()
             // Добавляем встроенные разделы
-            values().forEach { result.add(it) }
+            entries.forEach { result.add(it) }
             // Добавляем пользовательские разделы
             result.addAll(customSections)
             return result
@@ -75,11 +75,6 @@ enum class HabitSection(override val displayName: String) : HabitSectionBase {
             addCustomSection("Здоровье")
             addCustomSection("Работа")
         }
-        
-        // Проверка, является ли имя раздела стандартным пользовательским разделом
-        fun isDefaultCustomSection(name: String): Boolean {
-            return name == "Спорт" || name == "Здоровье" || name == "Работа"
-        }
     }
 }
 
@@ -101,30 +96,14 @@ data class Habit(
         return "Создано: ${dateFormat.format(createdDate)}"
     }
     
-    fun getFormattedDate(context: android.content.Context): String {
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-        return context.getString(R.string.created_date_format, dateFormat.format(createdDate))
-    }
-    
     fun getProgressText(): String {
         return when (type) {
             HabitType.TIME -> "$current / $target мин"
             HabitType.REPEAT -> {
-                val unitText = if (unit.isNotEmpty()) unit else "раз"
+                val unitText = unit.ifEmpty { "раз" }
                 "$current / $target $unitText"
             }
             HabitType.SIMPLE -> if (current > 0) "Выполнено" else "Не выполнено"
-        }
-    }
-    
-    fun getProgressText(context: android.content.Context): String {
-        return when (type) {
-            HabitType.TIME -> context.getString(R.string.progress_format, current, target, context.getString(R.string.min))
-            HabitType.REPEAT -> {
-                val unitText = if (unit.isNotEmpty()) unit else context.getString(R.string.times)
-                context.getString(R.string.progress_format, current, target, unitText)
-            }
-            HabitType.SIMPLE -> if (current > 0) context.getString(R.string.completed) else context.getString(R.string.not_completed)
         }
     }
     

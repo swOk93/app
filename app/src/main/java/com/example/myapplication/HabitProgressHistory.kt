@@ -1,7 +1,6 @@
 package com.example.myapplication
 
 import android.content.Context
-import android.widget.Toast
 import androidx.core.content.edit
 import java.util.Calendar
 
@@ -61,12 +60,7 @@ class HabitProgressHistory(private val context: Context) {
     fun getRecordsForHabit(position: Int): List<ProgressRecord> {
         return progressRecords.filter { it.position == position }
     }
-    
-    fun clearRecords() {
-        progressRecords.clear()
-        // Очищаем сохраненную историю
-        saveProgressHistory()
-    }
+
     
     /**
      * Сохраняет историю прогресса в SharedPreferences

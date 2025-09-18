@@ -211,7 +211,6 @@ class AddHabitFragment : DialogFragment() {
         private const val ARG_HABIT_TYPE = "habit_type"
         private const val ARG_HABIT_TARGET = "habit_target"
         private const val ARG_HABIT_UNIT = "habit_unit" // Константа для единицы измерения
-        private const val ARG_HABIT_SECTION = "habit_section" // Константа для раздела
         private const val ARG_HABIT_SECTION_NAME = "habit_section_name" // Константа для имени раздела
         
         /**

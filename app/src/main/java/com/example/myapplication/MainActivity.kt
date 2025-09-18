@@ -19,7 +19,6 @@ import androidx.core.content.edit
 import android.widget.ImageButton
 import android.widget.PopupWindow
 import android.widget.TextView
-import android.content.Context
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapter.OnStartDragListener, AddSectionFragment.OnSectionAddedListener {
 
