@@ -164,12 +164,7 @@ class HabitChartFragment : Fragment() {
         return records
     }
     
-    /**
-     * Получает записи из кэша или загружает новые, если кэш устарел
-     */
-    private fun getCachedWeekRecords(): List<HabitProgressHistory.ProgressRecord> {
-        return getRecordsForTimeRange(TimeRange.WEEK)
-    }
+    
     
     private fun setupChart() {
         // Включаем аппаратное ускорение для графика
@@ -212,8 +207,9 @@ class HabitChartFragment : Fragment() {
                         .filter { it.timestamp >= dayTimestamp && it.timestamp < nextDayTimestamp }
                     
                     val value = if (habit.type == HabitType.SIMPLE) {
-                        // Для простой привычки берем последнее значение за день (0 или 1)
-                        dayRecords.maxByOrNull { it.timestamp }?.count?.toFloat() ?: 0f
+                        // Суммируем отметки за день (0/1) и при кумулятивном режиме накапливаем
+                        val dailySum = dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                        if (isCumulativeMode && i > 0) dailySum + entries[i - 1].y else dailySum
                     } else {
                         // Для других типов суммируем все значения за день
                         val dailySum = dayRecords.sumOf { it.count.toDouble() }.toFloat()
@@ -252,8 +248,9 @@ class HabitChartFragment : Fragment() {
                         .filter { it.timestamp >= dayTimestamp && it.timestamp < nextDayTimestamp }
                     
                     val value = if (habit.type == HabitType.SIMPLE) {
-                        // Для простой привычки берем последнее значение за день (0 или 1)
-                        dayRecords.maxByOrNull { it.timestamp }?.count?.toFloat() ?: 0f
+                        // Суммируем отметки за день (0/1) и при кумулятивном режиме накапливаем
+                        val dailySum = dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                        if (isCumulativeMode && i > 0) dailySum + entries[i - 1].y else dailySum
                     } else {
                         // Для других типов суммируем все значения за день
                         val dailySum = dayRecords.sumOf { it.count.toDouble() }.toFloat()
@@ -311,8 +308,9 @@ class HabitChartFragment : Fragment() {
                         val dayRecords = dayMap[i] ?: emptyList()
                         
                         val value = if (habit.type == HabitType.SIMPLE) {
-                            // Для простой привычки берем последнее значение за день (0 или 1)
-                            dayRecords.maxByOrNull { it.timestamp }?.count?.toFloat() ?: 0f
+                            // Суммируем отметки за день (0/1) и при кумулятивном режиме накапливаем
+                            val dailySum = dayRecords.sumOf { it.count.toDouble() }.toFloat()
+                            if (isCumulativeMode && i > 0) dailySum + entries[i - 1].y else dailySum
                         } else {
                             // Для других типов суммируем все значения за день
                             val dailySum = dayRecords.sumOf { it.count.toDouble() }.toFloat()
@@ -347,15 +345,9 @@ class HabitChartFragment : Fragment() {
                         val pointIndex = dayIndex / daysPerPoint
                         // Проверка на отрицательный индекс и выход за границы массива
                         if (pointIndex in 0 until numPoints) {
-                            if (habit.type == HabitType.SIMPLE) {
-                                // Для простой привычки берем максимальное значение в группе дней
-                                aggregatedData[pointIndex] = kotlin.math.max(aggregatedData[pointIndex], record.count.toFloat())
-                                pointCounts[pointIndex] = 1 // Для простой привычки не нужно считать среднее
-                            } else {
-                                // Для других типов суммируем значения
-                                aggregatedData[pointIndex] += record.count.toFloat()
-                                pointCounts[pointIndex]++
-                            }
+                            // Для SIMPLE ведём себя как для REPEAT: суммируем
+                            aggregatedData[pointIndex] += record.count.toFloat()
+                            pointCounts[pointIndex]++
                         } else {
                             // Логируем ошибку, если индекс некорректный
                             android.util.Log.e("HabitChartFragment", "Некорректный pointIndex: $pointIndex, dayIndex: $dayIndex, numPoints: $numPoints")
@@ -364,10 +356,7 @@ class HabitChartFragment : Fragment() {
                     
                     // Создаем записи для графика
                     for (i in 0 until numPoints) {
-                        val value = if (habit.type == HabitType.SIMPLE) {
-                            // Для простой привычки уже взяли максимальное значение
-                            aggregatedData[i]
-                        } else if (pointCounts[i] > 0) {
+                        val value = if (pointCounts[i] > 0) {
                             // Для других типов берем среднее значение за период
                             val periodValue = aggregatedData[i] / pointCounts[i]
                             if (isCumulativeMode && i > 0) {
