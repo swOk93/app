@@ -8,27 +8,22 @@
 
     <TextView
         android:id="@+id/textViewTitle"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/add_section"
-        android:textAlignment="center"
         android:textColor="@color/mint_accent"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/sectionNameLayout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="@string/section_name"
-        app:boxBackgroundColor="@color/mint_background"
-        app:boxStrokeColor="@color/mint_accent"
-        app:hintTextColor="@color/mint_accent"
+        android:layout_marginTop="24dp"
+        app:hintEnabled="false"
+        app:boxBackgroundMode="none"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewTitle">
@@ -37,9 +32,13 @@
             android:id="@+id/editTextSectionName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/edit_text_background"
+            android:hint="@string/section_name"
+            android:padding="12dp"
+            android:textColor="@color/mint_accent"
+            android:textColorHint="@color/mint_text_secondary"
             android:inputType="textCapSentences"
-            android:maxLines="1"
-            android:textColor="@color/mint_accent" />
+            android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
@@ -51,28 +50,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sectionNameLayout">
 
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/cancelButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:padding="12dp"
+            android:background="@drawable/rounded_button_background"
+            app:backgroundTint="@color/mint_dark"
             android:text="@string/cancel"
-            android:textColor="@color/black"
-            app:strokeColor="@color/mint_accent" />
+            android:textColor="#000000" />
 
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/saveButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:backgroundTint="@color/mint_accent"
-            android:padding="12dp"
+            android:background="@drawable/rounded_button_background"
             android:text="@string/save"
-            android:textColor="@color/black" />
+            android:textColor="#000000" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout> 
