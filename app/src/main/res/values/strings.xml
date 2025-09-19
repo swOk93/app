@@ -58,6 +58,10 @@
     
     <!-- Строки из MainActivity.kt -->
     <string name="settings">Настройки</string>
+    <string name="language">Язык</string>
+    <string name="select_language">Выберите язык</string>
+    <string name="language_ru">Русский</string>
+    <string name="language_en">English</string>
     <string name="habit_added_format">Привычка добавлена: %1$s</string>
     <string name="habit_marked_completed">Привычка отмечена как выполненная</string>
     <string name="habit_marked_uncompleted">Привычка отмечена как невыполненная</string>

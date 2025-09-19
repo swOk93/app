@@ -22,7 +22,7 @@ import android.widget.TextView
 
 class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapter.OnStartDragListener, AddSectionFragment.OnSectionAddedListener {
 
-    private lateinit var binding: ActivityMainBinding
+    lateinit var binding: ActivityMainBinding
     public lateinit var habitAdapter: HabitAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
     public lateinit var progressHistory: HabitProgressHistory
@@ -56,6 +56,17 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Применяем сохранённый язык до инфлейта view
+        val prefs = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
+        val savedCode = prefs.getString("app_language", null)
+        if (savedCode != null) {
+            val locale = java.util.Locale(savedCode)
+            java.util.Locale.setDefault(locale)
+            val config = resources.configuration
+            config.setLocale(locale)
+            @Suppress("DEPRECATION")
+            resources.updateConfiguration(config, resources.displayMetrics)
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -121,6 +132,16 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         val sectionsListLayout = binding.sectionSpinnerLayout.findViewById<View>(R.id.sectionsListLayout)
         val sectionHeaderTextView = sectionsListLayout.findViewById<TextView>(R.id.sectionHeaderTextView)
         val expandSectionsButton = sectionsListLayout.findViewById<ImageButton>(R.id.expandSectionsButton)
+        val settingsButton = sectionsListLayout.findViewById<ImageButton>(R.id.sectionSettingsButton)
+        // Открытие настроек по шестерёнке
+        settingsButton.setOnClickListener {
+            val settings = SettingsFragment()
+            supportFragmentManager.commit {
+                replace(R.id.fragment_container, settings)
+                addToBackStack("settings")
+            }
+            showFragmentContainer()
+        }
         
         // Устанавливаем текст текущего раздела
         sectionHeaderTextView.text = currentSection.displayName
@@ -605,6 +626,24 @@ class MainActivity : AppCompatActivity(), HabitAdapter.HabitListener, HabitAdapt
         sharedPreferences.edit {
             putLong("last_launch_date", System.currentTimeMillis())
         }
+    }
+
+    // Применение языка приложения и сохранение
+    fun applyAppLanguage(languageCode: String) {
+        val prefs = getSharedPreferences("HabitsPrefs", MODE_PRIVATE)
+        prefs.edit {
+            putString("app_language", languageCode)
+        }
+
+        val locale = java.util.Locale(languageCode)
+        java.util.Locale.setDefault(locale)
+        val config = resources.configuration
+        config.setLocale(locale)
+        @Suppress("DEPRECATION")
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        // Пересоздаем активити, чтобы применить строки
+        recreate()
     }
     
     /**
